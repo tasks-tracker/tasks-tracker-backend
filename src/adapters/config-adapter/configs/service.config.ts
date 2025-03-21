@@ -18,7 +18,7 @@ import { Yaml } from '../../../libs/yaml';
     ...loggerConfigRaw,
   }),
 })
-class ServiceConfig {
+export class ServiceConfig {
   @Max(65535)
   @Min(1)
   @IsInt()
