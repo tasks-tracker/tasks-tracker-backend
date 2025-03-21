@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:6.2
+    container_name: redis_container
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=password
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "$REDIS_PASSWORD"]
+
+volumes:
+  redis_data:

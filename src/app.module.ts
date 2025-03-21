@@ -1,11 +1,26 @@
+import type { CacheConfig } from './adapters';
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ConfigAdapterModule } from './adapters';
+import { loggerConfigRaw } from './adapters';
 import { CqrsAdapterModule } from './adapters';
+import { CacheAdapterModule } from './adapters';
+import { LoggerModule } from './libs';
 
 @Module({
   imports: [
+    LoggerModule.register({
+      global: true,
+      options: loggerConfigRaw,
+    }),
     ConfigAdapterModule,
     CqrsAdapterModule,
+    CacheAdapterModule.registerAsync({
+      useFactory: (
+        configService: ConfigService,
+      ) => configService.get<CacheConfig>('cache')!,
+      inject: [ConfigService],
+    })
   ],
   controllers: [],
   providers: [],
