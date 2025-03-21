@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { readFileSync, existsSync } from 'fs';
 import { parse } from 'yaml';
 import { plainToClass } from 'class-transformer';

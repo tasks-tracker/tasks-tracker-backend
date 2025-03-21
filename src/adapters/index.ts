@@ -1,1 +1,1 @@
-export * from './config-adapter'
+export * from './config-adapter';

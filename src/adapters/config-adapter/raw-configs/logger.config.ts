@@ -7,9 +7,7 @@ import { IsNumber } from 'class-validator';
 import { Yaml } from '../../../libs';
 
 @Yaml({
-  file:
-    process.env.LOGGER_CONFIG_FILE_PATH ||
-    'configs/logger.config.yml',
+  file: process.env.LOGGER_CONFIG_FILE_PATH || 'configs/logger.config.yml',
   encoding: 'utf-8',
   logger: LoggerModule.createLoggerByOptions({ context: 'LoggingConfig' }),
 })

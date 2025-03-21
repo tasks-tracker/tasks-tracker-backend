@@ -1,3 +1,3 @@
-export * from './configs'
-export * from './module'
-export * from './raw-configs'
+export * from './configs';
+export * from './module';
+export * from './raw-configs';

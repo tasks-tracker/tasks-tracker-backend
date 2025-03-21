@@ -1,2 +1,2 @@
-export * from './service.config'
-export * from './swagger.config'
+export * from './service.config';
+export * from './swagger.config';
