@@ -31,19 +31,12 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
   async registerByLogin(
     @Body() body: RegisterByLoginBodyDto,
-    @Res() res: Response,
   ) {
     try {
       const result = await this.commandBus.execute(
         new RegisterUserByLoginCommand(new LoginVO(body.login), new PasswordVO(body.password))
       );
       if (result.isOk()) {
-        const sessionToken = result.value;
-        res.cookie('session_token', sessionToken, {
-          httpOnly: true,
-          secure: this.sessionCookieConfig.secure,
-          maxAge: this.sessionCookieConfig.maxAge,
-        });
         return { message: 'USER_REGISTERED_SUCCESSFULLY' };
       }
 
