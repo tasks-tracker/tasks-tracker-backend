@@ -22,6 +22,32 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+  backend:
+    image: node:22-alpine
+    container_name: backend
+    restart: always
+    working_dir: /app
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    command: sh -c "npm run start:dev"
+    depends_on:
+      - database
+    environment:
+      DATABASE_HOST: database
+      CACHE_HOST: redis
+  db-migrations:
+    image: node:22-alpine
+    container_name: db-migrations
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm run migration:dev up"
+    depends_on:
+      - database
+    environment:
+      DATABASE_HOST: database
 
 volumes:
   redis_data:
