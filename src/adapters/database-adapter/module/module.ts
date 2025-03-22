@@ -16,13 +16,14 @@ export class DatabaseModule {
   constructor() { }
 
   static register(options: DatabaseModuleOptions): DynamicModule {
+    const pgPromiseModule = PgPromiseModule.register(options)
     return {
       imports: [
-        PgPromiseModule.register(options),
+        pgPromiseModule,
         ClsModule.forRoot({
           plugins: [
             new ClsPluginTransactional({
-              imports: [PgPromiseModule],
+              imports: [pgPromiseModule],
               adapter: new TransactionalAdapterPgPromise({
                 dbInstanceToken: PG_PROMISE,
               }),
