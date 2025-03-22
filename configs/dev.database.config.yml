@@ -1,5 +1,5 @@
 ssl: false
-host: localhost
+host: ${DATABASE_HOST}
 port: 5432
 username: username
 password: password
