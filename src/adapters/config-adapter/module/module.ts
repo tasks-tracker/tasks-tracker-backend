@@ -1,8 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { serviceConfig, swaggerConfig } from '../configs';
+import { serviceConfig, swaggerConfig, cacheConfig, databaseConfig } from '../configs';
 
-const configs = [serviceConfig, swaggerConfig];
+const configs = [
+  serviceConfig,
+  swaggerConfig,
+  cacheConfig,
+  databaseConfig
+];
 
 @Module({
   imports: [
@@ -13,4 +18,4 @@ const configs = [serviceConfig, swaggerConfig];
   ],
   exports: [ConfigModule],
 })
-export class ConfigAdapterModule {}
+export class ConfigAdapterModule { }

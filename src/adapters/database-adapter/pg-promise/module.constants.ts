@@ -1,0 +1,4 @@
+export const PG_PROMISE_MODULE_OPTIONS = Symbol('PG_PROMISE_MODULE_OPTIONS');
+export const PG_PROMISE = Symbol('PG_PROMISE');
+export const DEFAULT_MAX_RETRIES = 10;
+export const DEFAULT_RETRY_DELAY = 2000;
