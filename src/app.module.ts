@@ -6,6 +6,7 @@ import { loggerConfigRaw } from './adapters';
 import { CqrsAdapterModule } from './adapters';
 import { CacheAdapterModule } from './adapters';
 import { LoggerModule } from './libs';
+import { DatabaseModule } from './adapters';
 
 @Module({
   imports: [
@@ -19,6 +20,11 @@ import { LoggerModule } from './libs';
       useFactory: (
         configService: ConfigService,
       ) => configService.get<CacheConfig>('cache')!,
+      inject: [ConfigService],
+    }),
+    DatabaseModule.registerAsync({
+      useFactory: (configService: ConfigService) =>
+        configService.get('database')!,
       inject: [ConfigService],
     })
   ],
