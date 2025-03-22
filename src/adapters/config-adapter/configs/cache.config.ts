@@ -28,10 +28,6 @@ export class CacheConfig implements CacheModuleOptions {
   @IsOptional()
   @IsString()
   host: string;
-
-  @IsOptional()
-  @IsString()
-  password?: string;
 }
 
 export const cacheConfig = registerAs(
