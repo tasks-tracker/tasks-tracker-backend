@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PasswordVO } from '../../domain';
 import { PasswordHashVO } from '../../domain';
+import { SessionTokenVO } from '../../domain';
 
 @Injectable()
 export class CryptoPortImpl implements CryptoPort {
@@ -24,5 +25,9 @@ export class CryptoPortImpl implements CryptoPort {
     } catch {
       return false;
     }
+  }
+
+  public async generateSessionToken(): Promise<SessionTokenVO> {
+    return new SessionTokenVO(await bcrypt.genSalt());
   }
 }
