@@ -12,7 +12,7 @@ import { GetUserInfoQuery } from "../application";
 import { LoginVO, PasswordVO, SessionTokenVO } from "../domain";
 import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError, NotUsedSessionTokenDomainError } from "../domain";
 import { ValidationException } from "../../../libs";
-import { SessionCookieConfig } from "../../../adapters";
+import { SessionCookieConfig } from "@adapters/config-adapter";
 import { AuthHelper } from "../helpers";
 import { SessionToken } from "../../../libs";
 

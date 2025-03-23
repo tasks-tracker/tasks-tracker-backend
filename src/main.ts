@@ -1,13 +1,13 @@
 import * as dotenv from 'dotenv';
 if (process.env.ENV_PATH) dotenv.config({ path: process.env.ENV_PATH });
 
-import type { ServiceConfig } from './adapters';
-import type { SwaggerConfig } from './adapters';
+import type { ServiceConfig } from '@adapters/config-adapter';
+import type { SwaggerConfig } from '@adapters/config-adapter';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { LoggerModule } from './libs';
-import { loggerConfigRaw } from './adapters';
+import { loggerConfigRaw } from '@adapters/config-adapter';
 import { createNestJsLogger, enableCookieParser } from './boostrap';
 import { enableSwagger } from './boostrap';
 
