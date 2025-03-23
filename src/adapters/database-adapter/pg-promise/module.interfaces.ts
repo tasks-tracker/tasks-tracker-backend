@@ -15,6 +15,7 @@ export type PgPromiseOptions = {
   retryDelay?: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PgPromiseModuleOptions extends PgPromiseOptions {}
 
 export interface PgPromiseOptionsFactory {

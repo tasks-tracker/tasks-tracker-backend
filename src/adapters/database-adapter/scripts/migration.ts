@@ -33,6 +33,7 @@ const migrator = new Migrator(
 
 const command = process.argv[2];
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   switch (command) {
     case 'up':

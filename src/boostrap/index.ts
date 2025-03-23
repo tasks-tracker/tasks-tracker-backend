@@ -1,3 +1,3 @@
 export * from './create-nestjs-logger';
 export * from './swagger';
-export * from './cookie-parser'
+export * from './cookie-parser';

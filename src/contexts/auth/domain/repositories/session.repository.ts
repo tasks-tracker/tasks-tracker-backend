@@ -6,6 +6,10 @@ import type { Result } from 'neverthrow';
 
 export abstract class SessionRepository {
   public abstract nextId(): SessionIdVO;
-  public abstract deleteSession(sessionToken: SessionTokenVO): Promise<Result<null, NotUsedSessionTokenDomainError>>
-  public abstract getUserIdBySessionToken(sessionToken: SessionTokenVO): Promise<Result<UserIdVO, NotUsedSessionTokenDomainError>>
+  public abstract deleteSession(
+    sessionToken: SessionTokenVO,
+  ): Promise<Result<null, NotUsedSessionTokenDomainError>>;
+  public abstract getUserIdBySessionToken(
+    sessionToken: SessionTokenVO,
+  ): Promise<Result<UserIdVO, NotUsedSessionTokenDomainError>>;
 }

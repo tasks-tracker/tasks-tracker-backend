@@ -1,20 +1,38 @@
-import type { Response, Request } from "express";
-import { Controller, Post, Get, Body, Res, Req } from "@nestjs/common";
-import { ConflictException, BadRequestException, UnprocessableEntityException, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { HttpStatus } from "@nestjs/common";
-import { HttpCode } from "@nestjs/common";
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { ApiTags, ApiResponse } from "@nestjs/swagger";
-import { RegisterByLoginBodyDto, LoginBodyDto, GetUserInfoResponseDto } from "./dtos";
-import { RegisterUserByLoginCommand, LoginUserCommand, LogoutSessionCommand } from "../application";
-import { GetUserInfoQuery } from "../application";
-import { LoginVO, PasswordVO, SessionTokenVO } from "../domain";
-import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError, NotUsedSessionTokenDomainError } from "../domain";
-import { ValidationException } from "@libs/validation-exception";
-import { SessionCookieConfig } from "@adapters/config-adapter";
-import { AuthHelper } from "../helpers";
-import { SessionToken } from "@libs/session-token-decorator";
+import type { Response } from 'express';
+import { Controller, Post, Get, Body, Res } from '@nestjs/common';
+import {
+  ConflictException,
+  BadRequestException,
+  UnprocessableEntityException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { HttpStatus } from '@nestjs/common';
+import { HttpCode } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import {
+  RegisterByLoginBodyDto,
+  LoginBodyDto,
+  GetUserInfoResponseDto,
+} from './dtos';
+import {
+  RegisterUserByLoginCommand,
+  LoginUserCommand,
+  LogoutSessionCommand,
+} from '../application';
+import { GetUserInfoQuery } from '../application';
+import { LoginVO, PasswordVO, SessionTokenVO } from '../domain';
+import {
+  UserLoginAlreadyUsedDomainError,
+  InvalidPasswordDomainError,
+  UserWithLoginNotExistDomainError,
+  NotUsedSessionTokenDomainError,
+} from '../domain';
+import { ValidationException } from '@libs/validation-exception';
+import { SessionCookieConfig } from '@adapters/config-adapter';
+import { AuthHelper } from '../helpers';
+import { SessionToken } from '@libs/session-token-decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,22 +42,33 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     private readonly authHelper: AuthHelper,
     private readonly queryBus: QueryBus,
-    configService: ConfigService
+    configService: ConfigService,
   ) {
-    this.sessionCookieConfig = configService.get<SessionCookieConfig>('session-cookie', { infer: true });
+    this.sessionCookieConfig =
+      configService.get<SessionCookieConfig>('session-cookie')!;
   }
 
   @Post('register-by-login')
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'USER_REGISTERED_SUCCESSFULLY' })
-  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'LOGIN_ALREADY_USED' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'USER_REGISTERED_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'LOGIN_ALREADY_USED',
+  })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'UNKNOWN_ERROR' })
-  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
-  async registerByLogin(
-    @Body() body: RegisterByLoginBodyDto,
-  ) {
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
+  async registerByLogin(@Body() body: RegisterByLoginBodyDto) {
     try {
       const result = await this.commandBus.execute(
-        new RegisterUserByLoginCommand(new LoginVO(body.login), new PasswordVO(body.password))
+        new RegisterUserByLoginCommand(
+          new LoginVO(body.login),
+          new PasswordVO(body.password),
+        ),
       );
       if (result.isOk()) {
         return { message: 'USER_REGISTERED_SUCCESSFULLY' };
@@ -60,17 +89,26 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: HttpStatus.OK, description: 'USER_LOGGED_IN_SUCCESSFULLY' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'USER_NOT_FOUND || INVALID_PASSWORD || UNKNOWN_ERROR' })
-  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
-  async login(
-    @Body() body: LoginBodyDto,
-    @Res() res: Response,
-  ) {
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'USER_LOGGED_IN_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'USER_NOT_FOUND || INVALID_PASSWORD || UNKNOWN_ERROR',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
+  async login(@Body() body: LoginBodyDto, @Res() res: Response) {
     try {
       const result = await this.commandBus.execute(
-        new LoginUserCommand(new LoginVO(body.login), new PasswordVO(body.password))
-      )
+        new LoginUserCommand(
+          new LoginVO(body.login),
+          new PasswordVO(body.password),
+        ),
+      );
       if (result.isOk()) {
         const sessionToken = result.value;
         res.cookie('session_token', sessionToken.value, {
@@ -80,7 +118,7 @@ export class AuthController {
         });
         res.send({ message: 'USER_LOGGED_IN_SUCCESSFULLY' });
         return;
-      };
+      }
 
       const err = result.error;
       if (err instanceof UserWithLoginNotExistDomainError) {
@@ -99,21 +137,28 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: HttpStatus.OK, description: 'USER_LOGGED_OUT_SUCCESSFULLY' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'SESSION_TOKEN_NOT_FOUND || UNKNOWN_ERROR' })
-  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'USER_LOGGED_OUT_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'SESSION_TOKEN_NOT_FOUND || UNKNOWN_ERROR',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
   async logout(
-    @Req() req: Request,
+    @SessionToken() sessionToken: string | null,
     @Res() res: Response,
   ) {
-    const cookies = req.cookies;
-    const sessionToken = cookies['session_token'];
     if (!sessionToken) {
       throw new BadRequestException('SESSION_TOKEN_NOT_FOUND');
     }
     try {
       const result = await this.commandBus.execute(
-        new LogoutSessionCommand(new SessionTokenVO(sessionToken))
+        new LogoutSessionCommand(new SessionTokenVO(sessionToken)),
       );
       if (result.isOk()) {
         res.clearCookie('session_token');
@@ -136,8 +181,14 @@ export class AuthController {
 
   @Get('me')
   @ApiResponse({ status: HttpStatus.OK, description: 'USER_DATA' })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'SESSION_TOKEN_NOT_FOUND' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'USER_INFO_NOT_FOUND' })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'SESSION_TOKEN_NOT_FOUND',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'USER_INFO_NOT_FOUND',
+  })
   async me(
     @SessionToken() sessionToken: string | null,
   ): Promise<GetUserInfoResponseDto> {
@@ -145,15 +196,12 @@ export class AuthController {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
     const userId = await this.authHelper.getUserIdByCookies(sessionToken);
-    console.log({ userId })
     if (!userId) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
-    const userInfo = await this.queryBus.execute(
-      new GetUserInfoQuery(userId)
-    );
+    const userInfo = await this.queryBus.execute(new GetUserInfoQuery(userId));
     if (!userInfo) {
-      throw new BadRequestException("USER_INFO_NOT_FOUND");
+      throw new BadRequestException('USER_INFO_NOT_FOUND');
     }
     return userInfo;
   }

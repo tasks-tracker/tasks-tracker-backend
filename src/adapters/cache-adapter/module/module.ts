@@ -108,7 +108,7 @@ export class CacheAdapterModule implements OnModuleInit, OnApplicationShutdown {
     }
   }
 
-  async onApplicationShutdown(): Promise<void> {
+  onApplicationShutdown(): void {
     this.redis.disconnect();
   }
 }

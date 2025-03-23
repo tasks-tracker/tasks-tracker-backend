@@ -23,4 +23,4 @@ import { AuthModule } from './contexts';
     AuthModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}
