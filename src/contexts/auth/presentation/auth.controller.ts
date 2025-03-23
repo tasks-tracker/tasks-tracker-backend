@@ -145,6 +145,7 @@ export class AuthController {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
     const userId = await this.authHelper.getUserIdByCookies(sessionToken);
+    console.log({ userId })
     if (!userId) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
