@@ -1,5 +1,5 @@
-import type { Response } from "express";
-import { Controller, Post, Body, Res } from "@nestjs/common";
+import type { Response, Request } from "express";
+import { Controller, Post, Body, Res, Req } from "@nestjs/common";
 import { ConflictException, BadRequestException, UnprocessableEntityException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { HttpStatus } from "@nestjs/common";
@@ -98,9 +98,11 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'SESSION_TOKEN_NOT_FOUND || UNKNOWN_ERROR' })
   @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
   async logout(
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const sessionToken = res.locals.sessionToken;
+    const cookies = req.cookies;
+    const sessionToken = cookies['session_token'];
     if (!sessionToken) {
       throw new BadRequestException('SESSION_TOKEN_NOT_FOUND');
     }

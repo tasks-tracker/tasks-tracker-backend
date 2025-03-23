@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { LoggerModule } from './libs';
 import { loggerConfigRaw } from './adapters';
-import { createNestJsLogger } from './boostrap';
+import { createNestJsLogger, enableCookieParser } from './boostrap';
 import { enableSwagger } from './boostrap';
 
 async function bootstrap() {
@@ -20,6 +20,7 @@ async function bootstrap() {
   const swaggerConfig = configService.get<SwaggerConfig>('swagger')!;
   if (swaggerConfig.enabled)
     enableSwagger(app, { swaggerPrefix: swaggerConfig.swaggerPrefix });
+  enableCookieParser(app);
   const serviceConfig = configService.get<ServiceConfig>('service')!;
   await app.listen(serviceConfig.port);
 }
