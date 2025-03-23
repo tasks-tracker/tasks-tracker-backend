@@ -1,1 +1,1 @@
-export * from './session-token.decorator'
+export * from './session-token.decorator';

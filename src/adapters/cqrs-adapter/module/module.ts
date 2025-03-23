@@ -1,4 +1,5 @@
-import { Module, Global } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { Global } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 
 @Global()
@@ -6,4 +7,4 @@ import { CqrsModule } from '@nestjs/cqrs';
   imports: [CqrsModule],
   exports: [CqrsModule],
 })
-export class CqrsAdapterModule {}
+export class CqrsAdapterModule { }

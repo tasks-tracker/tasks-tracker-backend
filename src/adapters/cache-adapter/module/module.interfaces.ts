@@ -4,6 +4,7 @@ import type { InjectionToken } from '@nestjs/common';
 import type { OptionalFactoryDependency } from '@nestjs/common';
 import type { RedisOptions } from 'ioredis';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CacheModuleOptions extends RedisOptions {}
 
 export interface CacheOptionsFactory {

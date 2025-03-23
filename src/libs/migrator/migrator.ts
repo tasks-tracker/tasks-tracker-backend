@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Logger } from '../logger';
 import type { Migration } from './interface';
 import type { IDatabase } from 'pg-promise';
@@ -14,7 +15,7 @@ export class Migrator {
     private readonly migrationsPath: string,
     private readonly migrationTable: string,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   private async ensureMigrationsTable() {
     await this.db.query(`

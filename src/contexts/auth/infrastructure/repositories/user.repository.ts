@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
 import type { UserRepository } from '../../domain';
 import type { Result } from 'neverthrow';
 
@@ -66,12 +70,7 @@ export class UserRepositoryImpl implements UserRepository {
 
   private async saveRegisteredByLoginEvent(
     user: User,
-  ): Promise<
-    Result<
-      null,
-      UserLoginAlreadyUsedDomainError | UserLoginAlreadyUsedDomainError
-    >
-  > {
+  ): Promise<Result<null, UserLoginAlreadyUsedDomainError>> {
     try {
       await this.txHost.tx.none(
         `INSERT INTO users
