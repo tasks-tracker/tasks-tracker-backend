@@ -6,6 +6,7 @@ import { AuthController } from "./presentation/auth.controller";
 import { RegisterUserByLoginCommandHandler } from "./application";
 import { LoginUserCommandHandler } from "./application";
 import { LogoutSessionCommandHandler } from "./application";
+import { GetUserIdBySessionTokenQueryHandler } from "./application";
 import { CryptoPort } from "./domain";
 import { CryptoPortImpl } from "./infrastructure";
 import { UserRepository } from "./domain";
@@ -29,6 +30,7 @@ import { AuthHelper } from "./helpers";
     RegisterUserByLoginCommandHandler,
     LoginUserCommandHandler,
     LogoutSessionCommandHandler,
+    GetUserIdBySessionTokenQueryHandler,
     {
       provide: CryptoPort,
       useClass: CryptoPortImpl,

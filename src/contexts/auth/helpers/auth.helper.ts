@@ -10,8 +10,7 @@ export class AuthHelper {
   constructor(
     public readonly queryBus: QueryBus,
   ) { }
-  public async getUserIdByRequest(request: Request): Promise<UserIdVO | null> {
-    const sessionToken = request.cookies['session-token'];
+  public async getUserIdByCookies(sessionToken?: string): Promise<UserIdVO | null> {
     if (!sessionToken) return null;
     try {
       const userId = await this.queryBus.execute(new GetUserIdBySessionTokenQuery(new SessionTokenVO(sessionToken)));

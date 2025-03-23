@@ -1,10 +1,10 @@
 import type { Response, Request } from "express";
-import { Controller, Post, Body, Res, Req } from "@nestjs/common";
-import { ConflictException, BadRequestException, UnprocessableEntityException } from "@nestjs/common";
+import { Controller, Post, Get, Body, Res, Req } from "@nestjs/common";
+import { ConflictException, BadRequestException, UnprocessableEntityException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { HttpStatus } from "@nestjs/common";
 import { HttpCode } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiTags, ApiResponse } from "@nestjs/swagger";
 import { RegisterByLoginBodyDto, LoginBodyDto } from "./dtos";
 import { RegisterUserByLoginCommand, LoginUserCommand, LogoutSessionCommand } from "../application";
@@ -12,6 +12,8 @@ import { LoginVO, PasswordVO, SessionTokenVO } from "../domain";
 import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError, NotUsedSessionTokenDomainError } from "../domain";
 import { ValidationException } from "../../../libs";
 import { SessionCookieConfig } from "../../../adapters";
+import { AuthHelper } from "../helpers";
+import { SessionToken } from "../../../libs";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,6 +21,8 @@ export class AuthController {
   private readonly sessionCookieConfig: SessionCookieConfig;
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly authHelper: AuthHelper,
+    private readonly queryBus: QueryBus,
     configService: ConfigService
   ) {
     this.sessionCookieConfig = configService.get<SessionCookieConfig>('session-cookie', { infer: true });
@@ -127,5 +131,22 @@ export class AuthController {
       }
       throw err;
     }
+  }
+
+  @Get('me')
+  @ApiResponse({ status: HttpStatus.OK, description: 'USER_DATA' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'SESSION_TOKEN_NOT_FOUND || UNKNOWN_ERROR' })
+  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
+  async me(
+    @SessionToken() sessionToken: string | null,
+  ) {
+    if (!sessionToken) {
+      throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
+    }
+    const userId = await this.authHelper.getUserIdByCookies(sessionToken);
+    if (!userId) {
+      throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
+    }
+    return userId;
   }
 }
