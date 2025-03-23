@@ -1,4 +1,4 @@
-import { ValidationException } from '../../../../libs';
+import { ValidationException } from '@libs/validation-exception';
 import { validateSync } from 'class-validator';
 import { IsString } from 'class-validator';
 import { Length } from 'class-validator';

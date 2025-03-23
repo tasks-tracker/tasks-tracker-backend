@@ -11,10 +11,10 @@ import { RegisterUserByLoginCommand, LoginUserCommand, LogoutSessionCommand } fr
 import { GetUserInfoQuery } from "../application";
 import { LoginVO, PasswordVO, SessionTokenVO } from "../domain";
 import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError, NotUsedSessionTokenDomainError } from "../domain";
-import { ValidationException } from "../../../libs";
-import { SessionCookieConfig } from "../../../adapters";
+import { ValidationException } from "@libs/validation-exception";
+import { SessionCookieConfig } from "@adapters/config-adapter";
 import { AuthHelper } from "../helpers";
-import { SessionToken } from "../../../libs";
+import { SessionToken } from "@libs/session-token-decorator";
 
 @ApiTags('Auth')
 @Controller('auth')

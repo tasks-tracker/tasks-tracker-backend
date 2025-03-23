@@ -1,11 +1,11 @@
-import { LoggerModule } from '../../../libs';
+import { LoggerModule } from '@libs/logger';
 
 import { IsBoolean } from 'class-validator';
 import { IsString } from 'class-validator';
 
 import { loggerConfigRaw } from '../raw-configs';
 import { registerAs } from '@nestjs/config';
-import { Yaml } from '../../../libs';
+import { Yaml } from '@libs/yaml';
 
 @Yaml({
   file: process.env.SWAGGER_CONFIG_FILE_PATH || 'configs/swagger.config.yml',

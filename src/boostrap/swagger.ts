@@ -3,7 +3,7 @@ import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { SwaggerModule } from '@nestjs/swagger';
 
-import { LoggerModule } from '../libs';
+import { LoggerModule } from '@libs/logger';
 
 interface SwaggerOptions {
   swaggerPrefix: string;

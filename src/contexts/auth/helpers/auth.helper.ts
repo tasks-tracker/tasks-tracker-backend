@@ -1,4 +1,3 @@
-import type { Request } from "express";
 import { Injectable } from "@nestjs/common";
 import { QueryBus } from "@nestjs/cqrs";
 import { GetUserIdBySessionTokenQuery } from "../application";

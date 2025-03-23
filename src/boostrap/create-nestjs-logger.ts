@@ -1,4 +1,4 @@
-import { LoggerModule } from '../libs';
+import { LoggerModule } from '@libs/logger';
 
 export const createNestJsLogger = () => {
   const logger = LoggerModule.createLoggerByOptions({

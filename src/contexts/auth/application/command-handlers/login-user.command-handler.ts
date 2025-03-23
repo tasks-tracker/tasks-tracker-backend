@@ -1,5 +1,4 @@
 import type { ICommandHandler } from '@nestjs/cqrs';
-import type { Result } from 'neverthrow';
 import { CommandHandler } from '@nestjs/cqrs';
 import { LoginUserCommand } from '../commands';
 import { Session } from '../../domain';
@@ -14,13 +13,12 @@ import { err } from 'neverthrow';
 
 @CommandHandler(LoginUserCommand)
 export class LoginUserCommandHandler
-  implements ICommandHandler<LoginUserCommand>
-{
+  implements ICommandHandler<LoginUserCommand> {
   constructor(
     private readonly cryptoPort: CryptoPort,
     private readonly userRepository: UserRepository,
     private readonly sessionRepository: SessionRepository,
-  ) {}
+  ) { }
   async execute(command: LoginUserCommand) {
     const user = await this.userRepository.getUserByLogin(command.login);
     if (!user) return err(new UserWithLoginNotExistDomainError());

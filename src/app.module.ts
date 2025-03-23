@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ConfigAdapterModule } from './adapters';
-import { loggerConfigRaw } from './adapters';
-import { CqrsAdapterModule } from './adapters';
-import { LoggerModule } from './libs';
-import { DatabaseModule } from './adapters';
+import { ConfigAdapterModule } from '@adapters/config-adapter';
+import { loggerConfigRaw } from '@adapters/config-adapter';
+import { CqrsAdapterModule } from '@adapters/cqrs-adapter';
+import { LoggerModule } from '@libs/logger';
+import { DatabaseModule } from '@adapters/database-adapter';
 import { AuthModule } from './contexts';
 
 @Module({
@@ -25,4 +25,4 @@ import { AuthModule } from './contexts';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

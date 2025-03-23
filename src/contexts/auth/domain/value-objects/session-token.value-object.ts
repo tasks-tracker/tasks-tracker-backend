@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 import { validateSync } from 'class-validator';
-import { ValidationException } from '../../../../libs';
+import { ValidationException } from '@libs/validation-exception';
 
 export class SessionTokenVO {
   @IsString()
