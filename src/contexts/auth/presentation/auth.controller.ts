@@ -7,9 +7,9 @@ import { HttpCode } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { ApiTags, ApiResponse } from "@nestjs/swagger";
 import { RegisterByLoginBodyDto, LoginBodyDto } from "./dtos";
-import { RegisterUserByLoginCommand, LoginUserCommand } from "../application";
-import { LoginVO, PasswordVO } from "../domain";
-import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError } from "../domain";
+import { RegisterUserByLoginCommand, LoginUserCommand, LogoutSessionCommand } from "../application";
+import { LoginVO, PasswordVO, SessionTokenVO } from "../domain";
+import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError, NotUsedSessionTokenDomainError } from "../domain";
 import { ValidationException } from "../../../libs";
 import { SessionCookieConfig } from "../../../adapters";
 
@@ -81,6 +81,39 @@ export class AuthController {
         throw new BadRequestException('USER_NOT_FOUND');
       } else if (err instanceof InvalidPasswordDomainError) {
         throw new BadRequestException('INVALID_PASSWORD');
+      }
+      throw new BadRequestException('UNKNOWN_ERROR');
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        throw new UnprocessableEntityException();
+      }
+      throw err;
+    }
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: HttpStatus.OK, description: 'USER_LOGGED_OUT_SUCCESSFULLY' })
+  async logout(
+    @Res() res: Response,
+  ) {
+    const sessionToken = res.locals.sessionToken;
+    if (!sessionToken) {
+      throw new BadRequestException('SESSION_TOKEN_NOT_FOUND');
+    }
+    try {
+      const result = await this.commandBus.execute(
+        new LogoutSessionCommand(new SessionTokenVO(sessionToken))
+      );
+      if (result.isOk()) {
+        res.clearCookie('session_token');
+        res.send({ message: 'USER_LOGGED_OUT_SUCCESSFULLY' });
+        return;
+      }
+
+      const err = result.error;
+      if (err instanceof NotUsedSessionTokenDomainError) {
+        throw new BadRequestException('SESSION_TOKEN_NOT_FOUND');
       }
       throw new BadRequestException('UNKNOWN_ERROR');
     } catch (err) {
