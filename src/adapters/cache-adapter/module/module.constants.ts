@@ -1,1 +1,1 @@
-export const CACHE_MODULE_OPTIONS = Symbol('cache-module-options')
+export const CACHE_MODULE_OPTIONS = Symbol('cache-module-options');

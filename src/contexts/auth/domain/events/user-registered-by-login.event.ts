@@ -1,7 +1,5 @@
-import { UserIdVO } from "../value-objects";
+import { UserIdVO } from '../value-objects';
 
 export class UserRegisteredByLoginEvent {
-  constructor(
-    public readonly id: UserIdVO,
-  ) { }
+  constructor(public readonly id: UserIdVO) {}
 }

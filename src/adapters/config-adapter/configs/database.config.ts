@@ -13,9 +13,7 @@ import { loggerConfigRaw } from '../raw-configs';
 import { Yaml } from '../../../libs';
 
 @Yaml({
-  file:
-    process.env.DATABASE_CONFIG_FILE_PATH ||
-    'configs/database.config.yml',
+  file: process.env.DATABASE_CONFIG_FILE_PATH || 'configs/database.config.yml',
   encoding: 'utf-8',
   logger: LoggerModule.createLoggerByOptions({
     context: 'DatabaseConfig',

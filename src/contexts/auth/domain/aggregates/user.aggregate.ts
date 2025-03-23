@@ -17,7 +17,7 @@ export class User extends AggregateRoot {
     login: LoginVO,
     passwordHash: PasswordHashVO,
     registeredAt: Date,
-    sessions: Session[]
+    sessions: Session[],
   ) {
     super();
     this.#id = id;

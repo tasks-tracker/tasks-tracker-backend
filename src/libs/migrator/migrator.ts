@@ -14,7 +14,7 @@ export class Migrator {
     private readonly migrationsPath: string,
     private readonly migrationTable: string,
     private readonly logger: Logger,
-  ) { }
+  ) {}
 
   private async ensureMigrationsTable() {
     await this.db.query(`
