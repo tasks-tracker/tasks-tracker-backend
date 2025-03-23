@@ -5,12 +5,17 @@ import { CacheAdapterModule } from '../../adapters';
 import { AuthController } from './presentation/auth.controller';
 import { RegisterUserByLoginCommandHandler } from './application';
 import { LoginUserCommandHandler } from './application';
+import { GetUserIdBySessionTokenQueryHandler } from './application';
+import { GetUserInfoQueryHandler } from './application';
 import { CryptoPort } from './domain';
 import { CryptoPortImpl } from './infrastructure';
 import { UserRepository } from './domain';
 import { UserRepositoryImpl } from './infrastructure';
 import { SessionRepository } from './domain';
 import { SessionRepositoryImpl } from './infrastructure';
+import { UserQueryRepository } from './application';
+import { UserQueryRepositoryImpl } from './infrastructure';
+import { AuthHelper } from './helpers';
 
 @Module({
   imports: [
@@ -22,6 +27,9 @@ import { SessionRepositoryImpl } from './infrastructure';
   ],
   controllers: [AuthController],
   providers: [
+    AuthHelper,
+    GetUserIdBySessionTokenQueryHandler,
+    GetUserInfoQueryHandler,
     RegisterUserByLoginCommandHandler,
     LoginUserCommandHandler,
     {
@@ -36,6 +44,10 @@ import { SessionRepositoryImpl } from './infrastructure';
       provide: SessionRepository,
       useClass: SessionRepositoryImpl,
     },
+    {
+      provide: UserQueryRepository,
+      useClass: UserQueryRepositoryImpl,
+    },
   ],
 })
-export class AuthModule {}
+export class AuthModule { }
