@@ -1,3 +1,3 @@
-import { DomainError } from '../../../../libs';
+import { DomainError } from '@libs/domain-error';
 
-export class UserWithLoginNotExistDomainError extends DomainError {}
+export class UserWithLoginNotExistDomainError extends DomainError { }

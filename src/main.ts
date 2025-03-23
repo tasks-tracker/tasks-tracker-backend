@@ -6,7 +6,7 @@ import type { SwaggerConfig } from '@adapters/config-adapter';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { LoggerModule } from './libs';
+import { LoggerModule } from '@libs/logger';
 import { loggerConfigRaw } from '@adapters/config-adapter';
 import { createNestJsLogger, enableCookieParser } from './boostrap';
 import { enableSwagger } from './boostrap';

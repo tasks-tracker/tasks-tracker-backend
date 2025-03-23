@@ -89,7 +89,8 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@adapters(|/.*)$": "<rootDir>/adapters/$1"
+      "^@adapters(|/.*)$": "<rootDir>/adapters/$1",
+      "^@libs(|/.*)$": "<rootDir>/libs/$1"
     }
   }
 }

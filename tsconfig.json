@@ -23,6 +23,12 @@
       ],
       "@adapters/*": [
         "src/adapters/*"
+      ],
+      "@libs": [
+        "src/libs"
+      ],
+      "@libs/*": [
+        "src/libs/*"
       ]
     }
   }

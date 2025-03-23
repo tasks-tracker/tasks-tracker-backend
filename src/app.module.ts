@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ConfigAdapterModule } from '@adapters/config-adapter';
 import { loggerConfigRaw } from '@adapters/config-adapter';
 import { CqrsAdapterModule } from '@adapters/cqrs-adapter';
-import { LoggerModule } from './libs';
+import { LoggerModule } from '@libs/logger';
 import { DatabaseModule } from '@adapters/database-adapter';
 import { AuthModule } from './contexts';
 

@@ -7,8 +7,6 @@ import { randomUUID } from 'node:crypto';
 import Redis from 'ioredis';
 import { err } from 'neverthrow';
 import { ok } from 'neverthrow';
-import { TransactionHost } from '@nestjs-cls/transactional';
-import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
 
 import { SessionIdVO } from '../../domain';
 import { SessionTokenVO } from '../../domain';
@@ -18,7 +16,6 @@ import { NotUsedSessionTokenDomainError } from '../../domain';
 @Injectable()
 export class SessionRepositoryImpl implements SessionRepository {
   constructor(
-    private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
     public readonly redis: Redis,
   ) { }
 

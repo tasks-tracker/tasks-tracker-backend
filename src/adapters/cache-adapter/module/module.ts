@@ -11,7 +11,7 @@ import { Module } from '@nestjs/common';
 import { Redis } from 'ioredis';
 
 import { CACHE_MODULE_OPTIONS } from './module.constants.js';
-import { Logger } from '../../../libs';
+import { Logger } from '@libs/logger';
 
 // TODO: add logger that logs all messages
 @Module({})

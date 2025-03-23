@@ -16,7 +16,7 @@ import { PG_PROMISE_MODULE_OPTIONS } from './module.constants.js';
 import { PG_PROMISE } from './module.constants.js';
 import { DEFAULT_MAX_RETRIES } from './module.constants.js';
 import { DEFAULT_RETRY_DELAY } from './module.constants.js';
-import { Logger } from '../../../libs';
+import { Logger } from '@libs/logger';
 
 @Module({})
 export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {

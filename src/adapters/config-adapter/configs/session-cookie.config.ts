@@ -1,11 +1,11 @@
-import { LoggerModule } from '../../../libs/logger';
+import { LoggerModule } from '@libs/logger';
 
 import { registerAs } from '@nestjs/config';
 import { IsInt } from 'class-validator';
 import { IsBoolean } from 'class-validator';
 
 import { loggerConfigRaw } from '../raw-configs';
-import { Yaml } from '../../../libs/yaml';
+import { Yaml } from '@libs/yaml';
 
 @Yaml({
   file:
