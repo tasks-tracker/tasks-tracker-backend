@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { CacheConfig } from "../../adapters";
 import { CacheAdapterModule } from "../../adapters";
 import { AuthController } from "./presentation/auth.controller";
-import { RegisterUserByLoginCommandHandler } from "./application";
+import { GetUserInfoQueryHandler, RegisterUserByLoginCommandHandler } from "./application";
 import { LoginUserCommandHandler } from "./application";
 import { LogoutSessionCommandHandler } from "./application";
 import { GetUserIdBySessionTokenQueryHandler } from "./application";
@@ -13,6 +13,8 @@ import { UserRepository } from "./domain";
 import { UserRepositoryImpl } from "./infrastructure";
 import { SessionRepository } from "./domain";
 import { SessionRepositoryImpl } from "./infrastructure";
+import { UserQueryRepository } from "./application";
+import { UserQueryRepositoryImpl } from "./infrastructure";
 import { AuthHelper } from "./helpers";
 
 @Module({
@@ -31,6 +33,7 @@ import { AuthHelper } from "./helpers";
     LoginUserCommandHandler,
     LogoutSessionCommandHandler,
     GetUserIdBySessionTokenQueryHandler,
+    GetUserInfoQueryHandler,
     {
       provide: CryptoPort,
       useClass: CryptoPortImpl,
@@ -42,6 +45,10 @@ import { AuthHelper } from "./helpers";
     {
       provide: SessionRepository,
       useClass: SessionRepositoryImpl,
+    },
+    {
+      provide: UserQueryRepository,
+      useClass: UserQueryRepositoryImpl,
     }
   ],
   exports: [

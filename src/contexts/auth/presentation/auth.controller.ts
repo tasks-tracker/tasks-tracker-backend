@@ -6,8 +6,9 @@ import { HttpStatus } from "@nestjs/common";
 import { HttpCode } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiTags, ApiResponse } from "@nestjs/swagger";
-import { RegisterByLoginBodyDto, LoginBodyDto } from "./dtos";
+import { RegisterByLoginBodyDto, LoginBodyDto, GetUserInfoResponseDto } from "./dtos";
 import { RegisterUserByLoginCommand, LoginUserCommand, LogoutSessionCommand } from "../application";
+import { GetUserInfoQuery } from "../application";
 import { LoginVO, PasswordVO, SessionTokenVO } from "../domain";
 import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError, NotUsedSessionTokenDomainError } from "../domain";
 import { ValidationException } from "../../../libs";
@@ -135,11 +136,11 @@ export class AuthController {
 
   @Get('me')
   @ApiResponse({ status: HttpStatus.OK, description: 'USER_DATA' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'SESSION_TOKEN_NOT_FOUND || UNKNOWN_ERROR' })
-  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'SESSION_TOKEN_NOT_FOUND' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'USER_INFO_NOT_FOUND' })
   async me(
     @SessionToken() sessionToken: string | null,
-  ) {
+  ): Promise<GetUserInfoResponseDto> {
     if (!sessionToken) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
@@ -147,6 +148,12 @@ export class AuthController {
     if (!userId) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
-    return userId;
+    const userInfo = await this.queryBus.execute(
+      new GetUserInfoQuery(userId)
+    );
+    if (!userInfo) {
+      throw new BadRequestException("USER_INFO_NOT_FOUND");
+    }
+    return userInfo;
   }
 }
