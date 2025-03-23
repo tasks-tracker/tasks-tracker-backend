@@ -57,6 +57,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: HttpStatus.OK, description: 'USER_LOGGED_IN_SUCCESSFULLY' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'USER_NOT_FOUND || INVALID_PASSWORD || UNKNOWN_ERROR' })
+  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
   async login(
     @Body() body: LoginBodyDto,
     @Res() res: Response,
@@ -94,6 +95,8 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: HttpStatus.OK, description: 'USER_LOGGED_OUT_SUCCESSFULLY' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'SESSION_TOKEN_NOT_FOUND || UNKNOWN_ERROR' })
+  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
   async logout(
     @Res() res: Response,
   ) {
