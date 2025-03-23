@@ -1,5 +1,5 @@
-import type { SessionIdVO } from "../value-objects";
+import type { SessionIdVO } from '../value-objects';
 
 export class SessionAddedEvent {
-  constructor(readonly sessionId: SessionIdVO) { }
+  constructor(readonly sessionId: SessionIdVO) {}
 }

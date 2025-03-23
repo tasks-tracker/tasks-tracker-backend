@@ -23,7 +23,7 @@ export class UserRepositoryImpl implements UserRepository {
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
     private readonly redis: Redis,
-  ) { }
+  ) {}
 
   public nextId(): UserIdVO {
     return new UserIdVO(randomUUID());
@@ -36,8 +36,13 @@ export class UserRepositoryImpl implements UserRepository {
     if (events.some((event) => event instanceof UserRegisteredByLoginEvent)) {
       return await this.saveRegisteredByLoginEvent(user);
     } else if (events.some((event) => event instanceof SessionAddedEvent)) {
-      const sessionAddedEvent = events.find((event) => event instanceof SessionAddedEvent) as SessionAddedEvent;
-      return await this.saveSessionAddedEvent(user, sessionAddedEvent.sessionId);
+      const sessionAddedEvent = events.find(
+        (event) => event instanceof SessionAddedEvent,
+      ) as SessionAddedEvent;
+      return await this.saveSessionAddedEvent(
+        user,
+        sessionAddedEvent.sessionId,
+      );
     }
     throw new Error('Unknown event');
   }
@@ -48,7 +53,7 @@ export class UserRepositoryImpl implements UserRepository {
        FROM users
        WHERE login = $1`,
       [login.value],
-    )
+    );
     if (!dbUser) return null;
     return new User(
       new UserIdVO(dbUser.id),
@@ -90,22 +95,32 @@ export class UserRepositoryImpl implements UserRepository {
 
   private async saveSessionAddedEvent(
     user: User,
-    sessionId: SessionIdVO
+    sessionId: SessionIdVO,
   ): Promise<Result<null, never>> {
-    const session = user.sessions.find((session) => session.id.equals(sessionId))!;
+    const session = user.sessions.find((session) =>
+      session.id.equals(sessionId),
+    )!;
     const sessionKey = `session:${session.id.value}`;
     const userSessionsKey = `user_sessions:${user.id.value}`;
     const tokenKey = `token_to_session:${session.token.value}`;
-    const ttl = Math.max(0, Math.floor((session.expiresAt.getTime() - Date.now()) / 1000));
-    await this.redis.set(sessionKey, JSON.stringify({
-      id: session.id.value,
-      userId: user.id.value,
-      token: session.token.value,
-      expiresAt: session.expiresAt,
-    }), "EX", ttl);
+    const ttl = Math.max(
+      0,
+      Math.floor((session.expiresAt.getTime() - Date.now()) / 1000),
+    );
+    await this.redis.set(
+      sessionKey,
+      JSON.stringify({
+        id: session.id.value,
+        userId: user.id.value,
+        token: session.token.value,
+        expiresAt: session.expiresAt,
+      }),
+      'EX',
+      ttl,
+    );
 
     await this.redis.sadd(userSessionsKey, session.id.value);
-    await this.redis.set(tokenKey, session.id.value, "EX", ttl);
+    await this.redis.set(tokenKey, session.id.value, 'EX', ttl);
 
     return ok(null);
   }

@@ -7,8 +7,7 @@ import { SessionIdVO } from '../../domain';
 
 @Injectable()
 export class SessionRepositoryImpl implements SessionRepository {
-  constructor(
-  ) { }
+  constructor() {}
 
   public nextId(): SessionIdVO {
     return new SessionIdVO(randomUUID());

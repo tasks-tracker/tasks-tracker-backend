@@ -1,17 +1,25 @@
-import type { Response } from "express";
-import { Controller, Post, Body, Res } from "@nestjs/common";
-import { ConflictException, BadRequestException, UnprocessableEntityException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { HttpStatus } from "@nestjs/common";
-import { HttpCode } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
-import { ApiTags, ApiResponse } from "@nestjs/swagger";
-import { RegisterByLoginBodyDto, LoginBodyDto } from "./dtos";
-import { RegisterUserByLoginCommand, LoginUserCommand } from "../application";
-import { LoginVO, PasswordVO } from "../domain";
-import { UserLoginAlreadyUsedDomainError, InvalidPasswordDomainError, UserWithLoginNotExistDomainError } from "../domain";
-import { ValidationException } from "../../../libs";
-import { SessionCookieConfig } from "../../../adapters";
+import type { Response } from 'express';
+import { Controller, Post, Body, Res } from '@nestjs/common';
+import {
+  ConflictException,
+  BadRequestException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { HttpStatus } from '@nestjs/common';
+import { HttpCode } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { RegisterByLoginBodyDto, LoginBodyDto } from './dtos';
+import { RegisterUserByLoginCommand, LoginUserCommand } from '../application';
+import { LoginVO, PasswordVO } from '../domain';
+import {
+  UserLoginAlreadyUsedDomainError,
+  InvalidPasswordDomainError,
+  UserWithLoginNotExistDomainError,
+} from '../domain';
+import { ValidationException } from '../../../libs';
+import { SessionCookieConfig } from '../../../adapters';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,22 +27,35 @@ export class AuthController {
   private readonly sessionCookieConfig: SessionCookieConfig;
   constructor(
     private readonly commandBus: CommandBus,
-    configService: ConfigService
+    configService: ConfigService,
   ) {
-    this.sessionCookieConfig = configService.get<SessionCookieConfig>('session-cookie', { infer: true });
+    this.sessionCookieConfig = configService.get<SessionCookieConfig>(
+      'session-cookie',
+      { infer: true },
+    );
   }
 
   @Post('register-by-login')
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'USER_REGISTERED_SUCCESSFULLY' })
-  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'LOGIN_ALREADY_USED' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'USER_REGISTERED_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'LOGIN_ALREADY_USED',
+  })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'UNKNOWN_ERROR' })
-  @ApiResponse({ status: HttpStatus.UNPROCESSABLE_ENTITY, description: 'Validation error' })
-  async registerByLogin(
-    @Body() body: RegisterByLoginBodyDto,
-  ) {
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
+  async registerByLogin(@Body() body: RegisterByLoginBodyDto) {
     try {
       const result = await this.commandBus.execute(
-        new RegisterUserByLoginCommand(new LoginVO(body.login), new PasswordVO(body.password))
+        new RegisterUserByLoginCommand(
+          new LoginVO(body.login),
+          new PasswordVO(body.password),
+        ),
       );
       if (result.isOk()) {
         return { message: 'USER_REGISTERED_SUCCESSFULLY' };
@@ -55,16 +76,22 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: HttpStatus.OK, description: 'USER_LOGGED_IN_SUCCESSFULLY' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'USER_NOT_FOUND || INVALID_PASSWORD || UNKNOWN_ERROR' })
-  async login(
-    @Body() body: LoginBodyDto,
-    @Res() res: Response,
-  ) {
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'USER_LOGGED_IN_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'USER_NOT_FOUND || INVALID_PASSWORD || UNKNOWN_ERROR',
+  })
+  async login(@Body() body: LoginBodyDto, @Res() res: Response) {
     try {
       const result = await this.commandBus.execute(
-        new LoginUserCommand(new LoginVO(body.login), new PasswordVO(body.password))
-      )
+        new LoginUserCommand(
+          new LoginVO(body.login),
+          new PasswordVO(body.password),
+        ),
+      );
       if (result.isOk()) {
         const sessionToken = result.value;
         res.cookie('session_token', sessionToken.value, {
@@ -74,7 +101,7 @@ export class AuthController {
         });
         res.send({ message: 'USER_LOGGED_IN_SUCCESSFULLY' });
         return;
-      };
+      }
 
       const err = result.error;
       if (err instanceof UserWithLoginNotExistDomainError) {

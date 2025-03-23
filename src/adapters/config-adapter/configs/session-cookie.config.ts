@@ -8,7 +8,9 @@ import { loggerConfigRaw } from '../raw-configs';
 import { Yaml } from '../../../libs/yaml';
 
 @Yaml({
-  file: process.env.SESSION_COOKIE_CONFIG_FILE_PATH || 'configs/session-cookie.config.yml',
+  file:
+    process.env.SESSION_COOKIE_CONFIG_FILE_PATH ||
+    'configs/session-cookie.config.yml',
   encoding: 'utf-8',
   logger: LoggerModule.createLoggerByOptions({
     context: 'SessionCookieConfig',

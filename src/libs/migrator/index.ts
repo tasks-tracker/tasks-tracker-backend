@@ -1,2 +1,2 @@
-export * from './interface'
-export * from './migrator'
+export * from './interface';
+export * from './migrator';

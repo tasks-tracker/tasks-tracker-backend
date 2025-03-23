@@ -1,2 +1,2 @@
-export * from './ports'
-export * from './repositories'
+export * from './ports';
+export * from './repositories';

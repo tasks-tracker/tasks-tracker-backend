@@ -9,9 +9,7 @@ import { SessionTokenVO } from '../../domain';
 export class CryptoPortImpl implements CryptoPort {
   private readonly saltRounds = 10;
 
-  public async hashPassword(
-    password: PasswordVO,
-  ): Promise<PasswordHashVO> {
+  public async hashPassword(password: PasswordVO): Promise<PasswordHashVO> {
     const passwordHash = await bcrypt.hash(password.value, this.saltRounds);
     return new PasswordHashVO(passwordHash);
   }

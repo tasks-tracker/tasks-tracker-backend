@@ -20,9 +20,9 @@ import { AuthModule } from './contexts';
         configService.get('database')!,
       inject: [ConfigService],
     }),
-    AuthModule
+    AuthModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

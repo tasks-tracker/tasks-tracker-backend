@@ -1,31 +1,32 @@
-import type { DynamicModule } from '@nestjs/common'
-import type { OnModuleInit } from '@nestjs/common'
-import type { OnApplicationShutdown } from '@nestjs/common'
-import type { Provider } from '@nestjs/common'
-import type { IDatabase } from 'pg-promise'
+import type { DynamicModule } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import type { OnApplicationShutdown } from '@nestjs/common';
+import type { Provider } from '@nestjs/common';
+import type { IDatabase } from 'pg-promise';
 
-import type { PgPromiseModuleOptions } from './module.interfaces.js'
-import type { PgPromiseModuleAsyncOptions } from './module.interfaces.js'
-import type { PgPromiseOptionsFactory } from './module.interfaces.js'
+import type { PgPromiseModuleOptions } from './module.interfaces.js';
+import type { PgPromiseModuleAsyncOptions } from './module.interfaces.js';
+import type { PgPromiseOptionsFactory } from './module.interfaces.js';
 
-import { Module } from '@nestjs/common'
-import { Inject } from '@nestjs/common'
+import { Module } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import * as pgPromise from 'pg-promise';
 
-import { PG_PROMISE_MODULE_OPTIONS } from './module.constants.js'
-import { PG_PROMISE } from './module.constants.js'
-import { DEFAULT_MAX_RETRIES } from './module.constants.js'
-import { DEFAULT_RETRY_DELAY } from './module.constants.js'
-import { Logger } from '../../../libs'
+import { PG_PROMISE_MODULE_OPTIONS } from './module.constants.js';
+import { PG_PROMISE } from './module.constants.js';
+import { DEFAULT_MAX_RETRIES } from './module.constants.js';
+import { DEFAULT_RETRY_DELAY } from './module.constants.js';
+import { Logger } from '../../../libs';
 
 @Module({})
 export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
   constructor(
     @Inject(PG_PROMISE) private db: IDatabase<any>,
-    @Inject(PG_PROMISE_MODULE_OPTIONS) private readonly options: PgPromiseModuleOptions,
-    private readonly logger: Logger
+    @Inject(PG_PROMISE_MODULE_OPTIONS)
+    private readonly options: PgPromiseModuleOptions,
+    private readonly logger: Logger,
   ) {
-    logger.changeOptions({ context: PgPromiseModule.name })
+    logger.changeOptions({ context: PgPromiseModule.name });
   }
 
   static register(options: PgPromiseModuleOptions): DynamicModule {
@@ -44,7 +45,7 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
         return db;
       },
       inject: [PG_PROMISE_MODULE_OPTIONS],
-    }
+    };
 
     return {
       module: PgPromiseModule,
@@ -56,7 +57,7 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
         pgp,
       ],
       exports: [pgp],
-    }
+    };
   }
 
   static registerAsync(options: PgPromiseModuleAsyncOptions): DynamicModule {
@@ -75,19 +76,21 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
         return db;
       },
       inject: [PG_PROMISE_MODULE_OPTIONS],
-    }
+    };
 
     return {
       module: PgPromiseModule,
       imports: options.imports || [],
       providers: [...this.createAsyncProviders(options), pgp],
       exports: [pgp],
-    }
+    };
   }
 
-  private static createAsyncProviders(options: PgPromiseModuleAsyncOptions): Array<Provider> {
+  private static createAsyncProviders(
+    options: PgPromiseModuleAsyncOptions,
+  ): Array<Provider> {
     if (options.useExisting || options.useFactory) {
-      return [this.createAsyncOptionsProvider(options)]
+      return [this.createAsyncOptionsProvider(options)];
     }
 
     return [
@@ -96,25 +99,28 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
         provide: options.useClass!,
         useClass: options.useClass!,
       },
-    ]
+    ];
   }
 
-  private static createAsyncOptionsProvider(options: PgPromiseModuleAsyncOptions): Provider {
+  private static createAsyncOptionsProvider(
+    options: PgPromiseModuleAsyncOptions,
+  ): Provider {
     if (options.useFactory) {
       return {
         provide: PG_PROMISE_MODULE_OPTIONS,
         useFactory: options.useFactory,
         inject: options.inject || [],
-      }
+      };
     }
 
     return {
       provide: PG_PROMISE_MODULE_OPTIONS,
       useFactory: (
-        optionsFactory: PgPromiseOptionsFactory
-      ): PgPromiseModuleOptions | Promise<PgPromiseModuleOptions> => optionsFactory.createModuleOptions(),
+        optionsFactory: PgPromiseOptionsFactory,
+      ): PgPromiseModuleOptions | Promise<PgPromiseModuleOptions> =>
+        optionsFactory.createModuleOptions(),
       inject: [options.useExisting! || options.useClass!],
-    }
+    };
   }
 
   async onModuleInit(): Promise<void> {
@@ -128,11 +134,16 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
         return;
       } catch (error) {
         attempt++;
-        this.logger.error(`Database connection attempt ${attempt} failed.`, error);
+        this.logger.error(
+          `Database connection attempt ${attempt} failed.`,
+          error,
+        );
         if (attempt >= maxRetries) {
           throw error;
         }
-        await new Promise(res => setTimeout(res, this.options.retryDelay || DEFAULT_RETRY_DELAY));
+        await new Promise((res) =>
+          setTimeout(res, this.options.retryDelay || DEFAULT_RETRY_DELAY),
+        );
       }
     }
   }
