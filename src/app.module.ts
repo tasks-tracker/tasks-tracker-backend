@@ -22,7 +22,5 @@ import { AuthModule } from './contexts';
     }),
     AuthModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule { }
