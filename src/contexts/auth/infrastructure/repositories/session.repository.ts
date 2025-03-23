@@ -8,6 +8,7 @@ import { ok } from 'neverthrow';
 
 import { SessionIdVO } from '../../domain';
 import { SessionTokenVO } from '../../domain';
+import { UserIdVO } from '../../domain';
 import { NotUsedSessionTokenDomainError } from '../../domain';
 import Redis from 'ioredis';
 
@@ -36,5 +37,16 @@ export class SessionRepositoryImpl implements SessionRepository {
       .srem(`user_sessions:${userId}`, sessionId)
       .exec();
     return ok(null);
+  }
+
+  public async getUserIdBySessionToken(sessionToken: SessionTokenVO): Promise<Result<UserIdVO, NotUsedSessionTokenDomainError>> {
+    const sessionId = await this.redis.get(`token_to_session:${sessionToken.value}`);
+    if (!sessionId) return err(new NotUsedSessionTokenDomainError());
+
+    const sessionData = await this.redis.get(`session:${sessionId}`);
+    if (!sessionData) return err(new NotUsedSessionTokenDomainError());
+
+    const { userId } = JSON.parse(sessionData);
+    return ok(new UserIdVO(userId));
   }
 }
