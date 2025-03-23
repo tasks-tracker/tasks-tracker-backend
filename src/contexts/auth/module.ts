@@ -12,6 +12,7 @@ import { UserRepository } from "./domain";
 import { UserRepositoryImpl } from "./infrastructure";
 import { SessionRepository } from "./domain";
 import { SessionRepositoryImpl } from "./infrastructure";
+import { AuthHelper } from "./helpers";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SessionRepositoryImpl } from "./infrastructure";
   ],
   controllers: [AuthController],
   providers: [
+    AuthHelper,
     RegisterUserByLoginCommandHandler,
     LoginUserCommandHandler,
     LogoutSessionCommandHandler,
@@ -40,5 +42,8 @@ import { SessionRepositoryImpl } from "./infrastructure";
       useClass: SessionRepositoryImpl,
     }
   ],
+  exports: [
+    AuthHelper
+  ]
 })
 export class AuthModule { }
