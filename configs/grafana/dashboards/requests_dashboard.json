@@ -1,0 +1,20 @@
+{
+  "id": null,
+  "title": "HTTP Requests Dashboard",
+  "panels": [
+    {
+      "title": "HTTP Requests per 20s",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[20s])",
+          "legendFormat": "Requests per 20s"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 }
+    }
+  ],
+  "schemaVersion": 18,
+  "version": 1,
+  "refresh": "20s"
+}
