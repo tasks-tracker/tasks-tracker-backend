@@ -1,0 +1,74 @@
+{
+  "id": null,
+  "title": "HTTP Response Statuses - Auth API",
+  "schemaVersion": 18,
+  "version": 1,
+  "refresh": "20s",
+  "templating": {
+    "list": [
+      {
+        "name": "endpoint",
+        "type": "custom",
+        "options": [
+          "auth_login",
+          "auth_logout",
+          "auth_me",
+          "auth_register_by_login"
+        ],
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ["auth_login", "auth_logout", "auth_me", "auth_register_by_login"]
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "HTTP Requests per 20s - auth_login",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(http_auth_login_statuses[20s])",
+          "legendFormat": "{{status_code}} - Requests per 20s"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 }
+    },
+    {
+      "title": "HTTP Requests per 20s - auth_logout",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(http_auth_logout_statuses[20s])",
+          "legendFormat": "{{status_code}} - Requests per 20s"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 }
+    },
+    {
+      "title": "HTTP Requests per 20s - auth_me",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(http_auth_me_statuses[20s])",
+          "legendFormat": "{{status_code}} - Requests per 20s"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
+    },
+    {
+      "title": "HTTP Requests per 20s - auth_register_by_login",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(http_auth_register_by_login_statuses[20s])",
+          "legendFormat": "{{status_code}} - Requests per 20s"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 6 }
+    }
+  ]
+}

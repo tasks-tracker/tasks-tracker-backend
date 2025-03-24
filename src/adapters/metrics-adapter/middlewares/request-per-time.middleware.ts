@@ -9,7 +9,6 @@ export class RequestPerTimeMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     if (!(req.method === 'GET' && req.path === '/metrics')) {
-      console.log({ method: req.method, path: req.path });
       this.counter.inc();
     }
     next();
