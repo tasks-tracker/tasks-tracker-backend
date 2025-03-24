@@ -9,9 +9,11 @@ export class ResponseStatusesMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     res.on('finish', () => {
-      this.counter.inc({
-        status_code: res.statusCode.toString(),
-      });
+      if (!(req.method === 'GET' && req.path === '/metrics')) {
+        this.counter.inc({
+          status_code: res.statusCode.toString(),
+        });
+      }
     });
 
     next();
