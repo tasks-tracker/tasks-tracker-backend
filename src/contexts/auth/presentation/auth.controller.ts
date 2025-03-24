@@ -178,7 +178,11 @@ export class AuthController {
 
   @Get('me')
   @UseInterceptors(createTrackStatusesInterceptor('http_auth_me_statuses'))
-  @ApiResponse({ status: HttpStatus.OK, description: 'USER_DATA' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'USER_DATA',
+    type: GetUserInfoResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
     description: 'SESSION_TOKEN_NOT_FOUND',
