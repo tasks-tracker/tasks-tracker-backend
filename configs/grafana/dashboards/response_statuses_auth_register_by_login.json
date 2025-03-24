@@ -1,13 +1,13 @@
 {
   "id": null,
-  "title": "HTTP Response Statuses Auth Me Dashboard",
+  "title": "HTTP Response Statuses Auth Register By Login Dashboard",
   "panels": [
     {
       "title": "HTTP Requests per 20s (500)",
       "type": "timeseries",
       "targets": [
         {
-          "expr": "rate(http_auth_me_statuses{status_code=~\"500\"}[20s])",
+          "expr": "rate(http_auth_register_by_login_statuses{status_code=~\"500\"}[20s])",
           "legendFormat": "{{status_code}} - Requests per 20s"
         }
       ],

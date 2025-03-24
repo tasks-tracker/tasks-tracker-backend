@@ -5,6 +5,9 @@ import { RequestPerTimeMiddleware } from '../middlewares';
 import { ResponseStatusesMiddleware } from '../middlewares';
 import { MetricsController } from '../controllers';
 import { httpAuthMeStatusesProvider } from '../providers';
+import { httpAuthLogoutStatusesProvider } from '../providers';
+import { httpAuthRegisterByLoginStatusesProvider } from '../providers';
+import { httpAuthLoginStatusesProvider } from '../providers/http-auth-login-statuses.provider';
 
 @Global()
 @Module({
@@ -21,10 +24,16 @@ import { httpAuthMeStatusesProvider } from '../providers';
       labelNames: ['status_code'],
     }),
     httpAuthMeStatusesProvider,
+    httpAuthLogoutStatusesProvider,
+    httpAuthRegisterByLoginStatusesProvider,
+    httpAuthLoginStatusesProvider,
   ],
   exports: [
     PrometheusModule,
     httpAuthMeStatusesProvider,
+    httpAuthLogoutStatusesProvider,
+    httpAuthRegisterByLoginStatusesProvider,
+    httpAuthLoginStatusesProvider,
   ],
 })
 export class MetricsModule {

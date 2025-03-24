@@ -43,6 +43,7 @@ export class AuthController {
   }
 
   @Post('register-by-login')
+  @UseInterceptors(createTrackStatusesInterceptor('http_auth_register_by_login_statuses'))
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'USER_REGISTERED_SUCCESSFULLY',
@@ -82,6 +83,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseInterceptors(createTrackStatusesInterceptor('http_auth_login_statuses'))
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -130,6 +132,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @UseInterceptors(createTrackStatusesInterceptor('http_auth_logout_statuses'))
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
