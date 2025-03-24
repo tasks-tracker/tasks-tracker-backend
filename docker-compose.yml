@@ -10,6 +10,7 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+
   database:
     image: postgres:17.4
     container_name: database
@@ -22,6 +23,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
   backend:
     image: node:22-alpine
     container_name: backend
@@ -37,6 +39,7 @@ services:
     environment:
       DATABASE_HOST: database
       CACHE_HOST: redis
+
   db-migrations:
     image: node:22-alpine
     container_name: db-migrations
@@ -48,6 +51,28 @@ services:
       - database
     environment:
       DATABASE_HOST: database
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    container_name: prometheus
+    volumes:
+      - ./configs/prometheus/dev.prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - '9090:9090'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:11.5.2
+    container_name: grafana
+    volumes:
+      - ./configs/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./configs/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - '3000:3000'
 
 volumes:
   redis_data:

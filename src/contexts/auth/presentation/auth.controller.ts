@@ -5,6 +5,7 @@ import { BadRequestException } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UseInterceptors } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -25,6 +26,7 @@ import { ValidationException } from '@libs/validation-exception';
 import { SessionCookieConfig } from '@adapters/config-adapter';
 import { AuthHelper } from '../helpers';
 import { SessionToken } from '@libs/session-token-decorator';
+import { createTrackStatusesInterceptor } from '@adapters/metrics-adapter';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -41,6 +43,7 @@ export class AuthController {
   }
 
   @Post('register-by-login')
+  @UseInterceptors(createTrackStatusesInterceptor('http_auth_register_by_login_statuses'))
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'USER_REGISTERED_SUCCESSFULLY',
@@ -80,6 +83,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseInterceptors(createTrackStatusesInterceptor('http_auth_login_statuses'))
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -128,6 +132,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @UseInterceptors(createTrackStatusesInterceptor('http_auth_logout_statuses'))
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -172,6 +177,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @UseInterceptors(createTrackStatusesInterceptor('http_auth_me_statuses'))
   @ApiResponse({ status: HttpStatus.OK, description: 'USER_DATA' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
