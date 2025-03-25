@@ -4,18 +4,18 @@ import type { OnApplicationShutdown } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 import type { IDatabase } from 'pg-promise';
 
-import type { PgPromiseModuleOptions } from './module.interfaces.js';
-import type { PgPromiseModuleAsyncOptions } from './module.interfaces.js';
-import type { PgPromiseOptionsFactory } from './module.interfaces.js';
+import type { PgPromiseModuleOptions } from './module.interfaces';
+import type { PgPromiseModuleAsyncOptions } from './module.interfaces';
+import type { PgPromiseOptionsFactory } from './module.interfaces';
 
 import { Module } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import * as pgPromise from 'pg-promise';
 
-import { PG_PROMISE_MODULE_OPTIONS } from './module.constants.js';
-import { PG_PROMISE } from './module.constants.js';
-import { DEFAULT_MAX_RETRIES } from './module.constants.js';
-import { DEFAULT_RETRY_DELAY } from './module.constants.js';
+import { PG_PROMISE_MODULE_OPTIONS } from './module.constants';
+import { PG_PROMISE } from './module.constants';
+import { DEFAULT_MAX_RETRIES } from './module.constants';
+import { DEFAULT_RETRY_DELAY } from './module.constants';
 import { Logger } from '@libs/logger';
 
 @Module({})
