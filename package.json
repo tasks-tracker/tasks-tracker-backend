@@ -9,7 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "cross-env ENV_PATH=./configs/dev.env nest start --watch",
+    "start:dev": "cross-env ENV_PATH=./configs/backend/dev.env nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration": "npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts",
-    "migration:dev": "cross-env ENV_PATH=./configs/dev.env npm run migration"
+    "migration:dev": "cross-env ENV_PATH=./configs/backend/dev.env npm run migration"
   },
   "dependencies": {
     "@nestjs-cls/transactional": "2.5.1",
