@@ -25,18 +25,18 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   backend:
-    image: node:22-alpine
     container_name: backend
-    restart: always
-    working_dir: /app
+    build:
+      context: .
+    volumes:
+      - ./configs:/app/configs 
     ports:
       - 8000:8000
-    volumes:
-      - .:/app
-    command: sh -c "npm run start:dev"
+    restart: always
     depends_on:
       - database
     environment:
+      ENV_PATH: ./configs/backend/dev.env
       DATABASE_HOST: database
       CACHE_HOST: redis
 
