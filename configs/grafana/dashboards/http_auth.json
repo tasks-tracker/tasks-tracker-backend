@@ -1,6 +1,6 @@
 {
   "id": null,
-  "title": "HTTP Response Statuses - Auth API",
+  "title": "HTTP Auth API",
   "schemaVersion": 18,
   "version": 1,
   "refresh": "20s",
@@ -69,6 +69,50 @@
         }
       ],
       "gridPos": { "x": 0, "y": 18, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Request Duration (95th Percentile) - auth_register_by_login",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_auth_register_by_login_duration_seconds_bucket[20s]))",
+          "legendFormat": "95th Percentile Duration"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Request Duration (95th Percentile) - login",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_auth_login_duration_seconds_bucket[20s]))",
+          "legendFormat": "95th Percentile Duration"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Request Duration (95th Percentile) - logout",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_auth_logout_duration_seconds_bucket[20s]))",
+          "legendFormat": "95th Percentile Duration"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Request Duration (95th Percentile) - me",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_auth_me_duration_seconds_bucket[20s]))",
+          "legendFormat": "95th Percentile Duration"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 6 }
     }
   ]
 }
