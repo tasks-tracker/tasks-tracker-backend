@@ -1,12 +1,11 @@
 import type { INestApplication } from '@nestjs/common';
 
 import * as cookieParser from 'cookie-parser';
-import { LoggerModule } from '@libs/logger';
+import { Logger } from '@libs/logger';
 
-export const enableCookieParser = (app: INestApplication) => {
-  const logger = LoggerModule.createLoggerByOptions({
-    context: 'CookieParser',
-  });
+export const enableCookieParser = async (app: INestApplication) => {
+  const logger = await app.resolve(Logger)
+  logger.changeOptions({ context: 'CookieParser' });
   logger.debug(`Enabling cookie parser`);
   app.use(cookieParser());
 };

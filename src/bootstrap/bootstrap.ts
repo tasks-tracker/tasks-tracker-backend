@@ -20,8 +20,8 @@ export async function bootstrap() {
   const configService = app.get(ConfigService);
   const swaggerConfig = configService.get<SwaggerConfig>('swagger')!;
   if (swaggerConfig.enabled)
-    enableSwagger(app, { swaggerPrefix: swaggerConfig.swaggerPrefix });
-  enableCookieParser(app);
+    await enableSwagger(app, { swaggerPrefix: swaggerConfig.swaggerPrefix });
+  await enableCookieParser(app);
   const serviceConfig = configService.get<ServiceConfig>('service')!;
   await app.listen(serviceConfig.port);
 }

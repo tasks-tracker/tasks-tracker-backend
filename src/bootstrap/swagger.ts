@@ -3,17 +3,18 @@ import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { SwaggerModule } from '@nestjs/swagger';
 
-import { LoggerModule } from '@libs/logger';
+import { Logger } from '@libs/logger';
 
 interface SwaggerOptions {
   swaggerPrefix: string;
 }
 
-export const enableSwagger = (
+export const enableSwagger = async (
   app: INestApplication,
   options: SwaggerOptions,
 ) => {
-  const logger = LoggerModule.createLoggerByOptions({ context: 'Swagger' });
+  const logger = await app.resolve(Logger)
+  logger.changeOptions({ context: 'Swagger' });
   logger.debug(`Swagger is enabled on ${options.swaggerPrefix}`);
   const config = new DocumentBuilder()
     .setTitle('API')
