@@ -4,31 +4,20 @@ import { Global } from '@nestjs/common';
 import { RequestPerTimeMiddleware } from '../middlewares';
 import { ResponseStatusesMiddleware } from '../middlewares';
 import { MetricsController } from '../controllers';
-import { httpRequestTotalProvider } from '../providers';
-import { httpResponseStatusesProvider } from '../providers';
-import { httpAuthMeStatusesProvider } from '../providers';
-import { httpAuthLogoutStatusesProvider } from '../providers';
-import { httpAuthRegisterByLoginStatusesProvider } from '../providers';
-import { httpAuthLoginStatusesProvider } from '../providers';
+import * as providers from '../providers'
+
+const allProviders = Object.values(providers);
 
 @Global()
 @Module({
   imports: [PrometheusModule.register()],
   controllers: [MetricsController],
   providers: [
-    httpRequestTotalProvider,
-    httpResponseStatusesProvider,
-    httpAuthMeStatusesProvider,
-    httpAuthLogoutStatusesProvider,
-    httpAuthRegisterByLoginStatusesProvider,
-    httpAuthLoginStatusesProvider,
+    ...allProviders,
   ],
   exports: [
     PrometheusModule,
-    httpAuthMeStatusesProvider,
-    httpAuthLogoutStatusesProvider,
-    httpAuthRegisterByLoginStatusesProvider,
-    httpAuthLoginStatusesProvider,
+    ...allProviders,
   ],
 })
 export class MetricsModule {
