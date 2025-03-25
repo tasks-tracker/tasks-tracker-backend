@@ -24,6 +24,12 @@
       "@adapters/*": [
         "src/adapters/*"
       ],
+      "@contexts": [
+        "src/contexts"
+      ],
+      "@contexts/*": [
+        "src/contexts/*"
+      ],
       "@libs": [
         "src/libs"
       ],

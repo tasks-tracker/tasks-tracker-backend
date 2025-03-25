@@ -6,7 +6,7 @@ import { CqrsAdapterModule } from '@adapters/cqrs-adapter';
 import { LoggerModule } from '@libs/logger';
 import { DatabaseModule } from '@adapters/database-adapter';
 import { MetricsModule } from '@adapters/metrics-adapter';
-import { AuthModule } from './contexts';
+import { AuthModule } from '@contexts/auth';
 
 @Module({
   imports: [
