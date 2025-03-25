@@ -35,6 +35,7 @@ services:
     restart: always
     depends_on:
       - database
+      - redis
     environment:
       ENV_PATH: ./configs/backend/dev.env
       DATABASE_HOST: database
