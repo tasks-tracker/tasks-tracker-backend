@@ -1,4 +1,5 @@
-import type { StartedTestContainer } from 'testcontainers'
+import type { StartedTestContainer } from 'testcontainers';
+import type { DatabaseModuleOptions } from '@adapters/database-adapter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus } from '@nestjs/common';
 import { INestApplication } from '@nestjs/common';
@@ -10,39 +11,41 @@ import { databaseConfig } from '@adapters/config-adapter';
 import { serviceConfig } from '@adapters/config-adapter';
 import { sessionCookieConfig } from '@adapters/config-adapter';
 import { swaggerConfig } from '@adapters/config-adapter';
-import { Network } from 'testcontainers'
+import { Network } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
 import { Wait } from 'testcontainers';
 import { Logger } from '@libs/logger';
 import * as request from 'supertest';
-import { Migrator } from '@libs/migrator'
-import * as pgPromise from 'pg-promise'
+import { Migrator } from '@libs/migrator';
+import * as pgPromise from 'pg-promise';
 import { join } from 'path';
 
 jest.setTimeout(100_000);
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
-  let postgres: StartedTestContainer
-  let redis: StartedTestContainer
-  let server: any
+  let postgres: StartedTestContainer;
+  let redis: StartedTestContainer;
+  let server: App;
 
   beforeAll(async () => {
-    const network = await new Network().start()
+    const network = await new Network().start();
     postgres = await new GenericContainer('bitnami/postgresql:17.0.0')
-      .withWaitStrategy(Wait.forLogMessage('database system is ready to accept connections'))
+      .withWaitStrategy(
+        Wait.forLogMessage('database system is ready to accept connections'),
+      )
       .withEnvironment({
         POSTGRESQL_PASSWORD: 'password',
         POSTGRESQL_DATABASE: 'db',
         POSTGRESQL_REPLICATION_USE_PASSFILE: 'false',
       })
       .withNetwork(network)
-      .start()
+      .start();
 
     redis = await new GenericContainer('redis:6.2')
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .withNetwork(network)
-      .start()
+      .start();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -62,14 +65,14 @@ describe('AppController (e2e)', () => {
         username: 'postgres',
         password: 'password',
         database: 'db',
-        poolSize: 20
+        poolSize: 20,
       })
       .overrideProvider(serviceConfig.KEY)
       .useValue({})
       .overrideProvider(sessionCookieConfig.KEY)
       .useValue({
         maxAge: 1000000000,
-        secure: false
+        secure: false,
       })
       .overrideProvider(swaggerConfig.KEY)
       .useValue({})
@@ -78,11 +81,13 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication({
       bufferLogs: true,
     });
-    const logger = await app.resolve(Logger)
-    app.useLogger(logger)
+    const logger = await app.resolve(Logger);
+    app.useLogger(logger);
     await app.init();
     server = app.getHttpServer();
-    const dbConfig = await app.resolve(databaseConfig.KEY)
+    const dbConfig = await app.resolve<DatabaseModuleOptions>(
+      databaseConfig.KEY,
+    );
     const pgp = pgPromise();
     const client = pgp({
       ssl: dbConfig.ssl,
@@ -103,9 +108,9 @@ describe('AppController (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
-    await postgres.stop()
-    await redis.stop()
-  })
+    await postgres.stop();
+    await redis.stop();
+  });
 
   it('/auth/register-by-login (POST) - successful registration', async () => {
     const response = await request(server)

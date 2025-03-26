@@ -13,7 +13,7 @@ export const enableSwagger = async (
   app: INestApplication,
   options: SwaggerOptions,
 ) => {
-  const logger = await app.resolve(Logger)
+  const logger = await app.resolve(Logger);
   logger.setContext('Swagger');
   logger.debug(`Swagger is enabled on ${options.swaggerPrefix}`);
   const config = new DocumentBuilder()

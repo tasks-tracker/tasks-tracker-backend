@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 
 @Injectable()
 export class RequestPerTimeMiddleware implements NestMiddleware {
-  constructor(@InjectMetric('http_requests_total') private counter: Counter) { }
+  constructor(@InjectMetric('http_requests_total') private counter: Counter) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     if (!(req.method === 'GET' && req.path === '/metrics')) {

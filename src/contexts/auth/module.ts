@@ -52,4 +52,4 @@ import { AuthHelper } from './helpers';
     },
   ],
 })
-export class AuthModule { }
+export class AuthModule {}

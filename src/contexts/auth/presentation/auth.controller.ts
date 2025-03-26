@@ -44,8 +44,14 @@ export class AuthController {
   }
 
   @Post('register-by-login')
-  @UseInterceptors(createTrackStatusesInterceptor('http_auth_register_by_login_statuses'))
-  @UseInterceptors(createTrackExecutionTimeInterceptor('http_auth_register_by_login_duration_seconds'))
+  @UseInterceptors(
+    createTrackStatusesInterceptor('http_auth_register_by_login_statuses'),
+  )
+  @UseInterceptors(
+    createTrackExecutionTimeInterceptor(
+      'http_auth_register_by_login_duration_seconds',
+    ),
+  )
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'USER_REGISTERED_SUCCESSFULLY',
@@ -86,7 +92,9 @@ export class AuthController {
 
   @Post('login')
   @UseInterceptors(createTrackStatusesInterceptor('http_auth_login_statuses'))
-  @UseInterceptors(createTrackExecutionTimeInterceptor('http_auth_login_duration_seconds'))
+  @UseInterceptors(
+    createTrackExecutionTimeInterceptor('http_auth_login_duration_seconds'),
+  )
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -136,7 +144,9 @@ export class AuthController {
 
   @Post('logout')
   @UseInterceptors(createTrackStatusesInterceptor('http_auth_logout_statuses'))
-  @UseInterceptors(createTrackExecutionTimeInterceptor('http_auth_logout_duration_seconds'))
+  @UseInterceptors(
+    createTrackExecutionTimeInterceptor('http_auth_logout_duration_seconds'),
+  )
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -182,7 +192,9 @@ export class AuthController {
 
   @Get('me')
   @UseInterceptors(createTrackStatusesInterceptor('http_auth_me_statuses'))
-  @UseInterceptors(createTrackExecutionTimeInterceptor('http_auth_me_duration_seconds'))
+  @UseInterceptors(
+    createTrackExecutionTimeInterceptor('http_auth_me_duration_seconds'),
+  )
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'USER_DATA',
