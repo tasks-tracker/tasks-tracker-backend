@@ -14,7 +14,7 @@ import { LOGGER_MODULE_OPTIONS } from './logger.module.tokens';
 export class LoggerModule {
   private static defaultLoggerOptionsOutsideDI: LoggerOptions = {};
 
-  constructor() {  }
+  constructor() { }
 
   static setDefaultOptionsForLogerOutsideDI(options: LoggerOptions): void {
     LoggerModule.defaultLoggerOptionsOutsideDI = options;
@@ -52,8 +52,8 @@ export class LoggerModule {
   ): DynamicModule {
     const logger = {
       provide: Logger,
-      useFactory: (opts: LoggerModuleOptions): Logger => {
-        const logger = new Logger(opts.options);
+      useFactory: (opts: LoggerModuleOptions['options']): Logger => {
+        const logger = new Logger(opts);
         return logger;
       },
       inject: [LOGGER_MODULE_OPTIONS],
