@@ -1,6 +1,5 @@
 import type { DynamicModule } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
-import type { OnApplicationShutdown } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 import type { IDatabase } from 'pg-promise';
 
@@ -19,7 +18,7 @@ import { DEFAULT_RETRY_DELAY } from './module.constants';
 import { Logger } from '@libs/logger';
 
 @Module({})
-export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
+export class PgPromiseModule implements OnModuleInit {
   constructor(
     @Inject(PG_PROMISE) private db: IDatabase<any>,
     @Inject(PG_PROMISE_MODULE_OPTIONS)
@@ -145,15 +144,6 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
           setTimeout(res, this.options.retryDelay || DEFAULT_RETRY_DELAY),
         );
       }
-    }
-  }
-
-  async onApplicationShutdown(): Promise<void> {
-    try {
-      await this.db.$pool.end();
-      this.logger.log('Database connection closed successfully.');
-    } catch (error) {
-      this.logger.error('Error while closing database connection.', error);
     }
   }
 }
