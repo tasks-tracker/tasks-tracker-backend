@@ -1,5 +1,4 @@
 import { LOG_LEVELS } from '@libs/logger';
-import { LoggerModule } from '@libs/logger';
 
 import { IsBoolean } from 'class-validator';
 import { IsEnum } from 'class-validator';
@@ -9,7 +8,6 @@ import { Yaml } from '@libs/yaml';
 @Yaml({
   file: process.env.LOGGER_CONFIG_FILE_PATH || 'configs/logger.config.yml',
   encoding: 'utf-8',
-  logger: LoggerModule.createLoggerByOptions({ context: 'LoggingConfig' }),
 })
 class LoggerConfig {
   @IsEnum(LOG_LEVELS)
