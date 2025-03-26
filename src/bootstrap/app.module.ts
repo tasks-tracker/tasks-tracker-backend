@@ -6,6 +6,9 @@ import { LoggerModule } from '@libs/logger';
 import { DatabaseModule } from '@adapters/database-adapter';
 import { MetricsModule } from '@adapters/metrics-adapter';
 import { AuthModule } from '@contexts/auth';
+import { MiddlewareConsumer } from '@nestjs/common';
+import { RequestMethod } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 @Module({
   imports: [
@@ -25,4 +28,8 @@ import { AuthModule } from '@contexts/auth';
     AuthModule,
   ],
 })
-export class AppModule { }
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(cookieParser()).forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

@@ -6,7 +6,6 @@ import type { SwaggerConfig } from '@adapters/config-adapter';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { enableCookieParser } from './cookie-parser';
 import { enableSwagger } from './swagger';
 import { Logger } from '@libs/logger';
 
@@ -21,7 +20,6 @@ export async function bootstrap() {
   const swaggerConfig = configService.get<SwaggerConfig>('swagger')!;
   if (swaggerConfig.enabled)
     await enableSwagger(app, { swaggerPrefix: swaggerConfig.swaggerPrefix });
-  await enableCookieParser(app);
   const serviceConfig = configService.get<ServiceConfig>('service')!;
   await app.listen(serviceConfig.port);
 }
