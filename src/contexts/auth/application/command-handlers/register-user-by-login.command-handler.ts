@@ -8,16 +8,16 @@ import { ok } from 'neverthrow';
 
 @CommandHandler(RegisterUserByLoginCommand)
 export class RegisterUserByLoginCommandHandler
-  implements ICommandHandler<RegisterUserByLoginCommand>
-{
+  implements ICommandHandler<RegisterUserByLoginCommand> {
   constructor(
     private readonly cryptoPort: CryptoPort,
     private readonly userRepository: UserRepository,
-  ) {}
+  ) { }
   async execute(command: RegisterUserByLoginCommand) {
     const passwordHash = await this.cryptoPort.hashPassword(command.password);
     const userId = this.userRepository.nextId();
-    const user = User.registerByLogin(userId, command.login, passwordHash);
+    const currentDate = new Date();
+    const user = User.registerByLogin(userId, command.login, passwordHash, currentDate);
     const saveResult = await this.userRepository.save(user);
     if (saveResult.isErr()) return saveResult;
     user.commit();

@@ -3,14 +3,14 @@ import type { OnModuleInit } from '@nestjs/common';
 import type { OnApplicationShutdown } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 
-import type { CacheModuleOptions } from './module.interfaces.js';
-import type { CacheModuleAsyncOptions } from './module.interfaces.js';
-import type { CacheOptionsFactory } from './module.interfaces.js';
+import type { CacheModuleOptions } from './module.interfaces';
+import type { CacheModuleAsyncOptions } from './module.interfaces';
+import type { CacheOptionsFactory } from './module.interfaces';
 
 import { Module } from '@nestjs/common';
 import { Redis } from 'ioredis';
 
-import { CACHE_MODULE_OPTIONS } from './module.constants.js';
+import { CACHE_MODULE_OPTIONS } from './module.constants';
 import { Logger } from '@libs/logger';
 
 // TODO: add logger that logs all messages
@@ -20,7 +20,7 @@ export class CacheAdapterModule implements OnModuleInit, OnApplicationShutdown {
     private readonly redis: Redis,
     private readonly logger: Logger,
   ) {
-    logger.changeOptions({ context: CacheAdapterModule.name });
+    logger.setContext(CacheAdapterModule.name);
   }
 
   static register(options: CacheModuleOptions): DynamicModule {

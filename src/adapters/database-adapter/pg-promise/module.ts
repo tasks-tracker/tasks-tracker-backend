@@ -1,39 +1,48 @@
 import type { DynamicModule } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
-import type { OnApplicationShutdown } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 import type { IDatabase } from 'pg-promise';
+import type { IInitOptions } from 'pg-promise';
 
-import type { PgPromiseModuleOptions } from './module.interfaces.js';
-import type { PgPromiseModuleAsyncOptions } from './module.interfaces.js';
-import type { PgPromiseOptionsFactory } from './module.interfaces.js';
+import type { PgPromiseModuleOptions } from './module.interfaces';
+import type { PgPromiseModuleAsyncOptions } from './module.interfaces';
+import type { PgPromiseOptionsFactory } from './module.interfaces';
 
 import { Module } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import * as pgPromise from 'pg-promise';
 
-import { PG_PROMISE_MODULE_OPTIONS } from './module.constants.js';
-import { PG_PROMISE } from './module.constants.js';
-import { DEFAULT_MAX_RETRIES } from './module.constants.js';
-import { DEFAULT_RETRY_DELAY } from './module.constants.js';
+import { PG_PROMISE_MODULE_OPTIONS } from './module.constants';
+import { PG_PROMISE } from './module.constants';
+import { DEFAULT_MAX_RETRIES } from './module.constants';
+import { DEFAULT_RETRY_DELAY } from './module.constants';
 import { Logger } from '@libs/logger';
 
 @Module({})
-export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
+export class PgPromiseModule implements OnModuleInit {
   constructor(
     @Inject(PG_PROMISE) private db: IDatabase<any>,
     @Inject(PG_PROMISE_MODULE_OPTIONS)
     private readonly options: PgPromiseModuleOptions,
     private readonly logger: Logger,
   ) {
-    logger.changeOptions({ context: PgPromiseModule.name });
+    logger.setContext(PgPromiseModule.name);
   }
 
   static register(options: PgPromiseModuleOptions): DynamicModule {
     const pgp = {
       provide: PG_PROMISE,
-      useFactory: (opts: PgPromiseModuleOptions) => {
-        const pgp = pgPromise();
+      useFactory: (
+        opts: PgPromiseModuleOptions,
+        logger: Logger,
+      ) => {
+        logger.setContext(PgPromiseModule.name)
+        const initOptions: IInitOptions = {
+          query(e) {
+            logger.debug('Executing query:', e.query, e.params);
+          },
+        }
+        const pgp = pgPromise(initOptions);
         const db = pgp({
           user: opts.username,
           host: opts.host,
@@ -44,7 +53,7 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
         });
         return db;
       },
-      inject: [PG_PROMISE_MODULE_OPTIONS],
+      inject: [PG_PROMISE_MODULE_OPTIONS, Logger],
     };
 
     return {
@@ -63,8 +72,17 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
   static registerAsync(options: PgPromiseModuleAsyncOptions): DynamicModule {
     const pgp = {
       provide: PG_PROMISE,
-      useFactory: (opts: PgPromiseModuleOptions) => {
-        const pgp = pgPromise();
+      useFactory: (
+        opts: PgPromiseModuleOptions,
+        logger: Logger,
+      ) => {
+        logger.setContext(PgPromiseModule.name);
+        const initOptions: IInitOptions = {
+          query(e) {
+            logger.debug('Executing query:', e.query, e.params);
+          },
+        }
+        const pgp = pgPromise(initOptions);
         const db = pgp({
           user: opts.username,
           host: opts.host,
@@ -75,7 +93,7 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
         });
         return db;
       },
-      inject: [PG_PROMISE_MODULE_OPTIONS],
+      inject: [PG_PROMISE_MODULE_OPTIONS, Logger],
     };
 
     return {
@@ -145,15 +163,6 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
           setTimeout(res, this.options.retryDelay || DEFAULT_RETRY_DELAY),
         );
       }
-    }
-  }
-
-  async onApplicationShutdown(): Promise<void> {
-    try {
-      await this.db.$pool.end();
-      this.logger.log('Database connection closed successfully.');
-    } catch (error) {
-      this.logger.error('Error while closing database connection.', error);
     }
   }
 }

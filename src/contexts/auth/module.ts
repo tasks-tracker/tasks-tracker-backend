@@ -5,6 +5,7 @@ import { CacheAdapterModule } from '@adapters/cache-adapter';
 import { AuthController } from './presentation/auth.controller';
 import { RegisterUserByLoginCommandHandler } from './application';
 import { LoginUserCommandHandler } from './application';
+import { LogoutSessionCommandHandler } from './application';
 import { GetUserIdBySessionTokenQueryHandler } from './application';
 import { GetUserInfoQueryHandler } from './application';
 import { CryptoPort } from './domain';
@@ -32,6 +33,7 @@ import { AuthHelper } from './helpers';
     GetUserInfoQueryHandler,
     RegisterUserByLoginCommandHandler,
     LoginUserCommandHandler,
+    LogoutSessionCommandHandler,
     {
       provide: CryptoPort,
       useClass: CryptoPortImpl,
@@ -50,4 +52,4 @@ import { AuthHelper } from './helpers';
     },
   ],
 })
-export class AuthModule {}
+export class AuthModule { }

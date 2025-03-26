@@ -51,8 +51,8 @@ export class User extends AggregateRoot {
     id: UserIdVO,
     login: LoginVO,
     passwordHash: PasswordHashVO,
+    currentDate: Date,
   ) {
-    const currentDate = new Date();
     const user = new User(id, login, passwordHash, currentDate, []);
     user.apply(new UserRegisteredByLoginEvent(id));
     return user;
