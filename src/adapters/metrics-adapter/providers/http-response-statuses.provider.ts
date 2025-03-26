@@ -1,4 +1,4 @@
-import { makeCounterProvider } from "@willsoto/nestjs-prometheus";
+import { makeCounterProvider } from '@willsoto/nestjs-prometheus';
 
 export const httpResponseStatusesProvider = makeCounterProvider({
   name: 'http_response_statuses',

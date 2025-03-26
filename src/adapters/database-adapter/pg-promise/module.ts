@@ -32,16 +32,13 @@ export class PgPromiseModule implements OnModuleInit {
   static register(options: PgPromiseModuleOptions): DynamicModule {
     const pgp = {
       provide: PG_PROMISE,
-      useFactory: (
-        opts: PgPromiseModuleOptions,
-        logger: Logger,
-      ) => {
-        logger.setContext(PgPromiseModule.name)
+      useFactory: (opts: PgPromiseModuleOptions, logger: Logger) => {
+        logger.setContext(PgPromiseModule.name);
         const initOptions: IInitOptions = {
           query(e) {
             logger.debug('Executing query:', e.query, e.params);
           },
-        }
+        };
         const pgp = pgPromise(initOptions);
         const db = pgp({
           user: opts.username,
@@ -72,16 +69,13 @@ export class PgPromiseModule implements OnModuleInit {
   static registerAsync(options: PgPromiseModuleAsyncOptions): DynamicModule {
     const pgp = {
       provide: PG_PROMISE,
-      useFactory: (
-        opts: PgPromiseModuleOptions,
-        logger: Logger,
-      ) => {
+      useFactory: (opts: PgPromiseModuleOptions, logger: Logger) => {
         logger.setContext(PgPromiseModule.name);
         const initOptions: IInitOptions = {
           query(e) {
             logger.debug('Executing query:', e.query, e.params);
           },
-        }
+        };
         const pgp = pgPromise(initOptions);
         const db = pgp({
           user: opts.username,

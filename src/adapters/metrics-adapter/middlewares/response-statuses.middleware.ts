@@ -5,7 +5,9 @@ import { Request, Response, NextFunction } from 'express';
 
 @Injectable()
 export class ResponseStatusesMiddleware implements NestMiddleware {
-  constructor(@InjectMetric('http_response_statuses') private counter: Counter) { }
+  constructor(
+    @InjectMetric('http_response_statuses') private counter: Counter,
+  ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     res.on('finish', () => {

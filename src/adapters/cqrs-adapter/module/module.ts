@@ -7,4 +7,4 @@ import { CqrsModule } from '@nestjs/cqrs';
   imports: [CqrsModule],
   exports: [CqrsModule],
 })
-export class CqrsAdapterModule { }
+export class CqrsAdapterModule {}

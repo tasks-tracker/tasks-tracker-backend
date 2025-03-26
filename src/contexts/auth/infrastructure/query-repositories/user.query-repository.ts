@@ -11,7 +11,7 @@ import { UserIdVO } from '../../domain';
 export class UserQueryRepositoryImpl implements UserQueryRepository {
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
-  ) { }
+  ) {}
 
   public async getUserInfoById(userId: UserIdVO): Promise<UserInfo | null> {
     const userInfo = await this.txHost.tx.oneOrNone<UserInfo>(

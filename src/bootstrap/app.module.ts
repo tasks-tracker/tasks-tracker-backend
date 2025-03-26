@@ -15,7 +15,8 @@ import * as cookieParser from 'cookie-parser';
     ConfigAdapterModule,
     LoggerModule.registerAsync({
       global: true,
-      useFactory: (configService: ConfigService) => configService.get('logger')!,
+      useFactory: (configService: ConfigService) =>
+        configService.get('logger')!,
       inject: [ConfigService],
     }),
     CqrsAdapterModule,
@@ -30,6 +31,8 @@ import * as cookieParser from 'cookie-parser';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(cookieParser()).forRoutes({ path: '*', method: RequestMethod.ALL });
+    consumer
+      .apply(cookieParser())
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

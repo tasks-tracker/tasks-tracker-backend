@@ -13,8 +13,8 @@ export async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
-  const nestLogger = await app.resolve(Logger)
-  nestLogger.setContext('NestJs')
+  const nestLogger = await app.resolve(Logger);
+  nestLogger.setContext('NestJs');
   app.useLogger(nestLogger);
   const configService = app.get(ConfigService);
   const swaggerConfig = configService.get<SwaggerConfig>('swagger')!;
