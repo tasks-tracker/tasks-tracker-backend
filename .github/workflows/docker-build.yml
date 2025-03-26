@@ -1,0 +1,35 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.GITHUB_ACTOR }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image tag
+        run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)-$(date +%s)" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/backend
+          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ env.IMAGE_TAG }} .
+
+      - name: Push Docker image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/backend
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ env.IMAGE_TAG }}

@@ -22,7 +22,7 @@ import { join } from 'path';
 
 jest.setTimeout(100_000);
 
-describe('AppController (e2e)', () => {
+describe('AuthController (e2e)', () => {
   let app: INestApplication<App>;
   let postgres: StartedTestContainer;
   let redis: StartedTestContainer;

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { CqrsModule } from '@nestjs/cqrs';
 import { RegisterUserByLoginCommandHandler } from './register-user-by-login.command-handler';
@@ -24,7 +25,11 @@ describe('RegisterUserByLoginCommandHandler', () => {
         RegisterUserByLoginCommandHandler,
         {
           provide: CryptoPort,
-          useValue: { hashPassword: jest.fn().mockResolvedValue(new PasswordHashVO('hashed-password')) },
+          useValue: {
+            hashPassword: jest
+              .fn()
+              .mockResolvedValue(new PasswordHashVO('hashed-password')),
+          },
         },
         {
           provide: UserRepository,
@@ -36,17 +41,22 @@ describe('RegisterUserByLoginCommandHandler', () => {
       ],
     }).compile();
 
-    handler = module.get<RegisterUserByLoginCommandHandler>(RegisterUserByLoginCommandHandler);
+    handler = module.get<RegisterUserByLoginCommandHandler>(
+      RegisterUserByLoginCommandHandler,
+    );
     cryptoPort = module.get<CryptoPort>(CryptoPort);
     userRepository = module.get<UserRepository>(UserRepository);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-  })
+  });
 
   it('should hash the password and create a user', async () => {
-    const command = new RegisterUserByLoginCommand(new LoginVO('test-login-0'), new PasswordVO('P@ssw0rd'));
+    const command = new RegisterUserByLoginCommand(
+      new LoginVO('test-login-0'),
+      new PasswordVO('P@ssw0rd'),
+    );
     await handler.execute(command);
 
     const lastCall = (cryptoPort.hashPassword as jest.Mock).mock.calls[0];
@@ -60,19 +70,27 @@ describe('RegisterUserByLoginCommandHandler', () => {
   });
 
   it('should save the user and commit the changes', async () => {
-    const command = new RegisterUserByLoginCommand(new LoginVO('test-login-1'), new PasswordVO('P@ssw0rdoTesto'));
+    const command = new RegisterUserByLoginCommand(
+      new LoginVO('test-login-1'),
+      new PasswordVO('P@ssw0rdoTesto'),
+    );
 
     await handler.execute(command);
 
     const saveCall = (userRepository.save as jest.Mock).mock.calls[0];
     const user: User = saveCall[0];
-    const events = user.getUncommittedEvents()
+    const events = user.getUncommittedEvents();
     expect(events.length).toBe(0);
   });
 
   it('should return error if saving user fails', async () => {
-    jest.spyOn(userRepository, 'save').mockResolvedValueOnce(err(new Error('Save failed')));
-    const command = new RegisterUserByLoginCommand(new LoginVO('test-login-2'), new PasswordVO('P@ssw0rdoTestoSupro'));
+    jest
+      .spyOn(userRepository, 'save')
+      .mockResolvedValueOnce(err(new Error('Save failed')));
+    const command = new RegisterUserByLoginCommand(
+      new LoginVO('test-login-2'),
+      new PasswordVO('P@ssw0rdoTestoSupro'),
+    );
 
     const result = await handler.execute(command);
 

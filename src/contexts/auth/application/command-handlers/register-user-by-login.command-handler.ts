@@ -9,12 +9,13 @@ import { ok } from 'neverthrow';
 
 @CommandHandler(RegisterUserByLoginCommand)
 export class RegisterUserByLoginCommandHandler
-  implements ICommandHandler<RegisterUserByLoginCommand> {
+  implements ICommandHandler<RegisterUserByLoginCommand>
+{
   constructor(
     private readonly cryptoPort: CryptoPort,
     private readonly userRepository: UserRepository,
     private readonly eventPublisher: EventPublisher,
-  ) { }
+  ) {}
   async execute(command: RegisterUserByLoginCommand) {
     const passwordHash = await this.cryptoPort.hashPassword(command.password);
     const userId = this.userRepository.nextId();
