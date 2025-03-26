@@ -20,7 +20,7 @@ export class CacheAdapterModule implements OnModuleInit, OnApplicationShutdown {
     private readonly redis: Redis,
     private readonly logger: Logger,
   ) {
-    logger.changeOptions({ context: CacheAdapterModule.name });
+    logger.setContext(CacheAdapterModule.name);
   }
 
   static register(options: CacheModuleOptions): DynamicModule {

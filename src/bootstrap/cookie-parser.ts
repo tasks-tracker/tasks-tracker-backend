@@ -5,7 +5,7 @@ import { Logger } from '@libs/logger';
 
 export const enableCookieParser = async (app: INestApplication) => {
   const logger = await app.resolve(Logger)
-  logger.changeOptions({ context: 'CookieParser' });
+  logger.setContext('CookieParser');
   logger.debug(`Enabling cookie parser`);
   app.use(cookieParser());
 };

@@ -81,11 +81,7 @@ export class Logger implements LoggerService {
     this.writeLog({ logLevel: 'VERBOSE', data: args });
   }
 
-  changeOptions(options: LoggerOptions) {
-    this.writeStream = options.stream ?? this.writeStream;
-    this.colors = options.colors ?? this.colors;
-    this.context = options.context ?? this.context;
-    this.minLogLevel =
-      this.logLevelsOrder[options.logLevel ?? DEFAULT_LOG_LEVEL];
+  setContext(context: string) {
+    this.context = context;
   }
 }

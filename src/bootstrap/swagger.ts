@@ -14,7 +14,7 @@ export const enableSwagger = async (
   options: SwaggerOptions,
 ) => {
   const logger = await app.resolve(Logger)
-  logger.changeOptions({ context: 'Swagger' });
+  logger.setContext('Swagger');
   logger.debug(`Swagger is enabled on ${options.swaggerPrefix}`);
   const config = new DocumentBuilder()
     .setTitle('API')

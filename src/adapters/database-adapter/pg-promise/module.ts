@@ -26,7 +26,7 @@ export class PgPromiseModule implements OnModuleInit, OnApplicationShutdown {
     private readonly options: PgPromiseModuleOptions,
     private readonly logger: Logger,
   ) {
-    logger.changeOptions({ context: PgPromiseModule.name });
+    logger.setContext(PgPromiseModule.name);
   }
 
   static register(options: PgPromiseModuleOptions): DynamicModule {
