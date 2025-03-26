@@ -6,14 +6,17 @@ import type { SwaggerConfig } from '@adapters/config-adapter';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { createNestJsLogger } from './create-nestjs-logger';
 import { enableCookieParser } from './cookie-parser';
 import { enableSwagger } from './swagger';
+import { Logger } from '@libs/logger';
 
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: createNestJsLogger(),
+    bufferLogs: true,
   });
+  const nestLogger = await app.resolve(Logger)
+  nestLogger.setContext('NestJs')
+  app.useLogger(nestLogger);
   const configService = app.get(ConfigService);
   const swaggerConfig = configService.get<SwaggerConfig>('swagger')!;
   if (swaggerConfig.enabled)
