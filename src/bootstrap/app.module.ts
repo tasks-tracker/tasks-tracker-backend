@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigAdapterModule } from '@adapters/config-adapter';
-import { loggerConfigRaw } from '@adapters/config-adapter';
 import { CqrsAdapterModule } from '@adapters/cqrs-adapter';
 import { LoggerModule } from '@libs/logger';
 import { DatabaseModule } from '@adapters/database-adapter';
@@ -10,11 +9,12 @@ import { AuthModule } from '@contexts/auth';
 
 @Module({
   imports: [
-    LoggerModule.register({
-      global: true,
-      options: loggerConfigRaw,
-    }),
     ConfigAdapterModule,
+    LoggerModule.registerAsync({
+      global: true,
+      useFactory: (configService: ConfigService) => configService.get('logger')!,
+      inject: [ConfigService],
+    }),
     CqrsAdapterModule,
     DatabaseModule.registerAsync({
       useFactory: (configService: ConfigService) =>
@@ -22,7 +22,7 @@ import { AuthModule } from '@contexts/auth';
       inject: [ConfigService],
     }),
     MetricsModule,
-    AuthModule,
+    // AuthModule,
   ],
 })
 export class AppModule { }

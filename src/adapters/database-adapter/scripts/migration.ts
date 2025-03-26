@@ -4,7 +4,7 @@ if (process.env.ENV_PATH) dotenv.config({ path: process.env.ENV_PATH });
 import { Migrator } from '@libs/migrator';
 import { join } from 'node:path';
 import { databaseConfig } from '@adapters/config-adapter';
-import { loggerConfigRaw } from '@adapters/config-adapter';
+import { loggerConfig } from '@adapters/config-adapter';
 import { LoggerModule } from '@libs/logger';
 import * as pgPromise from 'pg-promise';
 
@@ -21,7 +21,7 @@ const client = pgp({
 
 const logger = LoggerModule.createLoggerByOptions({
   context: 'Migration',
-  ...loggerConfigRaw,
+  ...loggerConfig(),
 });
 
 const migrator = new Migrator(

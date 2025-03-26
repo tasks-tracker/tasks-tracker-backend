@@ -6,14 +6,11 @@ import type { SwaggerConfig } from '@adapters/config-adapter';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { LoggerModule } from '@libs/logger';
-import { loggerConfigRaw } from '@adapters/config-adapter';
 import { createNestJsLogger } from './create-nestjs-logger';
 import { enableCookieParser } from './cookie-parser';
 import { enableSwagger } from './swagger';
 
 export async function bootstrap() {
-  LoggerModule.setDefaultOptionsForLogerOutsideDI(loggerConfigRaw);
   const app = await NestFactory.create(AppModule, {
     logger: createNestJsLogger(),
   });
