@@ -2,6 +2,7 @@ import type { DynamicModule } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 import type { IDatabase } from 'pg-promise';
+import type { IInitOptions } from 'pg-promise';
 
 import type { PgPromiseModuleOptions } from './module.interfaces';
 import type { PgPromiseModuleAsyncOptions } from './module.interfaces';
@@ -31,8 +32,17 @@ export class PgPromiseModule implements OnModuleInit {
   static register(options: PgPromiseModuleOptions): DynamicModule {
     const pgp = {
       provide: PG_PROMISE,
-      useFactory: (opts: PgPromiseModuleOptions) => {
-        const pgp = pgPromise();
+      useFactory: (
+        opts: PgPromiseModuleOptions,
+        logger: Logger,
+      ) => {
+        logger.setContext(PgPromiseModule.name)
+        const initOptions: IInitOptions = {
+          query(e) {
+            logger.debug('Executing query:', e.query, e.params);
+          },
+        }
+        const pgp = pgPromise(initOptions);
         const db = pgp({
           user: opts.username,
           host: opts.host,
@@ -43,7 +53,7 @@ export class PgPromiseModule implements OnModuleInit {
         });
         return db;
       },
-      inject: [PG_PROMISE_MODULE_OPTIONS],
+      inject: [PG_PROMISE_MODULE_OPTIONS, Logger],
     };
 
     return {
@@ -62,8 +72,17 @@ export class PgPromiseModule implements OnModuleInit {
   static registerAsync(options: PgPromiseModuleAsyncOptions): DynamicModule {
     const pgp = {
       provide: PG_PROMISE,
-      useFactory: (opts: PgPromiseModuleOptions) => {
-        const pgp = pgPromise();
+      useFactory: (
+        opts: PgPromiseModuleOptions,
+        logger: Logger,
+      ) => {
+        logger.setContext(PgPromiseModule.name);
+        const initOptions: IInitOptions = {
+          query(e) {
+            logger.debug('Executing query:', e.query, e.params);
+          },
+        }
+        const pgp = pgPromise(initOptions);
         const db = pgp({
           user: opts.username,
           host: opts.host,
@@ -74,7 +93,7 @@ export class PgPromiseModule implements OnModuleInit {
         });
         return db;
       },
-      inject: [PG_PROMISE_MODULE_OPTIONS],
+      inject: [PG_PROMISE_MODULE_OPTIONS, Logger],
     };
 
     return {
