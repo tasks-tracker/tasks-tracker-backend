@@ -22,7 +22,7 @@ import { AuthModule } from '@contexts/auth';
       inject: [ConfigService],
     }),
     MetricsModule,
-    // AuthModule,
+    AuthModule,
   ],
 })
 export class AppModule { }
