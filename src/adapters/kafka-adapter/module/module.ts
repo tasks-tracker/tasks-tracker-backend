@@ -3,6 +3,7 @@ import type { OnModuleInit } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 import type { logCreator } from 'kafkajs';
 import type { LogEntry } from 'kafkajs';
+import type { Producer } from 'kafkajs';
 
 import type { KafkaModuleOptions } from './module.interfaces';
 import type { KafkaModuleAsyncOptions } from './module.interfaces';
@@ -12,6 +13,7 @@ import type { KafkaOptionsFactory } from './module.interfaces';
 import { Module } from '@nestjs/common';
 
 import { KAFKA_MODULE_OPTIONS } from './module.constants';
+import { KAFKA_PRODUCER } from './module.constants';
 import { Kafka } from 'kafkajs';
 import { logLevel } from 'kafkajs';
 import { Logger } from '@libs/logger';
@@ -50,8 +52,18 @@ export class KafkaModule implements OnModuleInit {
       },
       inject: [KAFKA_MODULE_OPTIONS, Logger],
     };
+    const producer = {
+      provide: KAFKA_PRODUCER,
+      useFactory: async (kafka: Kafka): Promise<Producer> => {
+        const producer = kafka.producer();
+        await producer.connect();
+        return producer;
+      },
+      inject: [Kafka],
+    };
 
     return {
+      global: options.isGlobal,
       module: KafkaModule,
       providers: [
         {
@@ -59,8 +71,9 @@ export class KafkaModule implements OnModuleInit {
           useValue: options.options,
         },
         kafka,
+        producer,
       ],
-      exports: [kafka],
+      exports: [kafka, producer],
     };
   }
 
@@ -78,11 +91,22 @@ export class KafkaModule implements OnModuleInit {
       inject: [KAFKA_MODULE_OPTIONS, Logger],
     };
 
+    const producer = {
+      provide: KAFKA_PRODUCER,
+      useFactory: async (kafka: Kafka): Promise<Producer> => {
+        const producer = kafka.producer();
+        await producer.connect();
+        return producer;
+      },
+      inject: [Kafka],
+    };
+
     return {
+      global: options.isGlobal,
       module: KafkaModule,
       imports: options.imports || [],
-      providers: [...this.createAsyncProviders(options), kafka],
-      exports: [kafka],
+      providers: [...this.createAsyncProviders(options), kafka, producer],
+      exports: [kafka, producer],
     };
   }
 
