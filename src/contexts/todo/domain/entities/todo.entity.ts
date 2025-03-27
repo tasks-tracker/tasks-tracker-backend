@@ -4,7 +4,7 @@ import {
   TodoTitleVO,
 } from '@contexts/todo/domain/value-objects';
 
-export class Todo {
+export class TodoEntity {
   constructor(
     public readonly id: TodoIdVO,
     public readonly title: TodoTitleVO,
