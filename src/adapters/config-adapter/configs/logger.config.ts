@@ -1,3 +1,4 @@
+import type { LoggerModuleOptions } from '@libs/logger';
 import { LOG_LEVELS } from '@libs/logger';
 
 import { registerAs } from '@nestjs/config';
@@ -10,7 +11,7 @@ import { Yaml } from '@libs/yaml';
   file: process.env.LOGGER_CONFIG_FILE_PATH || 'configs/logger.config.yml',
   encoding: 'utf-8',
 })
-class LoggerConfig {
+class LoggerConfig implements LoggerModuleOptions {
   @IsEnum(LOG_LEVELS)
   logLevel: string;
 

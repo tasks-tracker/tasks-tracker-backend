@@ -1,4 +1,4 @@
-import type { PgPromiseModuleOptions } from 'src/adapters/database-adapter/pg-promise';
+import type { DatabaseModuleOptions } from '@adapters/database-adapter';
 
 import { registerAs } from '@nestjs/config';
 import { IsString } from 'class-validator';
@@ -13,7 +13,7 @@ import { Yaml } from '@libs/yaml';
   file: process.env.DATABASE_CONFIG_FILE_PATH || 'configs/database.config.yml',
   encoding: 'utf-8',
 })
-class DatabaseConfig implements PgPromiseModuleOptions {
+class DatabaseConfig implements DatabaseModuleOptions {
   @IsBoolean()
   ssl: boolean;
 
