@@ -21,6 +21,7 @@ import * as cookieParser from 'cookie-parser';
     }),
     CqrsAdapterModule,
     DatabaseModule.registerAsync({
+      isGlobal: true,
       useFactory: (configService: ConfigService) =>
         configService.get('database')!,
       inject: [ConfigService],

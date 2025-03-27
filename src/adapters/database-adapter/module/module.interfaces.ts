@@ -5,7 +5,12 @@ import type { OptionalFactoryDependency } from '@nestjs/common';
 import type { PgPromiseModuleOptions } from '../pg-promise';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DatabaseModuleOptions extends PgPromiseModuleOptions {}
+export interface DatabaseModuleOptions extends PgPromiseModuleOptions { }
+
+export interface DatabaseModuleSyncOptions {
+  isGlobal?: boolean;
+  options: DatabaseModuleOptions;
+}
 
 export interface DatabaseOptionsFactory {
   createModuleOptions: () =>
@@ -15,6 +20,7 @@ export interface DatabaseOptionsFactory {
 
 export interface DatabaseModuleAsyncOptions
   extends Pick<ModuleMetadata, 'imports' | 'providers'> {
+  isGlobal?: boolean;
   useExisting?: Type<DatabaseModuleOptions>;
   useClass?: Type<DatabaseModuleOptions>;
   useFactory?: (
