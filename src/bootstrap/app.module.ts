@@ -14,7 +14,7 @@ import * as cookieParser from 'cookie-parser';
   imports: [
     ConfigAdapterModule,
     LoggerModule.registerAsync({
-      global: true,
+      isGlobal: true,
       useFactory: (configService: ConfigService) =>
         configService.get('logger')!,
       inject: [ConfigService],
