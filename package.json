@@ -37,6 +37,7 @@
     "cookie-parser": "1.4.7",
     "dotenv": "16.4.7",
     "ioredis": "5.6.0",
+    "kafkajs": "2.2.4",
     "nestjs-cls": "5.4.1",
     "neverthrow": "8.2.0",
     "pg-promise": "11.13.0",
