@@ -15,7 +15,7 @@ import { LOGGER_MODULE_OPTIONS } from './logger.module.tokens';
 export class LoggerModule {
   private static defaultLoggerOptionsOutsideDI: LoggerOptions = {};
 
-  constructor() { }
+  constructor() {}
 
   static setDefaultOptionsForLogerOutsideDI(options: LoggerOptions): void {
     LoggerModule.defaultLoggerOptionsOutsideDI = options;

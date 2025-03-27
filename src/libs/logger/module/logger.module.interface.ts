@@ -4,7 +4,8 @@ import type { Type } from '@nestjs/common';
 import type { InjectionToken } from '@nestjs/common';
 import type { OptionalFactoryDependency } from '@nestjs/common';
 
-export interface LoggerModuleOptions extends LoggerOptions { }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface LoggerModuleOptions extends LoggerOptions {}
 
 export interface LoggerModuleSyncOptions {
   isGlobal?: boolean;

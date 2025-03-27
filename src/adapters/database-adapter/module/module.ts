@@ -13,7 +13,7 @@ import { PgPromiseModule } from '../pg-promise';
 
 @Module({})
 export class DatabaseModule {
-  constructor() { }
+  constructor() {}
 
   static register(options: DatabaseModuleSyncOptions): DynamicModule {
     const pgPromiseModule = PgPromiseModule.register(options.options);
