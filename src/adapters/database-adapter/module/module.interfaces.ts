@@ -5,7 +5,7 @@ import type { OptionalFactoryDependency } from '@nestjs/common';
 import type { PgPromiseModuleOptions } from '../pg-promise';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DatabaseModuleOptions extends PgPromiseModuleOptions { }
+export interface DatabaseModuleOptions extends PgPromiseModuleOptions {}
 
 export interface DatabaseModuleSyncOptions {
   isGlobal?: boolean;

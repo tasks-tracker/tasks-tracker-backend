@@ -1,3 +1,5 @@
+import type { LoggerConfig } from '@adapters/config-adapter';
+import type { DatabaseConfig } from '@adapters/config-adapter';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigAdapterModule } from '@adapters/config-adapter';
@@ -14,16 +16,16 @@ import * as cookieParser from 'cookie-parser';
   imports: [
     ConfigAdapterModule,
     LoggerModule.registerAsync({
-      global: true,
+      isGlobal: true,
       useFactory: (configService: ConfigService) =>
-        configService.get('logger')!,
+        configService.get<LoggerConfig>('logger')!,
       inject: [ConfigService],
     }),
     CqrsAdapterModule,
     DatabaseModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
-        configService.get('database')!,
+        configService.get<DatabaseConfig>('database')!,
       inject: [ConfigService],
     }),
     MetricsModule,

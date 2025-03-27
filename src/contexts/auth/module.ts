@@ -3,20 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { CacheConfig } from '@adapters/config-adapter';
 import { CacheAdapterModule } from '@adapters/cache-adapter';
 import { AuthController } from './presentation/auth.controller';
-import { RegisterUserByLoginCommandHandler } from './application';
-import { LoginUserCommandHandler } from './application';
-import { LogoutSessionCommandHandler } from './application';
-import { GetUserIdBySessionTokenQueryHandler } from './application';
-import { GetUserInfoQueryHandler } from './application';
-import { CryptoPort } from './domain';
-import { CryptoPortImpl } from './infrastructure';
-import { UserRepository } from './domain';
-import { UserRepositoryImpl } from './infrastructure';
-import { SessionRepository } from './domain';
-import { SessionRepositoryImpl } from './infrastructure';
-import { UserQueryRepository } from './application';
-import { UserQueryRepositoryImpl } from './infrastructure';
-import { AuthHelper } from './helpers';
+import { helpersProviders } from './module.providers';
+import { queryHandlersProviders } from './module.providers';
+import { commandHandlersProviders } from './module.providers';
+import { portsProviders } from './module.providers';
+import { repositoriesProviders } from './module.providers';
+import { queryRepositoriesProviders } from './module.providers';
 
 @Module({
   imports: [
@@ -28,28 +20,12 @@ import { AuthHelper } from './helpers';
   ],
   controllers: [AuthController],
   providers: [
-    AuthHelper,
-    GetUserIdBySessionTokenQueryHandler,
-    GetUserInfoQueryHandler,
-    RegisterUserByLoginCommandHandler,
-    LoginUserCommandHandler,
-    LogoutSessionCommandHandler,
-    {
-      provide: CryptoPort,
-      useClass: CryptoPortImpl,
-    },
-    {
-      provide: UserRepository,
-      useClass: UserRepositoryImpl,
-    },
-    {
-      provide: SessionRepository,
-      useClass: SessionRepositoryImpl,
-    },
-    {
-      provide: UserQueryRepository,
-      useClass: UserQueryRepositoryImpl,
-    },
+    ...helpersProviders,
+    ...queryHandlersProviders,
+    ...commandHandlersProviders,
+    ...portsProviders,
+    ...repositoriesProviders,
+    ...queryRepositoriesProviders,
   ],
 })
-export class AuthModule {}
+export class AuthModule {         }
