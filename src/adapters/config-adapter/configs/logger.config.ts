@@ -11,7 +11,7 @@ import { Yaml } from '@libs/yaml';
   file: process.env.LOGGER_CONFIG_FILE_PATH || 'configs/logger.config.yml',
   encoding: 'utf-8',
 })
-class LoggerConfig implements LoggerModuleOptions {
+export class LoggerConfig implements LoggerModuleOptions {
   @IsEnum(LOG_LEVELS)
   logLevel: string;
 

@@ -13,7 +13,7 @@ import { Yaml } from '@libs/yaml';
   file: process.env.DATABASE_CONFIG_FILE_PATH || 'configs/database.config.yml',
   encoding: 'utf-8',
 })
-class DatabaseConfig implements DatabaseModuleOptions {
+export class DatabaseConfig implements DatabaseModuleOptions {
   @IsBoolean()
   ssl: boolean;
 
