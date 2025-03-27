@@ -8,6 +8,7 @@ import { queryHandlersProviders } from './module.providers';
 import { commandHandlersProviders } from './module.providers';
 import { portsProviders } from './module.providers';
 import { repositoriesProviders } from './module.providers';
+import { queryRepositoriesProviders } from './module.providers';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { repositoriesProviders } from './module.providers';
     ...commandHandlersProviders,
     ...portsProviders,
     ...repositoriesProviders,
+    ...queryRepositoriesProviders,
   ],
 })
-export class AuthModule {        }
+export class AuthModule {         }
