@@ -5,7 +5,7 @@ import type { OptionalFactoryDependency } from '@nestjs/common';
 import type { KafkaConfig } from 'kafkajs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface KafkaModuleOptions extends KafkaConfig { }
+export interface KafkaModuleOptions extends KafkaConfig {}
 
 export interface KafkaModuleSyncOptions {
   isGlobal?: boolean;
@@ -13,9 +13,7 @@ export interface KafkaModuleSyncOptions {
 }
 
 export interface KafkaOptionsFactory {
-  createModuleOptions: () =>
-    | KafkaModuleOptions
-    | Promise<KafkaModuleOptions>;
+  createModuleOptions: () => KafkaModuleOptions | Promise<KafkaModuleOptions>;
 }
 
 export interface KafkaModuleAsyncOptions

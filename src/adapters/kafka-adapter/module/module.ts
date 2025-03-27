@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { DynamicModule } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
@@ -30,13 +31,42 @@ export class KafkaModule implements OnModuleInit {
   private static logCreator(logger: Logger): logCreator {
     return () =>
       ({ namespace, level, log }: LogEntry) => {
-        if (level === logLevel.NOTHING) logger.debug({ namespace, message: log.message, broker: log.broker, clientId: log.clientId });
-        else if (level === logLevel.ERROR) logger.error({ namespace, message: log.message, broker: log.broker, clientId: log.clientId });
-        else if (level === logLevel.WARN) logger.warn({ namespace, message: log.message, broker: log.broker, clientId: log.clientId });
-        else if (level === logLevel.INFO) logger.log({ namespace, message: log.message, broker: log.broker, clientId: log.clientId });
-        else if (level === logLevel.DEBUG) logger.debug({ namespace, message: log.message, broker: log.broker, clientId: log.clientId });
-      }
-      ;
+        if (level === logLevel.NOTHING)
+          logger.debug({
+            namespace,
+            message: log.message,
+            broker: log.broker,
+            clientId: log.clientId,
+          });
+        else if (level === logLevel.ERROR)
+          logger.error({
+            namespace,
+            message: log.message,
+            broker: log.broker,
+            clientId: log.clientId,
+          });
+        else if (level === logLevel.WARN)
+          logger.warn({
+            namespace,
+            message: log.message,
+            broker: log.broker,
+            clientId: log.clientId,
+          });
+        else if (level === logLevel.INFO)
+          logger.log({
+            namespace,
+            message: log.message,
+            broker: log.broker,
+            clientId: log.clientId,
+          });
+        else if (level === logLevel.DEBUG)
+          logger.debug({
+            namespace,
+            message: log.message,
+            broker: log.broker,
+            clientId: log.clientId,
+          });
+      };
   }
 
   static register(options: KafkaModuleSyncOptions): DynamicModule {
@@ -44,11 +74,10 @@ export class KafkaModule implements OnModuleInit {
       provide: Kafka,
       useFactory: (opts: KafkaModuleOptions, logger: Logger): Kafka => {
         logger.setContext(KafkaModule.name);
-        return new Kafka(
-          {
-            ...opts,
-            logCreator: KafkaModule.logCreator(logger),
-          })
+        return new Kafka({
+          ...opts,
+          logCreator: KafkaModule.logCreator(logger),
+        });
       },
       inject: [KAFKA_MODULE_OPTIONS, Logger],
     };
@@ -82,11 +111,10 @@ export class KafkaModule implements OnModuleInit {
       provide: Kafka,
       useFactory: (opts: KafkaModuleOptions, logger: Logger): Kafka => {
         logger.setContext(KafkaModule.name);
-        return new Kafka(
-          {
-            ...opts,
-            logCreator: KafkaModule.logCreator(logger),
-          })
+        return new Kafka({
+          ...opts,
+          logCreator: KafkaModule.logCreator(logger),
+        });
       },
       inject: [KAFKA_MODULE_OPTIONS, Logger],
     };

@@ -54,7 +54,7 @@ describe('AuthController (e2e)', () => {
     zookeeper = await new GenericContainer('confluentinc/cp-zookeeper:7.6.5')
       .withWaitStrategy(Wait.forLogMessage('INFO ZooKeeper audit is disabled.'))
       .withEnvironment({
-        ZOOKEEPER_CLIENT_PORT: '2181'
+        ZOOKEEPER_CLIENT_PORT: '2181',
       })
       .withExposedPorts(2181)
       .withNetwork(network)
@@ -62,7 +62,7 @@ describe('AuthController (e2e)', () => {
       .start();
 
     kafka = await new KafkaContainer()
-      // @ts-ignore
+      // @ts-expect-error KafkaContainer bad types
       .withNetwork(network)
       .withZooKeeper('zookeeper', 2181)
       .withExposedPorts(9093)
