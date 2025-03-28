@@ -1,38 +1,29 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UpdateTodoCommand } from '@contexts/todo/application/commands/update-todo.command';
-import { TodoNotFoundDomainError, TodoRepository } from '@contexts/todo/domain';
-import { err, ok, Result } from 'neverthrow';
-import { TodoNotOwnerExceptionDomainError } from '@contexts/todo/domain/domain-errors/todo-not-owner-exception.domain-error';
-import { isCollection } from 'yaml';
+import type { ICommandHandler } from '@nestjs/cqrs';
+import type { Result } from 'neverthrow';
+import { CommandHandler } from '@nestjs/cqrs';
+import { ok } from 'neverthrow';
+import { err } from 'neverthrow';
+import { UpdateTodoCommand } from '../commands';
+import { TodoNotFoundDomainError } from '../../domain';
+import { TodoNotOwnerExceptionDomainError } from '../../domain';
+import { TodoRepository } from '../../domain';
 
 @CommandHandler(UpdateTodoCommand)
 export class UpdateTodoCommandHandler
-  implements ICommandHandler<UpdateTodoCommand>
-{
-  constructor(public readonly todoRepository: TodoRepository) {}
+  implements ICommandHandler<UpdateTodoCommand> {
+  constructor(public readonly todoRepository: TodoRepository) { }
 
-  async execute(
-    command: UpdateTodoCommand,
-  ): Promise<
+  async execute(command: UpdateTodoCommand): Promise<
     Result<null, TodoNotFoundDomainError | TodoNotOwnerExceptionDomainError>
   > {
     const todo = await this.todoRepository.findById(command.todoId);
-    const { description, title, deadline, isCompleted } = command;
+    if (!todo) return err(new TodoNotFoundDomainError());
 
-    if (!todo) {
-      return err(new TodoNotFoundDomainError());
-    }
-
-    try {
-      todo.update(title, isCompleted, description, deadline);
-    } catch (error) {
-      if (error instanceof TodoNotOwnerExceptionDomainError) {
-        return err(error);
-      }
-      throw error;
-    }
+    const updateResult = todo.update(command.userId, command.title, command.description, command.deadline);
+    if (updateResult.isErr()) return updateResult;
 
     await this.todoRepository.save(todo);
+    todo.commit();
     return ok(null);
   }
 }
