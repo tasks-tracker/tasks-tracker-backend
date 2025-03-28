@@ -10,7 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
 import { Redis } from 'ioredis';
-import * as knex from 'knex';
+import { knex } from 'knex';
 import { randomUUID } from 'node:crypto';
 
 import { ok } from 'neverthrow';
