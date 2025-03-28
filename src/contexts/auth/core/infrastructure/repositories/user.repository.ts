@@ -26,11 +26,11 @@ import { SessionAddedEvent } from '../../domain';
 
 @Injectable()
 export class UserRepositoryImpl implements UserRepository {
-  private readonly knex = knex({ client: 'pg' })
+  private readonly knex = knex({ client: 'pg' });
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
     private readonly redis: Redis,
-  ) { }
+  ) {}
 
   public nextId(): UserIdVO {
     return new UserIdVO(randomUUID());
@@ -60,10 +60,7 @@ export class UserRepositoryImpl implements UserRepository {
       .where('login', login.value)
       .toSQL()
       .toNative();
-    const dbUser = await this.txHost.tx.oneOrNone(
-      SQL.sql,
-      SQL.bindings,
-    );
+    const dbUser = await this.txHost.tx.oneOrNone(SQL.sql, SQL.bindings);
     if (!dbUser) return null;
     return new User(
       new UserIdVO(dbUser.id),
@@ -87,10 +84,7 @@ export class UserRepositoryImpl implements UserRepository {
       .toSQL()
       .toNative();
     try {
-      await this.txHost.tx.none(
-        SQL.sql,
-        SQL.bindings,
-      );
+      await this.txHost.tx.none(SQL.sql, SQL.bindings);
       return ok(null);
     } catch (error) {
       if (error.constraint === 'unique_user_login')
