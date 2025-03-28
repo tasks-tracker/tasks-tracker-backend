@@ -12,4 +12,8 @@ export class TodoTitleVO {
       throw new ValidationException(errors);
     }
   }
+
+  equals(title: TodoTitleVO): boolean {
+    return this.value === title.value;
+  }
 }

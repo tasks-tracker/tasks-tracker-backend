@@ -12,4 +12,8 @@ export class TodoDescriptionVO {
       throw new ValidationException(errors);
     }
   }
+
+  equals(description: TodoDescriptionVO): boolean {
+    return this.value === description.value;
+  }
 }
