@@ -1,8 +1,8 @@
-import { isUUID, IsUUID, validateSync } from 'class-validator';
+import { IsUUID } from 'class-validator';
+import { validateSync } from 'class-validator';
 import { ValidationException } from '@libs/validation-exception';
-import { randomUUID } from 'node:crypto';
 
-export class TodoIdVO {
+export class UserIdVO {
   @IsUUID()
   public readonly value: string;
   constructor(value: string) {
@@ -12,9 +12,7 @@ export class TodoIdVO {
       throw new ValidationException(errors);
     }
   }
-
-  static create(): TodoIdVO {
-    const id = randomUUID();
-    return new TodoIdVO(id);
+  equals(other: UserIdVO): boolean {
+    return this.value === other.value;
   }
 }

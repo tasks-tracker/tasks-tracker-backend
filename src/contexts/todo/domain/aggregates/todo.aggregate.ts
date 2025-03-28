@@ -7,27 +7,35 @@ import { TodoUpdatedEvent } from '@contexts/todo/domain/events/todo-updated.even
 import { TodoCompletedEvent } from '@contexts/todo/domain/events/todo-completed.event';
 import { TodoUnCompletedEvent } from '@contexts/todo/domain/events/todo-uncompleted.event';
 import { TodoDeletedEvent } from '@contexts/todo/domain/events/todo-deleted.event';
+import { UserIdVO } from '../value-objects/todo-owner-id.value-object';
+import { TodoNotOwnerExceptionDomainError } from '@contexts/todo/domain/domain-errors/todo-not-owner-exception.domain-error';
 
 export class Todo extends AggregateRoot {
   #id: TodoIdVO;
   #title: TodoTitleVO;
   #description: TodoDescriptionVO | null;
-  #completed: boolean;
+  #isCompleted: boolean;
   #isDeleted: boolean;
+  #deadline: Date | null;
+  #ownerId: UserIdVO;
 
   constructor(
     id: TodoIdVO,
     title: TodoTitleVO,
     description: TodoDescriptionVO | null,
-    completed: boolean,
+    completedStatus: boolean,
     isDeleted: boolean,
+    deadline: Date | null,
+    ownerId: UserIdVO,
   ) {
     super();
     this.#id = id;
     this.#title = title;
     this.#description = description;
-    this.#completed = completed;
+    this.#isCompleted = completedStatus;
     this.#isDeleted = isDeleted;
+    this.#deadline = deadline;
+    this.#ownerId = ownerId;
   }
 
   get id() {
@@ -42,50 +50,73 @@ export class Todo extends AggregateRoot {
     return this.#description;
   }
 
-  get completed() {
-    return this.#completed;
+  get completedStatus() {
+    return this.#isCompleted;
   }
 
   get isDeleted() {
     return this.#isDeleted;
   }
 
+  get ownerId() {
+    return this.#ownerId;
+  }
+
   static create(
     id: TodoIdVO,
     title: TodoTitleVO,
     description: TodoDescriptionVO | null,
-  ) {
-    const todo = new Todo(id, title, description, false, false);
+    deadline: Date | null,
+    ownerId: UserIdVO,
+  ): Todo {
+    const todo = new Todo(
+      id,
+      title,
+      description,
+      false,
+      false,
+      deadline,
+      ownerId,
+    );
     todo.apply(new TodoCreatedEvent(id));
     return todo;
   }
 
-  updateTitle(title: TodoIdVO) {
+  update(
+    title: TodoTitleVO,
+    isCompleted: boolean,
+    description: TodoDescriptionVO | null,
+    deadline: Date | null,
+  ) {
     this.#title = title;
-    this.apply(new TodoUpdatedEvent(this.#id.value));
-  }
-
-  updateDescription(description: TodoDescriptionVO) {
     this.#description = description;
+    this.#deadline = deadline;
+    this.#isCompleted = isCompleted;
     this.apply(new TodoUpdatedEvent(this.#id.value));
   }
 
-  complete() {
-    if (!this.#completed) {
-      this.#completed = true;
-      this.apply(new TodoCompletedEvent(this.#id.value));
+  markIsCompleted(userId: UserIdVO) {
+    if (!this.#ownerId.equals(userId)) {
+      throw new TodoNotOwnerExceptionDomainError();
     }
+    this.#isCompleted = true;
+    this.apply(new TodoCompletedEvent(this.#id.value));
   }
 
-  uncomplete() {
-    if (this.#completed) {
-      this.#completed = false;
-      this.apply(new TodoUnCompletedEvent(this.#id.value));
-    }
+  markIsNotCompleted() {
+    this.#isCompleted = false;
+    this.apply(new TodoUnCompletedEvent(this.#id.value));
   }
 
-  delete() {
+  delete(userId: UserIdVO) {
+    if (!this.#ownerId.equals(userId)) {
+      throw new TodoNotOwnerExceptionDomainError();
+    }
     this.#isDeleted = true;
     this.apply(new TodoDeletedEvent(this.#id.value));
+  }
+
+  getDeadline() {
+    return this.#deadline;
   }
 }
