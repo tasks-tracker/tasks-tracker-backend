@@ -36,7 +36,12 @@ import * as cookieParser from 'cookie-parser';
         configService.get<KafkaConfig>('kafka')!,
       inject: [ConfigService],
     }),
-    MetricsModule,
+    MetricsModule.registerAsync({
+      isGlobal: true,
+      useFactory: (configService: ConfigService) =>
+        configService.get('metrics')!,
+      inject: [ConfigService],
+    }),
     AuthModule,
   ],
 })

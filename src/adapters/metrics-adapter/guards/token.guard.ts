@@ -3,25 +3,24 @@ import type { ExecutionContext } from '@nestjs/common';
 import type { Request } from 'express';
 
 import { Injectable } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { MetricsConfig } from '@adapters/config-adapter';
+import { METRICS_MODULE_OPTIONS } from '../module';
+import { MetricsModuleOptions } from '../module';
 
 @Injectable()
 export class TokenGuard implements CanActivate {
-  private readonly metricsConfig: MetricsConfig;
-
-  constructor(private readonly configService: ConfigService) {
-    this.metricsConfig = this.configService.get<MetricsConfig>('metrics')!;
-  }
+  constructor(
+    @Inject(METRICS_MODULE_OPTIONS) private readonly options: MetricsModuleOptions,
+  ) { }
 
   canActivate(context: ExecutionContext): boolean {
-    if (!this.metricsConfig.token) return true;
+    if (!this.options.authToken) return true;
 
     const request: Request = context.switchToHttp().getRequest();
     const token = request.headers['authorization'];
 
-    if (!token || token !== `Bearer ${this.metricsConfig.token}`) {
+    if (!token || token !== `Bearer ${this.options.authToken}`) {
       throw new NotFoundException();
     }
 
