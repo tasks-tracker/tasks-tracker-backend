@@ -1,20 +1,12 @@
-import { Command } from '@nestjs/cqrs';
-import { Result } from 'neverthrow';
-import {
-  InvalidTodoDescriptionDomainError,
-  InvalidTodoTitleDomainError,
-  TodoDescriptionVO,
-  TodoIdVO,
-  TodoTitleVO,
-} from '@contexts/todo/domain';
-import { UserIdVO } from '@contexts/todo/domain/value-objects/todo-owner-id.value-object';
+import type { Result } from 'neverthrow';
+import type { TodoDescriptionVO } from '../../domain';
+import type { TodoIdVO } from '../../domain';
+import type { TodoTitleVO } from '../../domain';
+import type { UserIdVO } from '../../domain';
 
-export class CreateTodoCommand extends Command<
-  Result<
-    TodoIdVO,
-    InvalidTodoDescriptionDomainError | InvalidTodoTitleDomainError
-  >
-> {
+import { Command } from '@nestjs/cqrs';
+
+export class CreateTodoCommand extends Command<Result<TodoIdVO, never>> {
   constructor(
     public readonly title: TodoTitleVO,
     public readonly description: TodoDescriptionVO,

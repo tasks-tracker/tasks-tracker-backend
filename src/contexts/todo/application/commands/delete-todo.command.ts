@@ -1,10 +1,13 @@
+import type { Result } from 'neverthrow';
+import type { TodoIdVO } from '../../domain';
+import type { TodoNotFoundDomainError } from '../../domain';
+import type { TodoNotOwnerExceptionDomainError } from '../../domain';
+import type { TodoAlreadyDeletedDomainError } from '../../domain';
+import type { UserIdVO } from '../../domain';
 import { Command } from '@nestjs/cqrs';
-import { Result } from 'neverthrow';
-import { TodoIdVO, TodoNotFoundDomainError } from '@contexts/todo/domain';
-import { UserIdVO } from '@contexts/todo/domain/value-objects/todo-owner-id.value-object';
 
 export class DeleteTodoCommand extends Command<
-  Result<null, TodoNotFoundDomainError>
+  Result<null, TodoNotFoundDomainError | TodoNotOwnerExceptionDomainError | TodoAlreadyDeletedDomainError>
 > {
   constructor(
     public readonly todoId: TodoIdVO,
