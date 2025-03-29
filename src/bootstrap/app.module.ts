@@ -24,7 +24,9 @@ import * as cookieParser from 'cookie-parser';
         configService.get<LoggerConfig>('logger')!,
       inject: [ConfigService],
     }),
-    CqrsAdapterModule,
+    CqrsAdapterModule.register({
+      isGlobal: true,
+    }),
     DatabaseModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
