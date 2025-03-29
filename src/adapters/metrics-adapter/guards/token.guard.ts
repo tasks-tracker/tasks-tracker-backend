@@ -11,8 +11,9 @@ import { MetricsModuleOptions } from '../module';
 @Injectable()
 export class TokenGuard implements CanActivate {
   constructor(
-    @Inject(METRICS_MODULE_OPTIONS) private readonly options: MetricsModuleOptions,
-  ) { }
+    @Inject(METRICS_MODULE_OPTIONS)
+    private readonly options: MetricsModuleOptions,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
     if (!this.options.authToken) return true;

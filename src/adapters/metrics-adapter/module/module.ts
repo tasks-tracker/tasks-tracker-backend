@@ -26,7 +26,7 @@
 //   }
 // }
 //
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import type { DynamicModule } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 import type { MiddlewareConsumer } from '@nestjs/common';
@@ -72,10 +72,7 @@ export class MetricsModule {
         },
         ...allProviders,
       ],
-      exports: [
-        PrometheusModule,
-        ...allProviders,
-      ],
+      exports: [PrometheusModule, ...allProviders],
     };
   }
 
@@ -84,18 +81,9 @@ export class MetricsModule {
       global: options.isGlobal,
       module: MetricsModule,
       controllers: [MetricsController],
-      imports: [
-        ...(options.imports || []),
-        PrometheusModule.register(),
-      ],
-      providers: [
-        ...this.createAsyncProviders(options),
-        ...allProviders,
-      ],
-      exports: [
-        PrometheusModule,
-        ...allProviders,
-      ],
+      imports: [...(options.imports || []), PrometheusModule.register()],
+      providers: [...this.createAsyncProviders(options), ...allProviders],
+      exports: [PrometheusModule, ...allProviders],
     };
   }
 
