@@ -1,5 +1,6 @@
 import type { CanActivate } from '@nestjs/common';
 import type { ExecutionContext } from '@nestjs/common';
+import type { Request } from 'express';
 
 import { Injectable } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
@@ -17,7 +18,7 @@ export class TokenGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     if (!this.metricsConfig.token) return true;
 
-    const request = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
     const token = request.headers['authorization'];
 
     if (!token || token !== `Bearer ${this.metricsConfig.token}`) {
