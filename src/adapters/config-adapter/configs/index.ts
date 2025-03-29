@@ -6,3 +6,4 @@ export * from './session-cookie.config';
 export * from './logger.config';
 export * from './kafka.config';
 export * from './cors.config';
+export * from './metrics.config'
