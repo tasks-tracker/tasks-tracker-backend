@@ -11,7 +11,7 @@ import { Yaml } from '@libs/yaml';
 export class MetricsConfig {
   @IsString()
   @IsOptional()
-  token?: string;
+  authToken?: string;
 }
 
 export const metricsConfig = registerAs(

@@ -1,6 +1,7 @@
 import type { LoggerConfig } from '@adapters/config-adapter';
 import type { DatabaseConfig } from '@adapters/config-adapter';
 import type { KafkaConfig } from '@adapters/config-adapter';
+import type { MetricsConfig } from '@adapters/config-adapter';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigAdapterModule } from '@adapters/config-adapter';
@@ -39,7 +40,7 @@ import * as cookieParser from 'cookie-parser';
     MetricsModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
-        configService.get('metrics')!,
+        configService.get<MetricsConfig>('metrics')!,
       inject: [ConfigService],
     }),
     AuthModule,
