@@ -5,7 +5,9 @@ import type { PasswordVO } from '../../domain';
 import type { SessionTokenVO } from '../../domain';
 import { Command } from '@nestjs/cqrs';
 
-export class LoginUserCommand extends Command<Result<SessionTokenVO, DomainError>> {
+export class LoginUserCommand extends Command<
+  Result<SessionTokenVO, DomainError>
+> {
   constructor(
     public readonly login: LoginVO,
     public readonly password: PasswordVO,
