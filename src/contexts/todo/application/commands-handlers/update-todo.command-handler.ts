@@ -1,11 +1,11 @@
 import type { ICommandHandler } from '@nestjs/cqrs';
 import type { Result } from 'neverthrow';
+import type { DomainError } from '@libs/domain-error';
 import { CommandHandler } from '@nestjs/cqrs';
 import { ok } from 'neverthrow';
 import { err } from 'neverthrow';
 import { UpdateTodoCommand } from '../commands';
 import { TodoNotFoundDomainError } from '../../domain';
-import { TodoNotOwnerExceptionDomainError } from '../../domain';
 import { TodoRepository } from '../../domain';
 
 @CommandHandler(UpdateTodoCommand)
@@ -14,7 +14,7 @@ export class UpdateTodoCommandHandler
   constructor(public readonly todoRepository: TodoRepository) { }
 
   async execute(command: UpdateTodoCommand): Promise<
-    Result<null, TodoNotFoundDomainError | TodoNotOwnerExceptionDomainError>
+    Result<null, DomainError>
   > {
     const todo = await this.todoRepository.findById(command.todoId);
     if (!todo) return err(new TodoNotFoundDomainError());

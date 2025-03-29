@@ -1,6 +1,7 @@
 import type { Result } from 'neverthrow';
 import type { ICommandHandler } from '@nestjs/cqrs';
 import type { TodoIdVO } from '../../domain';
+import type { DomainError } from '@libs/domain-error';
 
 import { CommandHandler } from '@nestjs/cqrs';
 import { ok } from 'neverthrow';
@@ -17,7 +18,7 @@ export class CreateTodoCommandHandler
 
   async execute(
     command: CreateTodoCommand,
-  ): Promise<Result<TodoIdVO, never>> {
+  ): Promise<Result<TodoIdVO, DomainError>> {
     const todoId = this.todoRepository.nextId();
     const todo = Todo.create(
       todoId,

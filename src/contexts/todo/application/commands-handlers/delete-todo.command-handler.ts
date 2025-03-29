@@ -1,13 +1,12 @@
 import type { ICommandHandler } from '@nestjs/cqrs';
 import type { Result } from 'neverthrow';
+import type { DomainError } from '@libs/domain-error';
 
 import { CommandHandler } from '@nestjs/cqrs';
 import { ok } from 'neverthrow';
 import { err } from 'neverthrow';
 import { DeleteTodoCommand } from '../commands';
 import { TodoNotFoundDomainError } from '../../domain';
-import { TodoAlreadyDeletedDomainError } from '../../domain';
-import { TodoNotOwnerExceptionDomainError } from '../../domain';
 import { TodoRepository } from '../../domain';
 
 @CommandHandler(DeleteTodoCommand)
@@ -18,7 +17,7 @@ export class DeleteTodoCommandHandler
   async execute(
     command: DeleteTodoCommand,
   ): Promise<
-    Result<null, TodoNotFoundDomainError | TodoNotOwnerExceptionDomainError | TodoAlreadyDeletedDomainError>
+    Result<null, DomainError>
   > {
     const todo = await this.todoRepository.findById(command.todoId);
     if (!todo) return err(new TodoNotFoundDomainError());
