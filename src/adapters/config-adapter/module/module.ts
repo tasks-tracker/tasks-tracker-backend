@@ -7,6 +7,7 @@ import { databaseConfig } from '../configs';
 import { sessionCookieConfig } from '../configs';
 import { loggerConfig } from '../configs';
 import { kafkaConfig } from '../configs';
+import { corsConfig } from '../configs';
 
 const configs = [
   loggerConfig,
@@ -16,6 +17,7 @@ const configs = [
   databaseConfig,
   sessionCookieConfig,
   kafkaConfig,
+  corsConfig,
 ];
 
 @Module({
