@@ -4,11 +4,13 @@
 
 import type { UserRepository } from '../../domain';
 import type { Result } from 'neverthrow';
+import type { UserSchema } from '@adapters/database-adapter';
 
 import { Injectable } from '@nestjs/common';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
 import { Redis } from 'ioredis';
+import { knex } from 'knex';
 import { randomUUID } from 'node:crypto';
 
 import { ok } from 'neverthrow';
@@ -24,6 +26,7 @@ import { SessionAddedEvent } from '../../domain';
 
 @Injectable()
 export class UserRepositoryImpl implements UserRepository {
+  private readonly knex = knex({ client: 'pg' });
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
     private readonly redis: Redis,
@@ -52,12 +55,12 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   public async getUserByLogin(login: LoginVO): Promise<User | null> {
-    const dbUser = await this.txHost.tx.oneOrNone(
-      `SELECT id, login, password_hash, registered_at
-       FROM users
-       WHERE login = $1`,
-      [login.value],
-    );
+    const SQL = this.knex<UserSchema>('users')
+      .select('id', 'login', 'password_hash', 'registered_at')
+      .where('login', login.value)
+      .toSQL()
+      .toNative();
+    const dbUser = await this.txHost.tx.oneOrNone(SQL.sql, SQL.bindings);
     if (!dbUser) return null;
     return new User(
       new UserIdVO(dbUser.id),
@@ -71,19 +74,17 @@ export class UserRepositoryImpl implements UserRepository {
   private async saveRegisteredByLoginEvent(
     user: User,
   ): Promise<Result<null, UserLoginAlreadyUsedDomainError>> {
+    const SQL = this.knex<UserSchema>('users')
+      .insert({
+        id: user.id.value,
+        login: user.login.value,
+        password_hash: user.passwordHash.value,
+        registered_at: user.registeredAt,
+      })
+      .toSQL()
+      .toNative();
     try {
-      await this.txHost.tx.none(
-        `INSERT INTO users
-         (id, login, password_hash, registered_at)
-       VALUES
-         ($1, $2, $3, $4)`,
-        [
-          user.id.value,
-          user.login.value,
-          user.passwordHash.value,
-          user.registeredAt,
-        ],
-      );
+      await this.txHost.tx.none(SQL.sql, SQL.bindings);
       return ok(null);
     } catch (error) {
       if (error.constraint === 'unique_user_login')

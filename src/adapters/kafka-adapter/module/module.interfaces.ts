@@ -1,28 +1,28 @@
-import type { LoggerOptions } from '../core';
 import type { ModuleMetadata } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
 import type { InjectionToken } from '@nestjs/common';
 import type { OptionalFactoryDependency } from '@nestjs/common';
+import type { KafkaConfig } from 'kafkajs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface LoggerModuleOptions extends LoggerOptions {}
+export interface KafkaModuleOptions extends KafkaConfig {}
 
-export interface LoggerModuleSyncOptions {
+export interface KafkaModuleSyncOptions {
   isGlobal?: boolean;
-  options: LoggerModuleOptions;
+  options: KafkaModuleOptions;
 }
 
-export interface LoggerOptionsFactory {
-  createLoggerOptions: () => Promise<LoggerModuleOptions> | LoggerModuleOptions;
+export interface KafkaOptionsFactory {
+  createModuleOptions: () => KafkaModuleOptions | Promise<KafkaModuleOptions>;
 }
 
-export interface LoggerModuleAsyncOptions
+export interface KafkaModuleAsyncOptions
   extends Pick<ModuleMetadata, 'imports' | 'providers'> {
   isGlobal?: boolean;
-  useExisting?: Type<LoggerModuleOptions>;
-  useClass?: Type<LoggerModuleOptions>;
+  useExisting?: Type<KafkaModuleOptions>;
+  useClass?: Type<KafkaModuleOptions>;
   useFactory?: (
     ...args: Array<any>
-  ) => Promise<LoggerModuleOptions> | LoggerModuleOptions;
+  ) => KafkaModuleOptions | Promise<KafkaModuleOptions>;
   inject?: Array<InjectionToken | OptionalFactoryDependency>;
 }

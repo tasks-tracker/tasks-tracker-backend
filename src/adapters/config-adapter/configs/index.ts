@@ -4,3 +4,5 @@ export * from './cache.config';
 export * from './database.config';
 export * from './session-cookie.config';
 export * from './logger.config';
+export * from './kafka.config';
+export * from './cors.config';

@@ -1,6 +1,6 @@
 import type { DynamicModule } from '@nestjs/common';
 
-import type { DatabaseModuleOptions } from './module.interfaces.js';
+import type { DatabaseModuleSyncOptions } from './module.interfaces.js';
 import type { DatabaseModuleAsyncOptions } from './module.interfaces.js';
 
 import { Module } from '@nestjs/common';
@@ -15,9 +15,10 @@ import { PgPromiseModule } from '../pg-promise';
 export class DatabaseModule {
   constructor() {}
 
-  static register(options: DatabaseModuleOptions): DynamicModule {
-    const pgPromiseModule = PgPromiseModule.register(options);
+  static register(options: DatabaseModuleSyncOptions): DynamicModule {
+    const pgPromiseModule = PgPromiseModule.register(options.options);
     return {
+      global: options.isGlobal,
       imports: [
         pgPromiseModule,
         ClsModule.forRoot({
@@ -34,13 +35,14 @@ export class DatabaseModule {
       ],
       module: DatabaseModule,
       providers: [],
-      exports: [PgPromiseModule, ClsModule],
+      exports: [pgPromiseModule, ClsModule],
     };
   }
 
   static registerAsync(options: DatabaseModuleAsyncOptions): DynamicModule {
     const pgPromiseModule = PgPromiseModule.registerAsync(options);
     return {
+      global: options.isGlobal,
       imports: [
         pgPromiseModule,
         ClsModule.forRoot({
@@ -57,7 +59,7 @@ export class DatabaseModule {
       ],
       module: DatabaseModule,
       providers: [],
-      exports: [PgPromiseModule, ClsModule],
+      exports: [pgPromiseModule, ClsModule],
     };
   }
 }

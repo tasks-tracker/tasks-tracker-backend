@@ -176,7 +176,7 @@ export class Migrator {
       return;
     }
 
-    const lastMigration = applied[0];
+    const lastMigration = applied[applied.length - 1];
     await this.runMigration({
       ...lastMigration,
       direction: MigrationDirection.DOWN,
