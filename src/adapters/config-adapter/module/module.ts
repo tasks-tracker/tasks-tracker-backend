@@ -29,4 +29,4 @@ const configs = [
   ],
   exports: [ConfigModule],
 })
-export class ConfigAdapterModule { }
+export class ConfigAdapterModule {}

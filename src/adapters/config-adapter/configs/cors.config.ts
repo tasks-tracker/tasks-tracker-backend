@@ -68,7 +68,6 @@ export class CorsConfig implements CorsOptions {
   @IsNumber()
   @IsOptional()
   optionsSuccessStatus?: number;
-
 }
 
 export const corsConfig = registerAs(
