@@ -5,7 +5,12 @@ import type { OptionalFactoryDependency } from '@nestjs/common';
 import type { RedisOptions } from 'ioredis';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface CacheModuleOptions extends RedisOptions {}
+export interface CacheModuleOptions extends RedisOptions { }
+
+export interface CacheModuleSyncOptions {
+  isGlobal?: boolean;
+  options: CacheModuleOptions;
+}
 
 export interface CacheOptionsFactory {
   createModuleOptions: () => CacheModuleOptions | Promise<CacheModuleOptions>;
@@ -13,6 +18,7 @@ export interface CacheOptionsFactory {
 
 export interface CacheModuleAsyncOptions
   extends Pick<ModuleMetadata, 'imports' | 'providers'> {
+  isGlobal?: boolean;
   useExisting?: Type<CacheModuleOptions>;
   useClass?: Type<CacheModuleOptions>;
   useFactory?: (
