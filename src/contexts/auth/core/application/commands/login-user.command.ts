@@ -1,16 +1,12 @@
 import type { Result } from 'neverthrow';
-import { LoginVO } from '../../domain';
-import { InvalidPasswordDomainError } from '../../domain';
-import { UserWithLoginNotExistDomainError } from '../../domain';
-import { PasswordVO } from '../../domain';
-import { SessionTokenVO } from '../../domain';
+import type { DomainError } from '@libs/domain-error';
+import type { LoginVO } from '../../domain';
+import type { PasswordVO } from '../../domain';
+import type { SessionTokenVO } from '../../domain';
 import { Command } from '@nestjs/cqrs';
 
 export class LoginUserCommand extends Command<
-  Result<
-    SessionTokenVO,
-    InvalidPasswordDomainError | UserWithLoginNotExistDomainError
-  >
+  Result<SessionTokenVO, DomainError>
 > {
   constructor(
     public readonly login: LoginVO,
