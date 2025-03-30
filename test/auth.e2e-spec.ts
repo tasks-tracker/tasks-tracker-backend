@@ -13,6 +13,7 @@ import { sessionCookieConfig } from '@adapters/config-adapter';
 import { swaggerConfig } from '@adapters/config-adapter';
 import { kafkaConfig } from '@adapters/config-adapter';
 import { corsConfig } from '@adapters/config-adapter';
+import { metricsConfig } from '@adapters/config-adapter';
 import { Network } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
 import { Wait } from 'testcontainers';
@@ -99,6 +100,8 @@ describe('AuthController (e2e)', () => {
       .overrideProvider(swaggerConfig.KEY)
       .useValue({})
       .overrideProvider(corsConfig.KEY)
+      .useValue({})
+      .overrideProvider(metricsConfig.KEY)
       .useValue({})
       .overrideProvider(kafkaConfig.KEY)
       .useValue({

@@ -1,0 +1,87 @@
+{
+  "id": null,
+  "title": "Node.js Performance Dashboard",
+  "panels": [
+    {
+      "title": "CPU Usage (rate per 1m)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(process_cpu_seconds_total[1m])",
+          "legendFormat": "CPU Usage"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Memory Usage (RSS)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes",
+          "legendFormat": "Memory (RSS)"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Event Loop Lag",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "nodejs_eventloop_lag_seconds",
+          "legendFormat": "Event Loop Lag"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Event Loop Lag (Percentiles)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "nodejs_eventloop_lag_p50_seconds",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "nodejs_eventloop_lag_p90_seconds",
+          "legendFormat": "p90"
+        },
+        {
+          "expr": "nodejs_eventloop_lag_p99_seconds",
+          "legendFormat": "p99"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Active Resources",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "nodejs_active_resources_total",
+          "legendFormat": "Active Resources"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 6 }
+    },
+    {
+      "title": "Heap Usage (Used vs Total)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "nodejs_heap_size_used_bytes",
+          "legendFormat": "Heap Used"
+        },
+        {
+          "expr": "nodejs_heap_size_total_bytes",
+          "legendFormat": "Heap Total"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 30, "w": 12, "h": 6 }
+    }
+  ],
+  "schemaVersion": 18,
+  "version": 1,
+  "refresh": "20s"
+}

@@ -8,6 +8,7 @@ import { sessionCookieConfig } from '../configs';
 import { loggerConfig } from '../configs';
 import { kafkaConfig } from '../configs';
 import { corsConfig } from '../configs';
+import { metricsConfig } from '../configs';
 
 const configs = [
   loggerConfig,
@@ -18,6 +19,7 @@ const configs = [
   sessionCookieConfig,
   kafkaConfig,
   corsConfig,
+  metricsConfig,
 ];
 
 @Module({

@@ -4,6 +4,7 @@ import type { OnApplicationShutdown } from '@nestjs/common';
 import type { Provider } from '@nestjs/common';
 
 import type { CacheModuleOptions } from './module.interfaces';
+import type { CacheModuleSyncOptions } from './module.interfaces';
 import type { CacheModuleAsyncOptions } from './module.interfaces';
 import type { CacheOptionsFactory } from './module.interfaces';
 
@@ -23,7 +24,7 @@ export class CacheAdapterModule implements OnModuleInit, OnApplicationShutdown {
     logger.setContext(CacheAdapterModule.name);
   }
 
-  static register(options: CacheModuleOptions): DynamicModule {
+  static register(options: CacheModuleSyncOptions): DynamicModule {
     const redis = {
       provide: Redis,
       useFactory: (opts: CacheModuleOptions): Redis => new Redis(opts),
@@ -31,11 +32,12 @@ export class CacheAdapterModule implements OnModuleInit, OnApplicationShutdown {
     };
 
     return {
+      global: options.isGlobal,
       module: CacheAdapterModule,
       providers: [
         {
           provide: CACHE_MODULE_OPTIONS,
-          useValue: options,
+          useValue: options.options,
         },
         redis,
       ],
@@ -51,6 +53,7 @@ export class CacheAdapterModule implements OnModuleInit, OnApplicationShutdown {
     };
 
     return {
+      global: options.isGlobal,
       module: CacheAdapterModule,
       imports: options.imports || [],
       providers: [...this.createAsyncProviders(options), redis],

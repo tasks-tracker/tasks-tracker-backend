@@ -1,0 +1,1 @@
+export const METRICS_MODULE_OPTIONS = Symbol('KAFKA_MODULE_OPTIONS');

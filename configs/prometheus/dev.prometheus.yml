@@ -5,3 +5,5 @@ scrape_configs:
   - job_name: 'nestjs_app'
     static_configs:
       - targets: ['backend:8000']
+    authorization:
+      credentials: 'dev-token'
