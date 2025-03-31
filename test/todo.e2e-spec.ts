@@ -1,5 +1,7 @@
+/* eslint-disable */
 import type { DatabaseModuleOptions } from '@adapters/database-adapter';
 import { StartedTestContainer } from 'testcontainers';
+import { App } from 'supertest/types';
 import { Network } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
 import { Wait } from 'testcontainers';
@@ -27,7 +29,7 @@ jest.setTimeout(100_000);
 
 describe('TodoController (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: App;
   let authCookie: string;
   let todoId: string;
   let postgres: StartedTestContainer;
@@ -166,7 +168,11 @@ describe('TodoController (e2e)', () => {
     const response = await request(server)
       .post('/todo/create')
       .set('Cookie', authCookie)
-      .send({ title: 'Test Todo', description: 'Test Description', deadline: new Date().toISOString() });
+      .send({
+        title: 'Test Todo',
+        description: 'Test Description',
+        deadline: new Date().toISOString(),
+      });
 
     expect(response.status).toBe(HttpStatus.CREATED);
     expect(response.body).toHaveProperty('id');

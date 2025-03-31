@@ -30,6 +30,7 @@ import { TodoAlreadyNotCompletedDomainError } from '../core';
 import { GetPaginationTodoForUserQuery } from '../core';
 import { GetPaginationTodoForUserLimit } from '../core';
 import { GetPaginationTodoForUserOffset } from '../core';
+import { GetPaginationTodoForUserResponse } from './dtos';
 import {
   CreateTodoBodyDto,
   CreateTodoResponseDto,
@@ -351,6 +352,7 @@ export class TodoController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Success',
+    type: GetPaginationTodoForUserResponse,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -366,13 +368,14 @@ export class TodoController {
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
     try {
-      return await this.queryBus.execute(
+      const items = await this.queryBus.execute(
         new GetPaginationTodoForUserQuery(
           userId as UserIdVO,
           new GetPaginationTodoForUserLimit(10),
           new GetPaginationTodoForUserOffset(0),
         ),
       );
+      return { items };
     } catch (err) {
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();
