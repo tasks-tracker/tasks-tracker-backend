@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Put, Body } from '@nestjs/common';
+import { Controller, Post, Delete, Put, Get, Body } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
@@ -9,6 +9,7 @@ import { NotFoundException } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { ValidationException } from '@libs/validation-exception';
 import { AuthHelper } from '@contexts/auth';
@@ -26,6 +27,9 @@ import { TodoNotOwnerExceptionDomainError } from '../core';
 import { TodoAlreadyDeletedDomainError } from '../core';
 import { TodoAlreadyCompletedDomainError } from '../core';
 import { TodoAlreadyNotCompletedDomainError } from '../core';
+import { GetPaginationTodoForUserQuery } from '../core';
+import { GetPaginationTodoForUserLimit } from '../core';
+import { GetPaginationTodoForUserOffset } from '../core';
 import {
   CreateTodoBodyDto,
   CreateTodoResponseDto,
@@ -42,8 +46,9 @@ import { UserIdVO } from '../core';
 export class TodoController {
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
     private readonly authHelper: AuthHelper,
-  ) {}
+  ) { }
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
@@ -335,6 +340,29 @@ export class TodoController {
         throw new ForbiddenException();
       }
       throw new BadRequestException('UNKNOWN_ERROR');
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        throw new UnprocessableEntityException();
+      }
+      throw err;
+    }
+  }
+
+  @Get('get-todos')
+  async getPaginationTodoForUser(
+    @SessionToken() sessionToken: string | null,
+  ) {
+    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
+    try {
+      return await this.queryBus.execute(
+        new GetPaginationTodoForUserQuery(
+          userId as UserIdVO,
+          new GetPaginationTodoForUserLimit(10),
+          new GetPaginationTodoForUserOffset(0),
+        )
+      )
     } catch (err) {
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();
