@@ -25,5 +25,5 @@ export class UpdateTodoBodyDto {
   todoId: string;
 
   @ApiPropertyOptional({ type: () => UpdateTodoFieldsDto })
-  fields?: UpdateTodoFieldsDto;
+  fields: UpdateTodoFieldsDto;
 }

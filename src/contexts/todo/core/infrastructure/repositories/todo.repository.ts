@@ -22,7 +22,7 @@ export class TodoRepositoryImpl implements TodoRepository {
   private readonly knex = knex({ client: 'pg' });
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
-  ) {}
+  ) { }
 
   public nextId(): TodoIdVO {
     return new TodoIdVO(randomUUID());
@@ -39,7 +39,7 @@ export class TodoRepositoryImpl implements TodoRepository {
         'deadline',
         'owner_id',
       )
-      .where('is', todoId.value)
+      .where('id', todoId.value)
       .andWhere('is_deleted', false)
       .toSQL()
       .toNative();

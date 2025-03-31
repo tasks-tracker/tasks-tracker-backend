@@ -1,4 +1,5 @@
 import type { UserIdVO } from '../../domain';
+import type { ToDoQuery } from '../query-repositories';
 import { Query } from '@nestjs/cqrs';
 
 import { validateSync } from 'class-validator';
@@ -11,8 +12,8 @@ export class GetPaginationTodoForUserLimit {
   @Max(15)
   @Min(1)
   @IsInt()
-  public readonly value: string;
-  constructor(value: string) {
+  public readonly value: number;
+  constructor(value: number) {
     this.value = value;
     const errors = validateSync(this);
     if (errors.length > 0) {
@@ -24,8 +25,8 @@ export class GetPaginationTodoForUserLimit {
 export class GetPaginationTodoForUserOffset {
   @Min(0)
   @IsInt()
-  public readonly value: string;
-  constructor(value: string) {
+  public readonly value: number;
+  constructor(value: number) {
     this.value = value;
     const errors = validateSync(this);
     if (errors.length > 0) {
@@ -34,7 +35,7 @@ export class GetPaginationTodoForUserOffset {
   }
 }
 
-export class GetPaginationTodoForUserQuery extends Query<null> {
+export class GetPaginationTodoForUserQuery extends Query<Array<ToDoQuery>> {
   constructor(
     public readonly userId: UserIdVO,
     public readonly limit: GetPaginationTodoForUserLimit,
