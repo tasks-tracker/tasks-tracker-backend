@@ -31,7 +31,8 @@ export class TodoQueryRepositoryImpl implements TodoQueryRepository {
       .offset(offset)
       .toSQL()
       .toNative();
-    const dbTodos = await this.txHost.tx.many<ToDoQuery>(SQL.sql, SQL.bindings);
+    const dbTodos = await this.txHost.tx.manyOrNone<ToDoQuery>(SQL.sql, SQL.bindings);
+    if (!dbTodos) return [];
     return dbTodos;
   }
 }
