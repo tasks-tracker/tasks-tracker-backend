@@ -1,5 +1,5 @@
-import type { TodoIdVO } from "../value-objects";
+import type { TodoIdVO } from '../value-objects';
 
 export class TodoCompletedEvent {
-  constructor(public readonly id: TodoIdVO) { }
+  constructor(public readonly id: TodoIdVO) {}
 }

@@ -5,9 +5,6 @@ import { repositoriesProviders } from './module.providers';
 
 @Module({
   controllers: [TodoController],
-  providers: [
-    ...commandHandlersProviders,
-    ...repositoriesProviders,
-  ],
+  providers: [...commandHandlersProviders, ...repositoriesProviders],
 })
-export class TodoModule { }
+export class TodoModule {}

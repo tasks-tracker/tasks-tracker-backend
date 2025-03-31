@@ -1,2 +1,2 @@
-export * from './commands'
-export * from './commands-handlers'
+export * from './commands';
+export * from './commands-handlers';

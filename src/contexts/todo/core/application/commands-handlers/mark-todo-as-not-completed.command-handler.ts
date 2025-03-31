@@ -11,10 +11,9 @@ import { TodoRepository } from '../../domain';
 
 @CommandHandler(MarkTodoAsNotCompletedCommand)
 export class MarkTodoAsNotCompletedCommandHandler
-  implements ICommandHandler<MarkTodoAsNotCompletedCommand> {
-  constructor(
-    public readonly todoRepository: TodoRepository,
-  ) { }
+  implements ICommandHandler<MarkTodoAsNotCompletedCommand>
+{
+  constructor(public readonly todoRepository: TodoRepository) {}
 
   async execute(
     command: MarkTodoAsNotCompletedCommand,
@@ -22,8 +21,8 @@ export class MarkTodoAsNotCompletedCommandHandler
     const todo = await this.todoRepository.findById(command.todoId);
     if (!todo) return err(new TodoNotFoundDomainError());
 
-    const result = todo.markIsNotCompleted(command.userId)
-    if (result.isErr()) return result
+    const result = todo.markIsNotCompleted(command.userId);
+    if (result.isErr()) return result;
 
     await this.todoRepository.save(todo);
     todo.commit();

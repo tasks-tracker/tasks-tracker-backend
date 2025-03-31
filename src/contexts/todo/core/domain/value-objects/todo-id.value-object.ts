@@ -1,4 +1,4 @@
-import { isUUID, IsUUID, validateSync } from 'class-validator';
+import { IsUUID, validateSync } from 'class-validator';
 import { ValidationException } from '@libs/validation-exception';
 import { randomUUID } from 'node:crypto';
 

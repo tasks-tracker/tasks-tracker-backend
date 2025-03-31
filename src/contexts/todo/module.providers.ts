@@ -1,10 +1,10 @@
-import { CreateTodoCommandHandler } from "./core";
-import { DeleteTodoCommandHandler } from "./core";
-import { MarkTodoAsCompletedCommand } from "./core";
-import { MarkTodoAsNotCompletedCommand } from "./core";
-import { UpdateTodoCommandHandler } from "./core";
-import { TodoRepository } from "./core";
-import { TodoRepositoryImpl } from "./core";
+import { CreateTodoCommandHandler } from './core';
+import { DeleteTodoCommandHandler } from './core';
+import { MarkTodoAsCompletedCommand } from './core';
+import { MarkTodoAsNotCompletedCommand } from './core';
+import { UpdateTodoCommandHandler } from './core';
+import { TodoRepository } from './core';
+import { TodoRepositoryImpl } from './core';
 
 export const commandHandlersProviders = [
   CreateTodoCommandHandler,

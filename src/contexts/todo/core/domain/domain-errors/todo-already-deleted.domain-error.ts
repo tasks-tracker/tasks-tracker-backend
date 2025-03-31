@@ -1,3 +1,3 @@
 import { DomainError } from '@libs/domain-error';
 
-export class TodoAlreadyDeletedDomainError extends DomainError { }
+export class TodoAlreadyDeletedDomainError extends DomainError {}

@@ -11,14 +11,13 @@ import { TodoRepository } from '../../domain';
 
 @CommandHandler(DeleteTodoCommand)
 export class DeleteTodoCommandHandler
-  implements ICommandHandler<DeleteTodoCommand> {
-  constructor(public readonly todoRepository: TodoRepository) { }
+  implements ICommandHandler<DeleteTodoCommand>
+{
+  constructor(public readonly todoRepository: TodoRepository) {}
 
   async execute(
     command: DeleteTodoCommand,
-  ): Promise<
-    Result<null, DomainError>
-  > {
+  ): Promise<Result<null, DomainError>> {
     const todo = await this.todoRepository.findById(command.todoId);
     if (!todo) return err(new TodoNotFoundDomainError());
 

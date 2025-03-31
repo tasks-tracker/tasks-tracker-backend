@@ -38,4 +38,4 @@ import { queryRepositoriesProviders } from './module.providers';
     ...queryRepositoriesProviders,
   ],
 })
-export class AuthModule { }
+export class AuthModule {}

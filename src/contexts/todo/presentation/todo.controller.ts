@@ -5,7 +5,7 @@ import { UnprocessableEntityException } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import { ForbiddenException } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
-import { UseInterceptors } from '@nestjs/common';
+// import { UseInterceptors } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -26,11 +26,16 @@ import { TodoNotOwnerExceptionDomainError } from '../core';
 import { TodoAlreadyDeletedDomainError } from '../core';
 import { TodoAlreadyCompletedDomainError } from '../core';
 import { TodoAlreadyNotCompletedDomainError } from '../core';
-import { CreateTodoBodyDto, CreateTodoResponseDto, MarkAsCompletedBodyDto, UpdateTodoBodyDto } from './dtos';
+import {
+  CreateTodoBodyDto,
+  CreateTodoResponseDto,
+  MarkAsCompletedBodyDto,
+  UpdateTodoBodyDto,
+} from './dtos';
 import { DeleteTodoByIdBodyDto } from './dtos';
 import { UserIdVO } from '../core';
-import { createTrackStatusesInterceptor } from '@adapters/metrics-adapter';
-import { createTrackExecutionTimeInterceptor } from '@adapters/metrics-adapter';
+// import { createTrackStatusesInterceptor } from '@adapters/metrics-adapter';
+// import { createTrackExecutionTimeInterceptor } from '@adapters/metrics-adapter';
 
 @ApiTags('Todo')
 @Controller('todo')
@@ -38,13 +43,13 @@ export class TodoController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly authHelper: AuthHelper,
-  ) { }
+  ) {}
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
   @ApiResponse({
     status: HttpStatus.CREATED,
-    type: CreateTodoResponseDto
+    type: CreateTodoResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -63,7 +68,7 @@ export class TodoController {
     @SessionToken() sessionToken: string | null,
   ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken)
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
     try {
       const result = await this.commandBus.execute(
@@ -123,10 +128,7 @@ export class TodoController {
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
     try {
       const result = await this.commandBus.execute(
-        new DeleteTodoCommand(
-          new TodoIdVO(body.todoId),
-          userId as UserIdVO
-        ),
+        new DeleteTodoCommand(new TodoIdVO(body.todoId), userId as UserIdVO),
       );
       if (result.isOk()) return;
       const error = result.error;
@@ -301,7 +303,7 @@ export class TodoController {
     @SessionToken() sessionToken: string | null,
   ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken)
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
     try {
       const fields: UpdateTodoCommand['fields'] = {};
@@ -309,16 +311,20 @@ export class TodoController {
         fields.title = new TodoTitleVO(body.fields.title);
       }
       if (body.fields?.description === null || body.fields?.description) {
-        fields.description = body.fields.description ? new TodoDescriptionVO(body.fields.description) : null;
+        fields.description = body.fields.description
+          ? new TodoDescriptionVO(body.fields.description)
+          : null;
       }
       if (body.fields?.deadline === null || body.fields?.deadline) {
-        fields.deadline = body.fields.deadline ? new Date(body.fields.deadline) : null;
+        fields.deadline = body.fields.deadline
+          ? new Date(body.fields.deadline)
+          : null;
       }
       const result = await this.commandBus.execute(
         new UpdateTodoCommand(
           new TodoIdVO(body.todoId),
           userId as UserIdVO,
-          fields
+          fields,
         ),
       );
       if (result.isOk()) return;

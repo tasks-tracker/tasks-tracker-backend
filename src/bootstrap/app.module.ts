@@ -34,12 +34,12 @@ import * as cookieParser from 'cookie-parser';
         configService.get<DatabaseConfig>('database')!,
       inject: [ConfigService],
     }),
-    // KafkaModule.registerAsync({
-    //   isGlobal: true,
-    //   useFactory: (configService: ConfigService) =>
-    //     configService.get<KafkaConfig>('kafka')!,
-    //   inject: [ConfigService],
-    // }),
+    KafkaModule.registerAsync({
+      isGlobal: true,
+      useFactory: (configService: ConfigService) =>
+        configService.get<KafkaConfig>('kafka')!,
+      inject: [ConfigService],
+    }),
     MetricsModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>

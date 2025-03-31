@@ -1,28 +1,28 @@
-import type { TodoRepository } from "../../domain";
-import type { TodoSchema } from "@adapters/database-adapter";
+import type { TodoRepository } from '../../domain';
+import type { TodoSchema } from '@adapters/database-adapter';
 
-import { Injectable } from "@nestjs/common";
-import { TransactionHost } from "@nestjs-cls/transactional";
-import { TransactionalAdapterPgPromise } from "@nestjs-cls/transactional-adapter-pg-promise";
-import { knex } from "knex";
-import { randomUUID } from "node:crypto";
-import { TodoIdVO } from "../../domain";
-import { TodoTitleVO } from "../../domain";
-import { TodoDescriptionVO } from "../../domain";
-import { UserIdVO } from "../../domain";
-import { Todo } from "../../domain";
-import { TodoCreatedEvent } from "../../domain";
-import { TodoUpdatedEvent } from "../../domain";
-import { TodoDeletedEvent } from "../../domain";
-import { TodoCompletedEvent } from "../../domain";
-import { TodoNotCompletedEvent } from "../../domain";
+import { Injectable } from '@nestjs/common';
+import { TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
+import { knex } from 'knex';
+import { randomUUID } from 'node:crypto';
+import { TodoIdVO } from '../../domain';
+import { TodoTitleVO } from '../../domain';
+import { TodoDescriptionVO } from '../../domain';
+import { UserIdVO } from '../../domain';
+import { Todo } from '../../domain';
+import { TodoCreatedEvent } from '../../domain';
+import { TodoUpdatedEvent } from '../../domain';
+import { TodoDeletedEvent } from '../../domain';
+import { TodoCompletedEvent } from '../../domain';
+import { TodoNotCompletedEvent } from '../../domain';
 
 @Injectable()
 export class TodoRepositoryImpl implements TodoRepository {
   private readonly knex = knex({ client: 'pg' });
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
-  ) { }
+  ) {}
 
   public nextId(): TodoIdVO {
     return new TodoIdVO(randomUUID());
@@ -30,12 +30,23 @@ export class TodoRepositoryImpl implements TodoRepository {
 
   public async findById(todoId: TodoIdVO): Promise<Todo | null> {
     const SQL = this.knex<TodoSchema>('todos')
-      .select('id', 'title', 'description', 'is_completed', 'is_deleted', 'deadline', 'owner_id')
+      .select(
+        'id',
+        'title',
+        'description',
+        'is_completed',
+        'is_deleted',
+        'deadline',
+        'owner_id',
+      )
       .where('is', todoId.value)
       .andWhere('is_deleted', false)
       .toSQL()
       .toNative();
-    const dbTodo = await this.txHost.tx.oneOrNone(SQL.sql, SQL.bindings);
+    const dbTodo = await this.txHost.tx.oneOrNone<TodoSchema>(
+      SQL.sql,
+      SQL.bindings,
+    );
     if (!dbTodo) return null;
     return new Todo(
       new TodoIdVO(dbTodo.id),
@@ -56,10 +67,7 @@ export class TodoRepositoryImpl implements TodoRepository {
       const todoUpdatedEvent = events.find(
         (event) => event instanceof TodoUpdatedEvent,
       ) as TodoUpdatedEvent;
-      return await this.saveUpdatedEvent(
-        todo,
-        todoUpdatedEvent.updatedFields,
-      );
+      return await this.saveUpdatedEvent(todo, todoUpdatedEvent.updatedFields);
     } else if (events.some((event) => event instanceof TodoDeletedEvent)) {
       return await this.saveDeletedEvent(todo);
     } else if (events.some((event) => event instanceof TodoCompletedEvent)) {
@@ -79,21 +87,26 @@ export class TodoRepositoryImpl implements TodoRepository {
         is_completed: todo.isCompleted,
         is_deleted: todo.isDeleted,
         deadline: todo.deadline ? todo.deadline : undefined,
-        owner_id: todo.ownerId.value
+        owner_id: todo.ownerId.value,
       })
       .toSQL()
       .toNative();
     await this.txHost.tx.none(SQL.sql, SQL.bindings);
   }
 
-  private async saveUpdatedEvent(todo: Todo, updatedFields: Array<string>): Promise<void> {
+  private async saveUpdatedEvent(
+    todo: Todo,
+    updatedFields: Array<string>,
+  ): Promise<void> {
     const updateData: Partial<TodoSchema> = {};
 
     if (updatedFields.includes('title')) {
       updateData.title = todo.title.value;
     }
     if (updatedFields.includes('description')) {
-      updateData.description = todo.description ? todo.description.value : undefined;
+      updateData.description = todo.description
+        ? todo.description.value
+        : undefined;
     }
     if (updatedFields.includes('deadline')) {
       updateData.deadline = todo.deadline ? todo.deadline : undefined;

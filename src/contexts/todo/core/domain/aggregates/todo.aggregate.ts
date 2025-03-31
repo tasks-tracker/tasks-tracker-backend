@@ -101,12 +101,13 @@ export class Todo extends AggregateRoot {
   update(
     userId: UserIdVO,
     fields: {
-      title?: TodoTitleVO,
-      description?: TodoDescriptionVO | null,
-      deadline?: Date | null,
-    }
+      title?: TodoTitleVO;
+      description?: TodoDescriptionVO | null;
+      deadline?: Date | null;
+    },
   ): Result<null, TodoNotOwnerExceptionDomainError> {
-    if (!this.#ownerId.equals(userId)) return err(new TodoNotOwnerExceptionDomainError())
+    if (!this.#ownerId.equals(userId))
+      return err(new TodoNotOwnerExceptionDomainError());
 
     const updatedFields: Array<string> = [];
     if (fields.title) {
@@ -127,34 +128,43 @@ export class Todo extends AggregateRoot {
     if (updatedFields.length > 0) {
       this.apply(new TodoUpdatedEvent(this.#id, updatedFields));
     }
-    this.apply(
-      new TodoUpdatedEvent(
-        this.#id,
-        updatedFields,
-      )
-    );
+    this.apply(new TodoUpdatedEvent(this.#id, updatedFields));
     return ok(null);
   }
 
-  markIsCompleted(userId: UserIdVO): Result<null, TodoNotOwnerExceptionDomainError | TodoAlreadyCompletedDomainError> {
-    if (!this.#ownerId.equals(userId)) return err(new TodoNotOwnerExceptionDomainError());
+  markIsCompleted(
+    userId: UserIdVO,
+  ): Result<
+    null,
+    TodoNotOwnerExceptionDomainError | TodoAlreadyCompletedDomainError
+  > {
+    if (!this.#ownerId.equals(userId))
+      return err(new TodoNotOwnerExceptionDomainError());
     if (this.#isCompleted) return err(new TodoAlreadyCompletedDomainError());
     this.#isCompleted = true;
     this.apply(new TodoCompletedEvent(this.#id));
     return ok(null);
   }
 
-  markIsNotCompleted(userId: UserIdVO): Result<null, TodoNotOwnerExceptionDomainError | TodoAlreadyNotCompletedDomainError> {
-    if (!this.#ownerId.equals(userId)) return err(new TodoNotOwnerExceptionDomainError());
-    if (!this.#isCompleted) return err(new TodoAlreadyNotCompletedDomainError());
+  markIsNotCompleted(
+    userId: UserIdVO,
+  ): Result<
+    null,
+    TodoNotOwnerExceptionDomainError | TodoAlreadyNotCompletedDomainError
+  > {
+    if (!this.#ownerId.equals(userId))
+      return err(new TodoNotOwnerExceptionDomainError());
+    if (!this.#isCompleted)
+      return err(new TodoAlreadyNotCompletedDomainError());
     this.#isCompleted = false;
     this.apply(new TodoNotCompletedEvent(this.#id));
     return ok(null);
   }
 
   delete(userId: UserIdVO): Result<null, TodoNotOwnerExceptionDomainError> {
-    if (!this.#ownerId.equals(userId)) return err(new TodoNotOwnerExceptionDomainError());
-    if (this.#isDeleted) return err(new TodoAlreadyDeletedDomainError())
+    if (!this.#ownerId.equals(userId))
+      return err(new TodoNotOwnerExceptionDomainError());
+    if (this.#isDeleted) return err(new TodoAlreadyDeletedDomainError());
     this.#isDeleted = true;
     this.apply(new TodoDeletedEvent(this.#id));
     return ok(null);

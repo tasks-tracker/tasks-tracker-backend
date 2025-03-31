@@ -10,12 +10,13 @@ import { TodoRepository } from '../../domain';
 
 @CommandHandler(UpdateTodoCommand)
 export class UpdateTodoCommandHandler
-  implements ICommandHandler<UpdateTodoCommand> {
-  constructor(public readonly todoRepository: TodoRepository) { }
+  implements ICommandHandler<UpdateTodoCommand>
+{
+  constructor(public readonly todoRepository: TodoRepository) {}
 
-  async execute(command: UpdateTodoCommand): Promise<
-    Result<null, DomainError>
-  > {
+  async execute(
+    command: UpdateTodoCommand,
+  ): Promise<Result<null, DomainError>> {
     const todo = await this.todoRepository.findById(command.todoId);
     if (!todo) return err(new TodoNotFoundDomainError());
 

@@ -11,10 +11,9 @@ import { TodoRepository } from '../../domain';
 
 @CommandHandler(CreateTodoCommand)
 export class CreateTodoCommandHandler
-  implements ICommandHandler<CreateTodoCommand> {
-  constructor(
-    public readonly todoRepository: TodoRepository,
-  ) { }
+  implements ICommandHandler<CreateTodoCommand>
+{
+  constructor(public readonly todoRepository: TodoRepository) {}
 
   async execute(
     command: CreateTodoCommand,
