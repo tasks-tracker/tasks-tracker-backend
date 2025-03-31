@@ -8,11 +8,13 @@ import { TodoDescriptionVO } from '../value-objects';
 import { TodoCreatedEvent } from '../events';
 import { TodoUpdatedEvent } from '../events';
 import { TodoCompletedEvent } from '../events';
+import { TodoNotCompletedEvent } from '../events';
 import { TodoDeletedEvent } from '../events';
 import { UserIdVO } from '../value-objects';
 import { TodoNotOwnerExceptionDomainError } from '../domain-errors';
 import { TodoAlreadyDeletedDomainError } from '../domain-errors';
 import { TodoAlreadyCompletedDomainError } from '../domain-errors';
+import { TodoAlreadyNotCompletedDomainError } from '../domain-errors';
 
 export class Todo extends AggregateRoot {
   #id: TodoIdVO;
@@ -58,8 +60,16 @@ export class Todo extends AggregateRoot {
     return this.#isCompleted;
   }
 
+  get isCompleted() {
+    return this.#isCompleted;
+  }
+
   get isDeleted() {
     return this.#isDeleted;
+  }
+
+  get deadline() {
+    return this.#deadline;
   }
 
   get ownerId() {
@@ -90,28 +100,24 @@ export class Todo extends AggregateRoot {
 
   update(
     userId: UserIdVO,
-    title: TodoTitleVO,
+    title: TodoTitleVO | null,
     description: TodoDescriptionVO | null,
     deadline: Date | null,
   ): Result<null, TodoNotOwnerExceptionDomainError> {
     if (!this.#ownerId.equals(userId)) return err(new TodoNotOwnerExceptionDomainError())
 
     const updatedFields: Array<string> = [];
-    if (!this.#title.equals(title)) {
+    if (title) {
       this.#title = title;
       updatedFields.push('title');
     }
 
-    if (
-      (this.#description !== null && description !== null && !this.#description.equals(description)) ||
-      (this.#description === null && description !== null) ||
-      (this.#description !== null && description === null)
-    ) {
+    if (description) {
       this.#description = description;
       updatedFields.push('description');
     }
 
-    if (this.#deadline?.getTime() !== deadline?.getTime()) {
+    if (deadline) {
       this.#deadline = deadline;
       updatedFields.push('deadline');
     }
@@ -133,6 +139,14 @@ export class Todo extends AggregateRoot {
     if (this.#isCompleted) return err(new TodoAlreadyCompletedDomainError());
     this.#isCompleted = true;
     this.apply(new TodoCompletedEvent(this.#id));
+    return ok(null);
+  }
+
+  markIsNotCompleted(userId: UserIdVO): Result<null, TodoNotOwnerExceptionDomainError | TodoAlreadyNotCompletedDomainError> {
+    if (!this.#ownerId.equals(userId)) return err(new TodoNotOwnerExceptionDomainError());
+    if (!this.#isCompleted) return err(new TodoAlreadyNotCompletedDomainError());
+    this.#isCompleted = false;
+    this.apply(new TodoNotCompletedEvent(this.#id));
     return ok(null);
   }
 

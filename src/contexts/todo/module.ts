@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { TodoController } from './presentation';
+import { commandHandlersProviders } from './module.providers';
+import { repositoriesProviders } from './module.providers';
+
+@Module({
+  controllers: [TodoController],
+  providers: [
+    ...commandHandlersProviders,
+    ...repositoriesProviders,
+  ],
+})
+export class TodoModule { }

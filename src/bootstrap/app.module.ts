@@ -11,6 +11,7 @@ import { DatabaseModule } from '@adapters/database-adapter';
 import { MetricsModule } from '@adapters/metrics-adapter';
 import { KafkaModule } from '@adapters/kafka-adapter';
 import { AuthModule } from '@contexts/auth';
+import { TodoModule } from '@contexts/todo';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
@@ -33,12 +34,12 @@ import * as cookieParser from 'cookie-parser';
         configService.get<DatabaseConfig>('database')!,
       inject: [ConfigService],
     }),
-    KafkaModule.registerAsync({
-      isGlobal: true,
-      useFactory: (configService: ConfigService) =>
-        configService.get<KafkaConfig>('kafka')!,
-      inject: [ConfigService],
-    }),
+    // KafkaModule.registerAsync({
+    //   isGlobal: true,
+    //   useFactory: (configService: ConfigService) =>
+    //     configService.get<KafkaConfig>('kafka')!,
+    //   inject: [ConfigService],
+    // }),
     MetricsModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
@@ -46,6 +47,7 @@ import * as cookieParser from 'cookie-parser';
       inject: [ConfigService],
     }),
     AuthModule,
+    TodoModule,
   ],
 })
 export class AppModule {

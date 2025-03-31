@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { Global } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheConfig } from '@adapters/config-adapter';
 import { CacheAdapterModule } from '@adapters/cache-adapter';
@@ -10,6 +11,7 @@ import { portsProviders } from './module.providers';
 import { repositoriesProviders } from './module.providers';
 import { queryRepositoriesProviders } from './module.providers';
 
+@Global()
 @Module({
   imports: [
     CacheAdapterModule.registerAsync({
@@ -27,5 +29,13 @@ import { queryRepositoriesProviders } from './module.providers';
     ...repositoriesProviders,
     ...queryRepositoriesProviders,
   ],
+  exports: [
+    ...helpersProviders,
+    ...queryHandlersProviders,
+    ...commandHandlersProviders,
+    ...portsProviders,
+    ...repositoriesProviders,
+    ...queryRepositoriesProviders,
+  ],
 })
-export class AuthModule {}
+export class AuthModule { }

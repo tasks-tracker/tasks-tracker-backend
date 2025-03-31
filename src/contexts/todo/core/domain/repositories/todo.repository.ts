@@ -1,5 +1,5 @@
-import { TodoIdVO } from '@contexts/todo/domain/value-objects';
-import { Todo } from '@contexts/todo/domain/aggregates';
+import { TodoIdVO } from '../value-objects';
+import { Todo } from '../aggregates';
 
 export abstract class TodoRepository {
   public abstract nextId(): TodoIdVO;

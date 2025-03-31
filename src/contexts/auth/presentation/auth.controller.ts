@@ -214,7 +214,7 @@ export class AuthController {
     if (!sessionToken) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
-    const userId = await this.authHelper.getUserIdByCookies(sessionToken);
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
