@@ -1,21 +1,25 @@
-import type { UserIdVO } from "../../domain";
-import type { ToDoQuery } from "../../application";
-import type { TodoSchema } from "@adapters/database-adapter";
+import type { UserIdVO } from '../../domain';
+import type { ToDoQuery } from '../../application';
+import type { TodoSchema } from '@adapters/database-adapter';
 
-import { Injectable } from "@nestjs/common";
-import { knex } from "knex";
-import { TransactionHost } from "@nestjs-cls/transactional";
-import { TransactionalAdapterPgPromise } from "@nestjs-cls/transactional-adapter-pg-promise";
-import { TodoQueryRepository } from "../../application";
+import { Injectable } from '@nestjs/common';
+import { knex } from 'knex';
+import { TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
+import { TodoQueryRepository } from '../../application';
 
 @Injectable()
 export class TodoQueryRepositoryImpl implements TodoQueryRepository {
   private readonly knex = knex({ client: 'pg' });
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
-  ) { }
+  ) {}
 
-  public async getPaginationTodosByUserId(userId: UserIdVO, limit: number, offset: number): Promise<Array<ToDoQuery>> {
+  public async getPaginationTodosByUserId(
+    userId: UserIdVO,
+    limit: number,
+    offset: number,
+  ): Promise<Array<ToDoQuery>> {
     const SQL = this.knex<TodoSchema>('todos')
       .select(
         'id',
@@ -31,7 +35,10 @@ export class TodoQueryRepositoryImpl implements TodoQueryRepository {
       .offset(offset)
       .toSQL()
       .toNative();
-    const dbTodos = await this.txHost.tx.manyOrNone<ToDoQuery>(SQL.sql, SQL.bindings);
+    const dbTodos = await this.txHost.tx.manyOrNone<ToDoQuery>(
+      SQL.sql,
+      SQL.bindings,
+    );
     if (!dbTodos) return [];
     return dbTodos;
   }

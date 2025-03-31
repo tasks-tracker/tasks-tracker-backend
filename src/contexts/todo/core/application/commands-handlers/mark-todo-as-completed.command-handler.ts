@@ -11,8 +11,9 @@ import { TodoRepository } from '../../domain';
 
 @CommandHandler(MarkTodoAsCompletedCommand)
 export class MarkTodoAsCompletedCommandHandler
-  implements ICommandHandler<MarkTodoAsCompletedCommand> {
-  constructor(public readonly todoRepository: TodoRepository) { }
+  implements ICommandHandler<MarkTodoAsCompletedCommand>
+{
+  constructor(public readonly todoRepository: TodoRepository) {}
 
   async execute(
     command: MarkTodoAsCompletedCommand,

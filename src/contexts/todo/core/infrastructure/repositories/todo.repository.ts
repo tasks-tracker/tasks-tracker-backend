@@ -22,7 +22,7 @@ export class TodoRepositoryImpl implements TodoRepository {
   private readonly knex = knex({ client: 'pg' });
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
-  ) { }
+  ) {}
 
   public nextId(): TodoIdVO {
     return new TodoIdVO(randomUUID());

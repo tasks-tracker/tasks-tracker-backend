@@ -48,7 +48,7 @@ export class TodoController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly authHelper: AuthHelper,
-  ) { }
+  ) {}
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
@@ -349,9 +349,7 @@ export class TodoController {
   }
 
   @Get('get-todos')
-  async getPaginationTodoForUser(
-    @SessionToken() sessionToken: string | null,
-  ) {
+  async getPaginationTodoForUser(@SessionToken() sessionToken: string | null) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
@@ -361,8 +359,8 @@ export class TodoController {
           userId as UserIdVO,
           new GetPaginationTodoForUserLimit(10),
           new GetPaginationTodoForUserOffset(0),
-        )
-      )
+        ),
+      );
     } catch (err) {
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();

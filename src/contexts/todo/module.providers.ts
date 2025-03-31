@@ -24,9 +24,7 @@ export const repositoriesProviders = [
   },
 ];
 
-export const queryHandlersProviders = [
-  GetPaginationTodoForUserQueryHandler,
-];
+export const queryHandlersProviders = [GetPaginationTodoForUserQueryHandler];
 
 export const queryRepositoriesProviders = [
   {

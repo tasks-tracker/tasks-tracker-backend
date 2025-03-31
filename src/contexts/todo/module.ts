@@ -14,4 +14,4 @@ import { queryRepositoriesProviders } from './module.providers';
     ...queryRepositoriesProviders,
   ],
 })
-export class TodoModule { }
+export class TodoModule {}

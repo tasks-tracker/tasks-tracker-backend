@@ -1,1 +1,1 @@
-export * from './todo.query-repository'
+export * from './todo.query-repository';
