@@ -348,6 +348,18 @@ export class TodoController {
     }
   }
 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'UNAUTHORIZED',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
   @Get('get-todos')
   async getPaginationTodoForUser(@SessionToken() sessionToken: string | null) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
