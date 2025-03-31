@@ -12,9 +12,11 @@ export class UpdateTodoCommand extends Command<
   constructor(
     public readonly todoId: TodoIdVO,
     public readonly userId: UserIdVO,
-    public readonly title: TodoTitleVO | null,
-    public readonly description: TodoDescriptionVO | null,
-    public readonly deadline: Date | null,
+    public readonly fields: {
+      title?: TodoTitleVO,
+      description?: TodoDescriptionVO | null,
+      deadline?: Date | null,
+    }
   ) {
     super();
   }

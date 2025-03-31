@@ -304,13 +304,21 @@ export class TodoController {
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken)
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
     try {
+      const fields: UpdateTodoCommand['fields'] = {};
+      if (body.fields?.title) {
+        fields.title = new TodoTitleVO(body.fields.title);
+      }
+      if (body.fields?.description === null || body.fields?.description) {
+        fields.description = body.fields.description ? new TodoDescriptionVO(body.fields.description) : null;
+      }
+      if (body.fields?.deadline === null || body.fields?.deadline) {
+        fields.deadline = body.fields.deadline ? new Date(body.fields.deadline) : null;
+      }
       const result = await this.commandBus.execute(
         new UpdateTodoCommand(
           new TodoIdVO(body.todoId),
           userId as UserIdVO,
-          body.title ? new TodoTitleVO(body.title) : null,
-          body.description ? new TodoDescriptionVO(body.description) : null,
-          body.deadline ? new Date(body.deadline) : null,
+          fields
         ),
       );
       if (result.isOk()) return;

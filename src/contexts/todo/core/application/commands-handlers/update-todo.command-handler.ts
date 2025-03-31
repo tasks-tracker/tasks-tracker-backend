@@ -19,7 +19,7 @@ export class UpdateTodoCommandHandler
     const todo = await this.todoRepository.findById(command.todoId);
     if (!todo) return err(new TodoNotFoundDomainError());
 
-    const updateResult = todo.update(command.userId, command.title, command.description, command.deadline);
+    const updateResult = todo.update(command.userId, command.fields);
     if (updateResult.isErr()) return updateResult;
 
     await this.todoRepository.save(todo);

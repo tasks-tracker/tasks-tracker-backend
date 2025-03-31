@@ -100,25 +100,27 @@ export class Todo extends AggregateRoot {
 
   update(
     userId: UserIdVO,
-    title: TodoTitleVO | null,
-    description: TodoDescriptionVO | null,
-    deadline: Date | null,
+    fields: {
+      title?: TodoTitleVO,
+      description?: TodoDescriptionVO | null,
+      deadline?: Date | null,
+    }
   ): Result<null, TodoNotOwnerExceptionDomainError> {
     if (!this.#ownerId.equals(userId)) return err(new TodoNotOwnerExceptionDomainError())
 
     const updatedFields: Array<string> = [];
-    if (title) {
-      this.#title = title;
+    if (fields.title) {
+      this.#title = fields.title;
       updatedFields.push('title');
     }
 
-    if (description) {
-      this.#description = description;
+    if (fields.description || fields.description === null) {
+      this.#description = fields.description;
       updatedFields.push('description');
     }
 
-    if (deadline) {
-      this.#deadline = deadline;
+    if (fields.deadline || fields.deadline === null) {
+      this.#deadline = fields.deadline;
       updatedFields.push('deadline');
     }
 

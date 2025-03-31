@@ -1,12 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class UpdateTodoBodyDto {
-  @ApiProperty({
-    example: '1234-1234-1234-1234',
-  })
-  todoId: string;
-
+class UpdateTodoFieldsDto {
   @ApiPropertyOptional({
     example: 'Example title',
   })
@@ -15,11 +9,21 @@ export class UpdateTodoBodyDto {
   @ApiPropertyOptional({
     example: 'description',
   })
-  description?: string;
+  description?: string | null;
 
   @ApiPropertyOptional({
     example: 1630000000,
     description: 'Unix timestamp',
   })
-  deadline?: number;
+  deadline?: number | null;
+}
+
+export class UpdateTodoBodyDto {
+  @ApiProperty({
+    example: '1234-1234-1234-1234',
+  })
+  todoId: string;
+
+  @ApiPropertyOptional({ type: () => UpdateTodoFieldsDto })
+  fields?: UpdateTodoFieldsDto;
 }
