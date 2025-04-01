@@ -1,0 +1,7 @@
+origin: '*'
+methods: '*'
+allowedHeaders: '*'
+exposedHeaders: '*'
+credentials: true
+preflightContinue: true
+optionsSuccessStatus: 204
