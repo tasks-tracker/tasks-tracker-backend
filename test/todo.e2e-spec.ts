@@ -212,8 +212,8 @@ describe('TodoController (e2e)', () => {
       .set('Cookie', authCookie);
 
     expect(response.status).toBe(HttpStatus.OK);
-    expect(response.body).toBeInstanceOf(Array);
-    expect(response.body.length).toBe(1);
+    expect(response.body.items).toBeInstanceOf(Array);
+    expect(response.body.items.length).toBe(1);
   });
 
   it('/todo/delete-by-id (DELETE) - delete a todo', async () => {
@@ -228,7 +228,7 @@ describe('TodoController (e2e)', () => {
       .set('Cookie', authCookie);
 
     expect(getResponse.status).toBe(HttpStatus.OK);
-    expect(getResponse.body).toBeInstanceOf(Array);
-    expect(getResponse.body.length).toBe(0);
+    expect(getResponse.body.items).toBeInstanceOf(Array);
+    expect(getResponse.body.items.length).toBe(0);
   });
 });
