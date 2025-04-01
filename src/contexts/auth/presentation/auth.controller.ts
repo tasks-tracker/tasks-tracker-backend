@@ -13,15 +13,15 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { RegisterByLoginBodyDto } from './dtos';
 import { LoginBodyDto } from './dtos';
 import { GetUserInfoResponseDto } from './dtos';
-import { RegisterUserByLoginCommand } from '../application';
-import { LoginUserCommand } from '../application';
-import { LogoutSessionCommand } from '../application';
-import { GetUserInfoQuery } from '../application';
-import { LoginVO, PasswordVO, SessionTokenVO } from '../domain';
-import { UserLoginAlreadyUsedDomainError } from '../domain';
-import { InvalidPasswordDomainError } from '../domain';
-import { UserWithLoginNotExistDomainError } from '../domain';
-import { NotUsedSessionTokenDomainError } from '../domain';
+import { RegisterUserByLoginCommand } from '../core';
+import { LoginUserCommand } from '../core';
+import { LogoutSessionCommand } from '../core';
+import { GetUserInfoQuery } from '../core';
+import { LoginVO, PasswordVO, SessionTokenVO } from '../core';
+import { UserLoginAlreadyUsedDomainError } from '../core';
+import { InvalidPasswordDomainError } from '../core';
+import { UserWithLoginNotExistDomainError } from '../core';
+import { NotUsedSessionTokenDomainError } from '../core';
 import { ValidationException } from '@libs/validation-exception';
 import { SessionCookieConfig } from '@adapters/config-adapter';
 import { AuthHelper } from '../helpers';
@@ -214,7 +214,7 @@ export class AuthController {
     if (!sessionToken) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }
-    const userId = await this.authHelper.getUserIdByCookies(sessionToken);
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }

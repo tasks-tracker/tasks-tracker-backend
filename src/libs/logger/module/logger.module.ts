@@ -4,6 +4,7 @@ import type { LoggerOptions } from '../core';
 import type { LoggerModuleAsyncOptions } from './logger.module.interface';
 import type { LoggerModuleOptions } from './logger.module.interface';
 import type { LoggerOptionsFactory } from './logger.module.interface';
+import type { LoggerModuleSyncOptions } from './logger.module.interface';
 
 import { Module } from '@nestjs/common';
 import { Scope } from '@nestjs/common';
@@ -28,9 +29,9 @@ export class LoggerModule {
     return logger;
   }
 
-  static register(loggerModuleOptions: LoggerModuleOptions): DynamicModule {
+  static register(loggerModuleOptions: LoggerModuleSyncOptions): DynamicModule {
     return {
-      global: loggerModuleOptions.global,
+      global: loggerModuleOptions.isGlobal,
       module: LoggerModule,
       providers: [
         {
@@ -52,7 +53,7 @@ export class LoggerModule {
   ): DynamicModule {
     const logger = {
       provide: Logger,
-      useFactory: (opts: LoggerModuleOptions['options']): Logger => {
+      useFactory: (opts: LoggerModuleOptions): Logger => {
         const logger = new Logger(opts);
         return logger;
       },
@@ -61,7 +62,7 @@ export class LoggerModule {
     };
 
     return {
-      global: loggerModuleOptions.global,
+      global: loggerModuleOptions.isGlobal,
       module: LoggerModule,
       imports: loggerModuleOptions.imports || [],
       providers: [...this.createAsyncProviders(loggerModuleOptions), logger],

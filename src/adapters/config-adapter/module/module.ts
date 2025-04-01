@@ -6,6 +6,9 @@ import { cacheConfig } from '../configs';
 import { databaseConfig } from '../configs';
 import { sessionCookieConfig } from '../configs';
 import { loggerConfig } from '../configs';
+import { kafkaConfig } from '../configs';
+import { corsConfig } from '../configs';
+import { metricsConfig } from '../configs';
 
 const configs = [
   loggerConfig,
@@ -14,6 +17,9 @@ const configs = [
   cacheConfig,
   databaseConfig,
   sessionCookieConfig,
+  kafkaConfig,
+  corsConfig,
+  metricsConfig,
 ];
 
 @Module({

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { GetUserIdBySessionTokenQuery } from '../application';
-import { SessionTokenVO } from '../domain';
-import { UserIdVO } from '../domain';
+import { GetUserIdBySessionTokenQuery } from '../core';
+import { SessionTokenVO } from '../core';
+import { UserIdVO } from '../core';
 
 @Injectable()
 export class AuthHelper {
   constructor(public readonly queryBus: QueryBus) {}
-  public async getUserIdByCookies(
+  public async getUserIdBySessionToken(
     sessionToken?: string,
   ): Promise<UserIdVO | null> {
     if (!sessionToken) return null;

@@ -11,6 +11,9 @@ import { databaseConfig } from '@adapters/config-adapter';
 import { serviceConfig } from '@adapters/config-adapter';
 import { sessionCookieConfig } from '@adapters/config-adapter';
 import { swaggerConfig } from '@adapters/config-adapter';
+import { kafkaConfig } from '@adapters/config-adapter';
+import { corsConfig } from '@adapters/config-adapter';
+import { metricsConfig } from '@adapters/config-adapter';
 import { Network } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
 import { Wait } from 'testcontainers';
@@ -19,6 +22,7 @@ import * as request from 'supertest';
 import { Migrator } from '@libs/migrator';
 import * as pgPromise from 'pg-promise';
 import { join } from 'path';
+import { KafkaContainer } from '@testcontainers/kafka';
 
 jest.setTimeout(100_000);
 
@@ -26,6 +30,8 @@ describe('AuthController (e2e)', () => {
   let app: INestApplication<App>;
   let postgres: StartedTestContainer;
   let redis: StartedTestContainer;
+  let zookeeper: StartedTestContainer;
+  let kafka: StartedTestContainer;
   let server: App;
 
   beforeAll(async () => {
@@ -45,6 +51,23 @@ describe('AuthController (e2e)', () => {
     redis = await new GenericContainer('redis:6.2')
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .withNetwork(network)
+      .start();
+
+    zookeeper = await new GenericContainer('confluentinc/cp-zookeeper:7.6.5')
+      .withWaitStrategy(Wait.forLogMessage('INFO ZooKeeper audit is disabled.'))
+      .withEnvironment({
+        ZOOKEEPER_CLIENT_PORT: '2181',
+      })
+      .withExposedPorts(2181)
+      .withNetwork(network)
+      .withNetworkAliases('zookeeper')
+      .start();
+
+    kafka = await new KafkaContainer()
+      // @ts-expect-error KafkaContainer bad types
+      .withNetwork(network)
+      .withZooKeeper('zookeeper', 2181)
+      .withExposedPorts(9093)
       .start();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -76,6 +99,15 @@ describe('AuthController (e2e)', () => {
       })
       .overrideProvider(swaggerConfig.KEY)
       .useValue({})
+      .overrideProvider(corsConfig.KEY)
+      .useValue({})
+      .overrideProvider(metricsConfig.KEY)
+      .useValue({})
+      .overrideProvider(kafkaConfig.KEY)
+      .useValue({
+        clientId: 'backend',
+        brokers: [`${kafka.getHost()}:${kafka.getMappedPort(9093)}`],
+      })
       .compile();
 
     app = moduleFixture.createNestApplication({
@@ -108,6 +140,8 @@ describe('AuthController (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
+    await zookeeper.stop();
+    await kafka.stop();
     await postgres.stop();
     await redis.stop();
   });
