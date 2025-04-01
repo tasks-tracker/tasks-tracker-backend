@@ -7,7 +7,7 @@ import { UserIdVO } from '../core';
 @Injectable()
 export class AuthHelper {
   constructor(public readonly queryBus: QueryBus) {}
-  public async getUserIdByCookies(
+  public async getUserIdBySessionToken(
     sessionToken?: string,
   ): Promise<UserIdVO | null> {
     if (!sessionToken) return null;
