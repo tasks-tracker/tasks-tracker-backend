@@ -1,12 +1,10 @@
-import {
-  Controller,
-  Post,
-  Delete,
-  Put,
-  Get,
-  Body,
-  Query,
-} from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { Post } from '@nestjs/common';
+import { Delete } from '@nestjs/common';
+import { Put } from '@nestjs/common';
+import { Get } from '@nestjs/common';
+import { Body } from '@nestjs/common';
+import { Query } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
@@ -40,12 +38,10 @@ import { GetPaginationTodoForUserLimit } from '../core';
 import { GetPaginationTodoForUserOffset } from '../core';
 import { GetPaginationTodoForUserResponse } from './dtos';
 import { GetPaginationTodoForUserQueryDto } from './dtos';
-import {
-  CreateTodoBodyDto,
-  CreateTodoResponseDto,
-  MarkAsCompletedBodyDto,
-  UpdateTodoBodyDto,
-} from './dtos';
+import { CreateTodoBodyDto } from './dtos';
+import { CreateTodoResponseDto } from './dtos';
+import { MarkAsCompletedBodyDto } from './dtos';
+import { UpdateTodoBodyDto } from './dtos';
 import { DeleteTodoByIdBodyDto } from './dtos';
 import { UserIdVO } from '../core';
 // import { createTrackStatusesInterceptor } from '@adapters/metrics-adapter';
@@ -389,7 +385,6 @@ export class TodoController {
       );
       return { items };
     } catch (err) {
-      console.log(err);
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();
       }
