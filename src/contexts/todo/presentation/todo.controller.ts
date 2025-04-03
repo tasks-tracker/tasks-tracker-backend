@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Put, Get, Body } from '@nestjs/common';
+import { Controller, Post, Delete, Put, Get, Body, Query } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
@@ -31,6 +31,7 @@ import { GetPaginationTodoForUserQuery } from '../core';
 import { GetPaginationTodoForUserLimit } from '../core';
 import { GetPaginationTodoForUserOffset } from '../core';
 import { GetPaginationTodoForUserResponse } from './dtos';
+import { GetPaginationTodoForUserQueryDto } from './dtos';
 import {
   CreateTodoBodyDto,
   CreateTodoResponseDto,
@@ -49,7 +50,7 @@ export class TodoController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly authHelper: AuthHelper,
-  ) {}
+  ) { }
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
@@ -363,7 +364,10 @@ export class TodoController {
     description: 'Validation error',
   })
   @Get('get-todos')
-  async getPaginationTodoForUser(@SessionToken() sessionToken: string | null) {
+  async getPaginationTodoForUser(
+    @SessionToken() sessionToken: string | null,
+    @Query() query: GetPaginationTodoForUserQueryDto
+  ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
@@ -371,12 +375,13 @@ export class TodoController {
       const items = await this.queryBus.execute(
         new GetPaginationTodoForUserQuery(
           userId as UserIdVO,
-          new GetPaginationTodoForUserLimit(10),
-          new GetPaginationTodoForUserOffset(0),
+          new GetPaginationTodoForUserLimit(parseInt(query.limit ?? '10')),
+          new GetPaginationTodoForUserOffset(parseInt(query.offset ?? '0')),
         ),
       );
       return { items };
     } catch (err) {
+      console.log(err)
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();
       }

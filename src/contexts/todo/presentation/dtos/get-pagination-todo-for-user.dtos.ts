@@ -1,5 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export class GetPaginationTodoForUserQueryDto {
+  @ApiProperty({
+    example: 0,
+    required: false,
+  })
+  offset?: string;
+
+  @ApiProperty({
+    example: 10,
+    required: false
+  })
+  limit?: string;
+}
+
 export class GetPaginationTodoForUserResponseDto {
   @ApiProperty({
     example: '1234-5678-9012-3456',
