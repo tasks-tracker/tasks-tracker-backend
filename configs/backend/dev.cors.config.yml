@@ -1,7 +1,7 @@
-origin: '*'
+origin: 'http://localhost:4200'
 methods: '*'
 allowedHeaders: '*'
 exposedHeaders: '*'
 credentials: true
-preflightContinue: true
+preflightContinue: false
 optionsSuccessStatus: 204
