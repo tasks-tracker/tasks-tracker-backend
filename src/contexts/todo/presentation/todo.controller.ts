@@ -1,4 +1,10 @@
-import { Controller, Post, Delete, Put, Get, Body } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { Post } from '@nestjs/common';
+import { Delete } from '@nestjs/common';
+import { Put } from '@nestjs/common';
+import { Get } from '@nestjs/common';
+import { Body } from '@nestjs/common';
+import { Query } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
@@ -31,12 +37,11 @@ import { GetPaginationTodoForUserQuery } from '../core';
 import { GetPaginationTodoForUserLimit } from '../core';
 import { GetPaginationTodoForUserOffset } from '../core';
 import { GetPaginationTodoForUserResponse } from './dtos';
-import {
-  CreateTodoBodyDto,
-  CreateTodoResponseDto,
-  MarkAsCompletedBodyDto,
-  UpdateTodoBodyDto,
-} from './dtos';
+import { GetPaginationTodoForUserQueryDto } from './dtos';
+import { CreateTodoBodyDto } from './dtos';
+import { CreateTodoResponseDto } from './dtos';
+import { MarkAsCompletedBodyDto } from './dtos';
+import { UpdateTodoBodyDto } from './dtos';
 import { DeleteTodoByIdBodyDto } from './dtos';
 import { UserIdVO } from '../core';
 // import { createTrackStatusesInterceptor } from '@adapters/metrics-adapter';
@@ -363,7 +368,10 @@ export class TodoController {
     description: 'Validation error',
   })
   @Get('get-todos')
-  async getPaginationTodoForUser(@SessionToken() sessionToken: string | null) {
+  async getPaginationTodoForUser(
+    @SessionToken() sessionToken: string | null,
+    @Query() query: GetPaginationTodoForUserQueryDto,
+  ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
     if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
@@ -371,8 +379,8 @@ export class TodoController {
       const items = await this.queryBus.execute(
         new GetPaginationTodoForUserQuery(
           userId as UserIdVO,
-          new GetPaginationTodoForUserLimit(10),
-          new GetPaginationTodoForUserOffset(0),
+          new GetPaginationTodoForUserLimit(parseInt(query.limit ?? '10')),
+          new GetPaginationTodoForUserOffset(parseInt(query.offset ?? '0')),
         ),
       );
       return { items };
