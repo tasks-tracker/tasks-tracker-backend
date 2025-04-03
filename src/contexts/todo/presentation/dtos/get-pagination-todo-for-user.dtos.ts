@@ -9,7 +9,7 @@ export class GetPaginationTodoForUserQueryDto {
 
   @ApiProperty({
     example: 10,
-    required: false
+    required: false,
   })
   limit?: string;
 }

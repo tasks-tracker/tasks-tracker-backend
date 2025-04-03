@@ -1,4 +1,12 @@
-import { Controller, Post, Delete, Put, Get, Body, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Delete,
+  Put,
+  Get,
+  Body,
+  Query,
+} from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
@@ -50,7 +58,7 @@ export class TodoController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly authHelper: AuthHelper,
-  ) { }
+  ) {}
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
@@ -366,7 +374,7 @@ export class TodoController {
   @Get('get-todos')
   async getPaginationTodoForUser(
     @SessionToken() sessionToken: string | null,
-    @Query() query: GetPaginationTodoForUserQueryDto
+    @Query() query: GetPaginationTodoForUserQueryDto,
   ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
@@ -381,7 +389,7 @@ export class TodoController {
       );
       return { items };
     } catch (err) {
-      console.log(err)
+      console.log(err);
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();
       }
