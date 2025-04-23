@@ -1,4 +1,4 @@
-import type { CacheModuleOptions } from 'src/adapters/cache-adapter';
+import type { CacheModuleOptions } from '@adapters/cache-adapter';
 
 import { registerAs } from '@nestjs/config';
 import { Max } from 'class-validator';
