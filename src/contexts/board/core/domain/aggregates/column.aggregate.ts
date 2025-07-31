@@ -20,7 +20,7 @@ export class Column extends AggregateRoot {
   #title: ColumnTitleVO;
   #order: ColumnOrderVO;
   #boardId: BoardIdVO;
-  #ownerId: ColumnOwnerIdVO;
+  #creatorId: ColumnOwnerIdVO;
   #createdAt: Date;
   #updatedAt: Date;
 
@@ -29,7 +29,7 @@ export class Column extends AggregateRoot {
     title: ColumnTitleVO,
     order: ColumnOrderVO,
     boardId: BoardIdVO,
-    ownerId: ColumnOwnerIdVO,
+    creatorId: ColumnOwnerIdVO,
     createdAt: Date,
     updatedAt: Date,
   ) {
@@ -38,7 +38,7 @@ export class Column extends AggregateRoot {
     this.#title = title;
     this.#order = order;
     this.#boardId = boardId;
-    this.#ownerId = ownerId;
+    this.#creatorId = creatorId;
     this.#createdAt = createdAt;
     this.#updatedAt = updatedAt;
   }
@@ -51,8 +51,8 @@ export class Column extends AggregateRoot {
     return this.#title;
   }
 
-  get ownerId() {
-    return this.#ownerId;
+  get creatorId() {
+    return this.#creatorId;
   }
 
   get order() {
@@ -78,14 +78,14 @@ export class Column extends AggregateRoot {
     boardId: BoardIdVO,
     createdAt: Date,
     updatedAt: Date,
-    ownerId: ColumnOwnerIdVO,
+    creatorId: ColumnOwnerIdVO,
   ): Column {
     const column = new Column(
       id,
       title,
       order,
       boardId,
-      ownerId,
+      creatorId,
       createdAt,
       updatedAt,
     );
@@ -99,10 +99,18 @@ export class Column extends AggregateRoot {
     this.apply(new ColumnRenameEvent(title));
   }
 
-  changeOwner(ownerId: ColumnOwnerIdVO) {
-    this.#ownerId = ownerId;
-    this.#updatedAt = new Date();
-    this.apply(new ColumnChangeOwnerEvent(this.#id, ownerId));
+  changeCreator(
+    currentCreatorId: ColumnOwnerIdVO,
+    newCreatorId: ColumnOwnerIdVO,
+  ) {
+    if (currentCreatorId.value === this.#creatorId.value) {
+      this.#creatorId = newCreatorId;
+      this.#updatedAt = new Date();
+      this.apply(new ColumnChangeOwnerEvent(currentCreatorId, newCreatorId));
+      return;
+    }
+
+    throw new Error('Current creator does not match the column creator');
   }
 
   changeOrder(order: ColumnOrderVO) {

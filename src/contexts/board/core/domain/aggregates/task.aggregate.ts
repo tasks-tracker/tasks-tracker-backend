@@ -17,7 +17,7 @@ export class Task extends AggregateRoot {
   #columnId: ColumnIdVO;
   #createdAt: Date;
   #updatedAt: Date;
-  #ownerId: TaskOwnerIdVO;
+  #assignerId: TaskOwnerIdVO;
 
   constructor(
     id: TaskIdVO,
@@ -27,7 +27,7 @@ export class Task extends AggregateRoot {
     columnId: ColumnIdVO,
     createdAt: Date,
     updatedAt: Date,
-    ownerId: TaskOwnerIdVO,
+    assignerId: TaskOwnerIdVO,
   ) {
     super();
     this.#id = id;
@@ -37,7 +37,7 @@ export class Task extends AggregateRoot {
     this.#columnId = columnId;
     this.#createdAt = createdAt;
     this.#updatedAt = updatedAt;
-    this.#ownerId = ownerId;
+    this.#assignerId = assignerId;
   }
 
   get id() {
@@ -68,8 +68,8 @@ export class Task extends AggregateRoot {
     return this.#updatedAt;
   }
 
-  get ownerId() {
-    return this.#ownerId;
+  get assignerId() {
+    return this.#assignerId;
   }
 
   static create(
@@ -80,7 +80,7 @@ export class Task extends AggregateRoot {
     columnId: ColumnIdVO,
     createdAt: Date,
     updatedAt: Date,
-    ownerId: TaskOwnerIdVO,
+    assignerId: TaskOwnerIdVO,
   ) {
     const task = new Task(
       id,
@@ -90,7 +90,7 @@ export class Task extends AggregateRoot {
       columnId,
       createdAt,
       updatedAt,
-      ownerId,
+      assignerId,
     );
 
     task.apply(new TaskCreatedEvent(id));

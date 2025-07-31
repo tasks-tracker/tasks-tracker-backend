@@ -66,10 +66,15 @@ export class Board extends AggregateRoot {
     this.apply(new BoardRenameEvent(title));
   }
 
-  changeOwner(ownerId: BoardOwnerIdVO) {
-    this.#ownerId = ownerId;
-    this.#updatedAt = new Date();
-    this.apply(new BoardOwnerChangedEvent(ownerId));
+  changeOwner(currentOwnerId: BoardOwnerIdVO, newOwnerId: BoardOwnerIdVO) {
+    if (currentOwnerId.value === this.#ownerId.value) {
+      this.#ownerId = newOwnerId;
+      this.#updatedAt = new Date();
+      this.apply(new BoardOwnerChangedEvent(currentOwnerId));
+      return;
+    }
+
+    throw new Error('Current owner does not match the board owner');
   }
 
   remove() {
