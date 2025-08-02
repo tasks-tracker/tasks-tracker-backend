@@ -58,6 +58,7 @@ export class Board extends AggregateRoot {
   ) {
     const board = new Board(id, title, ownerId, createdAt, updatedAt);
     board.apply(new BoardCreatedEvent(id));
+    return board;
   }
 
   rename(title: BoardTitleVO) {
