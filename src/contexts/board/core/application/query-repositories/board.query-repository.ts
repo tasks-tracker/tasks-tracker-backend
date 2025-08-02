@@ -10,7 +10,7 @@ import { Result } from 'neverthrow';
 
 export abstract class BoardQueryRepository {
   public abstract findById(
-    id: string,
+    id: BoardIdVO,
   ): Promise<Result<Board, BoardIsNotFoundDomainError>>;
 
   public abstract existsByTitle(
@@ -20,10 +20,6 @@ export abstract class BoardQueryRepository {
   public abstract findBoardsByUserId(
     userId: BoardUserIdVO,
   ): Promise<Result<Board[], BoardIsNotFoundDomainError>>;
-
-  public abstract getBoardInfoById(
-    id: BoardIdVO,
-  ): Promise<Result<Board, BoardIsNotFoundDomainError>>;
 
   public abstract existByUserId(
     userId: string,
