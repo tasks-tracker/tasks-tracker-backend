@@ -24,7 +24,7 @@ export class ChangeBoardOwnerCommandHandler
 
     board.changeOwner(command.currentOwnerId, command.newOwnerId);
 
-    await this.boardRepository.changeOwner(command.boardId, command.newOwnerId);
+    await this.boardRepository.save(board);
 
     board.commit();
     return ok(undefined);

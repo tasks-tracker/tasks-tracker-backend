@@ -3,7 +3,7 @@ import { CreateBoardCommand } from '../../commands/board';
 import { BoardRepository } from '@contexts/board/core/domain/repositories/board.repository';
 import { BoardIdVO } from '@contexts/board/core/domain/value-objects';
 import { DomainError } from '@libs/domain-error';
-import { err, ok, Result } from 'neverthrow';
+import { ok, Result } from 'neverthrow';
 import { Board } from '@contexts/board/core/domain/aggregates';
 
 @CommandHandler(CreateBoardCommand)
@@ -17,20 +17,16 @@ export class CreateBoardCommandHandler
   ): Promise<Result<BoardIdVO, DomainError>> {
     const boardId = this.boardRepository.nextId();
     const date = new Date();
-    const userIdResult = await this.boardRepository.getUserId(command.ownerId);
 
-    if (userIdResult.isErr()) {
-      return err(userIdResult.error);
-    }
+    const board = Board.create(
+      boardId,
+      command.title,
+      command.ownerId,
+      date,
+      date,
+    );
 
-    const userId = userIdResult.value;
-    const board = Board.create(boardId, command.title, userId, date, date);
-
-    const saveResult = await this.boardRepository.save(board);
-
-    if (saveResult.isErr()) {
-      return err(saveResult.error);
-    }
+    await this.boardRepository.save(board);
 
     board.commit();
 

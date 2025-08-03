@@ -6,6 +6,12 @@ import {
   BoardRemovedEvent,
   BoardRenameEvent,
 } from '../events';
+import { UserIdVO } from '@contexts/auth';
+import { err, ok, Result } from 'neverthrow';
+import {
+  BoardIsNotFoundDomainError,
+  BoardIsNotOwnerDomainError,
+} from '../domain-errors';
 
 export class Board extends AggregateRoot {
   #id: BoardIdVO;
@@ -13,6 +19,7 @@ export class Board extends AggregateRoot {
   #ownerId: BoardOwnerIdVO;
   #createdAt: Date;
   #updatedAt: Date;
+  #isDeleted: boolean;
 
   constructor(
     id: BoardIdVO,
@@ -20,6 +27,7 @@ export class Board extends AggregateRoot {
     ownerId: BoardOwnerIdVO,
     createdAt: Date,
     updatedAt: Date,
+    isDeleted: boolean,
   ) {
     super();
     this.#id = id;
@@ -27,6 +35,7 @@ export class Board extends AggregateRoot {
     this.#ownerId = ownerId;
     this.#createdAt = createdAt;
     this.#updatedAt = updatedAt;
+    this.#isDeleted = isDeleted;
   }
 
   get id() {
@@ -49,6 +58,10 @@ export class Board extends AggregateRoot {
     return this.#updatedAt;
   }
 
+  get isDeleted() {
+    return this.#isDeleted;
+  }
+
   static create(
     id: BoardIdVO,
     title: BoardTitleVO,
@@ -56,15 +69,30 @@ export class Board extends AggregateRoot {
     createdAt: Date,
     updatedAt: Date,
   ) {
-    const board = new Board(id, title, ownerId, createdAt, updatedAt);
+    const isDeleted = false;
+    const board = new Board(
+      id,
+      title,
+      ownerId,
+      createdAt,
+      updatedAt,
+      isDeleted,
+    );
     board.apply(new BoardCreatedEvent(id));
     return board;
   }
 
-  rename(title: BoardTitleVO) {
-    this.#title = title;
+  rename(
+    newTitle: BoardTitleVO,
+    userId: UserIdVO,
+  ): Result<null, BoardIsNotOwnerDomainError> {
+    if (this.#ownerId.value !== userId.value) {
+      return err(new BoardIsNotOwnerDomainError());
+    }
+    this.#title = newTitle;
     this.#updatedAt = new Date();
-    this.apply(new BoardRenameEvent(title));
+    this.apply(new BoardRenameEvent(newTitle));
+    return ok(null);
   }
 
   changeOwner(currentOwnerId: BoardOwnerIdVO, newOwnerId: BoardOwnerIdVO) {
@@ -78,8 +106,11 @@ export class Board extends AggregateRoot {
     throw new Error('Current owner does not match the board owner');
   }
 
-  remove() {
+  remove(userId: UserIdVO): Result<null, BoardIsNotFoundDomainError> {
+    if (this.#ownerId.value !== userId.value)
+      return err(new BoardIsNotFoundDomainError(userId.value));
+    this.#isDeleted = true;
     this.apply(new BoardRemovedEvent(this.#id.value));
-    return this;
+    return ok(null);
   }
 }

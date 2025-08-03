@@ -24,7 +24,9 @@ export class RemoveBoardCommandHandler
 
     const board = boardResult;
 
-    await this.boardRepository.remove(command.boardId);
+    board.remove(command.userId);
+
+    await this.boardRepository.save(board);
 
     board.commit();
 

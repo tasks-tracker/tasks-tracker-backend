@@ -12,6 +12,7 @@ export class RenameBoardCommand extends Command<
   constructor(
     public readonly boardId: BoardIdVO,
     public readonly newTitle: BoardTitleVO,
+    public readonly userId: UserIdVO,
   ) {
     super();
   }

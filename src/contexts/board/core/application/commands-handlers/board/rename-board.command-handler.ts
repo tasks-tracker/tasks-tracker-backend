@@ -24,7 +24,7 @@ export class RenameBoardCommandHandler
 
     const board = boardResult;
 
-    board.rename(command.newTitle);
+    board.rename(command.newTitle, command.userId);
 
     await this.boardRepository.save(board);
 
