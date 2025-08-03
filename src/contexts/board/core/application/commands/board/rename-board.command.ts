@@ -5,6 +5,7 @@ import {
   BoardIdVO,
   BoardTitleVO,
 } from '@contexts/board/core/domain/value-objects';
+import { UserIdVO } from '@contexts/auth';
 
 export class RenameBoardCommand extends Command<
   Result<BoardIdVO, DomainError>

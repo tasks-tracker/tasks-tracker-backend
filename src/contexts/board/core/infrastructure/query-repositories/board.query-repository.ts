@@ -82,6 +82,7 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
             new BoardUserIdVO(board.owner_id),
             board.created_at,
             board.updated_at,
+            false,
           ),
       ),
     );
@@ -110,6 +111,7 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
         new BoardUserIdVO(result.owner_id),
         result.created_at,
         result.updated_at,
+        false,
       ),
     );
   }

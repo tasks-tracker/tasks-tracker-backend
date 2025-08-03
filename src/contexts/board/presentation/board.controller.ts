@@ -1,5 +1,4 @@
 import { AuthHelper } from '@contexts/auth';
-import { CreateTodoResponseDto } from '@contexts/todo/presentation/dtos';
 import {
   BadRequestException,
   Body,
@@ -13,12 +12,18 @@ import {
   UnauthorizedException,
   UnprocessableEntityException,
   Patch,
+  Get,
+  Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   ChangeOwnerBoardBodyDto,
   CreateBoardBodyDto,
+  CreateBoardResponseDto,
+  ExistByTitleQueryDto,
+  ExistByUserIdQueryDto,
+  FindByUserIdQueryDto,
   RemoveBoardBodyDto,
   RenameBoardBodyDto,
 } from './dtos';
@@ -30,13 +35,17 @@ import {
   BoardOwnerIdVO,
   BoardOwnerVO,
   BoardTitleVO,
+  BoardUserIdVO,
   ChangeBoardOwnerCommand,
   CreateBoardCommand,
+  ExistByTitleBoardQuery,
+  ExistByUserIdQuery,
+  FindByUserIdQuery,
   RemoveBoardCommand,
   RenameBoardCommand,
 } from '../core';
 import { ValidationException } from '@libs/validation-exception';
-import { UserIdVO } from '@contexts/todo/core';
+import { UserIdVO } from '@contexts/auth/core';
 
 @ApiTags('Board')
 @Controller('board')
@@ -51,7 +60,8 @@ export class BoardController {
   @HttpCode(HttpStatus.CREATED)
   @ApiResponse({
     status: HttpStatus.CREATED,
-    type: CreateTodoResponseDto,
+    type: CreateBoardResponseDto,
+    description: 'Board created successfully',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -94,7 +104,7 @@ export class BoardController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Success',
+    description: 'Board owner changed successfully',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -144,7 +154,7 @@ export class BoardController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Success',
+    description: 'Board removed successfully',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -195,7 +205,7 @@ export class BoardController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
-    description: 'Success',
+    description: 'Board renamed successfully',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -234,6 +244,99 @@ export class BoardController {
       }
 
       throw new BadRequestException('UNKNOWN_ERROR');
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        throw new UnprocessableEntityException();
+      }
+      throw err;
+    }
+  }
+
+  @Get('exist-by-title')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Board exists by title',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
+  async existByTitle(@Query() query: ExistByTitleQueryDto) {
+    try {
+      const result = await this.queryBus.execute(
+        new ExistByTitleBoardQuery(new BoardTitleVO(query.title)),
+      );
+      return { exist: result };
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        throw new UnprocessableEntityException();
+      }
+      throw err;
+    }
+  }
+
+  @Get('exist-by-user-id')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Board exists by user ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
+  async existByUserId(@Query() query: ExistByUserIdQueryDto) {
+    try {
+      const result = await this.queryBus.execute(
+        new ExistByUserIdQuery(query.userId),
+      );
+      return { exist: result };
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        throw new UnprocessableEntityException();
+      }
+      throw err;
+    }
+  }
+
+  @Get('find-by-user-id')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Boards found by user ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
+  async findByUserId(@Query() query: FindByUserIdQueryDto) {
+    try {
+      const result = await this.queryBus.execute(
+        new FindByUserIdQuery(new BoardUserIdVO(query.userId)),
+      );
+      return { boards: result };
     } catch (err) {
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();

@@ -5,6 +5,7 @@ import {
   BoardIdVO,
   BoardOwnerChangedEvent,
   BoardOwnerIdVO,
+  BoardRemovedEvent,
   BoardRenameEvent,
   BoardRepository,
   BoardTitleVO,
@@ -33,11 +34,25 @@ export class BoardRepositoryImpl implements BoardRepository {
       events.some((event) => event instanceof BoardOwnerChangedEvent)
     ) {
       return await this.saveChangedOwnerEvent(board);
+    } else if (events.some((event) => event instanceof BoardRemovedEvent)) {
+      return await this.saveRemovedEvent(board);
     }
   }
 
   public nextId(): BoardIdVO {
     return new BoardIdVO(randomUUID());
+  }
+
+  private async saveRemovedEvent(board: Board): Promise<void> {
+    const SQL = this.knex<BoardSchema>('boards')
+      .update({
+        is_deleted: true,
+      })
+      .where('id', board.id.value)
+      .toSQL()
+      .toNative();
+
+    await this.txHost.tx.none(SQL.sql, SQL.bindings);
   }
 
   public async findById(boardId: BoardIdVO): Promise<Board | null> {

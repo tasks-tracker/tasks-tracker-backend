@@ -1,23 +1,22 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetBoardsIdsByUserIdQuery } from '../../queries/board';
+import { FindByUserIdQuery } from '../../queries/board';
 import { BoardQueryRepository } from '../../query-repositories';
 import { Board } from '@contexts/board/core/domain/aggregates';
 import {
   BoardIdVO,
   BoardOwnerIdVO,
   BoardTitleVO,
-  BoardUserIdVO,
 } from '@contexts/board/core/domain/value-objects';
 
-@QueryHandler(GetBoardsIdsByUserIdQuery)
+@QueryHandler(FindByUserIdQuery)
 export class FindBoardsByUserIdQueryHandler
-  implements IQueryHandler<GetBoardsIdsByUserIdQuery, Board[]>
+  implements IQueryHandler<FindByUserIdQuery, Board[]>
 {
   constructor(private readonly boardQueryRepository: BoardQueryRepository) {}
 
-  async execute(query: GetBoardsIdsByUserIdQuery) {
+  async execute(query: FindByUserIdQuery) {
     const result = await this.boardQueryRepository.findBoardsByUserId(
-      new BoardUserIdVO(query.userId.value),
+      query.userId,
     );
 
     if (result.isErr()) return [];

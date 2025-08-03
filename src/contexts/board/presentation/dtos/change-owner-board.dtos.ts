@@ -10,9 +10,4 @@ export class ChangeOwnerBoardBodyDto {
     example: '1234-5678-9012-3456',
   })
   newOwnerId: string;
-
-  @ApiProperty({
-    example: '1234-5678-9012-3456',
-  })
-  currentOwnerId: string;
 }

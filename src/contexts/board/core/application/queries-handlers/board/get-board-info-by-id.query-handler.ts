@@ -10,9 +10,7 @@ export class GetBoardInfoByIdQueryHandler
   constructor(private readonly boardQueryRepository: BoardQueryRepository) {}
 
   async execute(query: GetBoardInfoByIdQuery) {
-    const result = await this.boardQueryRepository.getBoardInfoById(
-      query.boardId,
-    );
+    const result = await this.boardQueryRepository.findById(query.boardId);
 
     if (result.isErr()) {
       throw new BoardIsNotFoundDomainError(query.boardId.value);
