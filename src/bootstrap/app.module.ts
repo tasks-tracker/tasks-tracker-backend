@@ -15,6 +15,7 @@ import { TodoModule } from '@contexts/todo';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import { BoardModule } from '@contexts/board';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import * as cookieParser from 'cookie-parser';
     }),
     AuthModule,
     TodoModule,
+    BoardModule,
   ],
 })
 export class AppModule {
