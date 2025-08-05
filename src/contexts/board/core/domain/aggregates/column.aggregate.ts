@@ -14,6 +14,8 @@ import {
   ColumnChangeBoardEvent,
   ColumnRemovedEvent,
 } from '../events';
+import { UserIdVO } from '@contexts/auth';
+import { DomainError } from '@libs/domain-error';
 
 export class Column extends AggregateRoot {
   #id: ColumnIdVO;
@@ -23,6 +25,7 @@ export class Column extends AggregateRoot {
   #creatorId: ColumnOwnerIdVO;
   #createdAt: Date;
   #updatedAt: Date;
+  #isDeleted: boolean;
 
   constructor(
     id: ColumnIdVO,
@@ -32,6 +35,7 @@ export class Column extends AggregateRoot {
     creatorId: ColumnOwnerIdVO,
     createdAt: Date,
     updatedAt: Date,
+    isDeleted: boolean,
   ) {
     super();
     this.#id = id;
@@ -41,6 +45,7 @@ export class Column extends AggregateRoot {
     this.#creatorId = creatorId;
     this.#createdAt = createdAt;
     this.#updatedAt = updatedAt;
+    this.#isDeleted = isDeleted;
   }
 
   get id() {
@@ -71,6 +76,10 @@ export class Column extends AggregateRoot {
     return this.#updatedAt;
   }
 
+  get isDeleted() {
+    return this.#isDeleted;
+  }
+
   static create(
     id: ColumnIdVO,
     title: ColumnTitleVO,
@@ -88,12 +97,16 @@ export class Column extends AggregateRoot {
       creatorId,
       createdAt,
       updatedAt,
+      false,
     );
     column.apply(new ColumnCreatedEvent(id));
     return column;
   }
 
-  rename(title: ColumnTitleVO) {
+  rename(userId: UserIdVO, title: ColumnTitleVO) {
+    if (userId.value !== this.#creatorId.value) {
+      throw new DomainError('USER_NOT_AUTHORIZED');
+    }
     this.#title = title;
     this.#updatedAt = new Date();
     this.apply(new ColumnRenameEvent(title));
@@ -125,7 +138,11 @@ export class Column extends AggregateRoot {
     this.apply(new ColumnChangeBoardEvent(boardId));
   }
 
-  remove() {
+  delete() {
+    if (this.#isDeleted) {
+      throw new DomainError('COLUMN_ALREADY_DELETED');
+    }
+
     this.apply(new ColumnRemovedEvent(this.#id));
     return this;
   }
