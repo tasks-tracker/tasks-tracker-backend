@@ -1,10 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ChangeColumnBoardCommand } from '../../commands';
-import { ColumnNotFoundDomainError, ColumnRepository } from '../../../domain';
+import {
+  BoardIdVO,
+  ColumnNotFoundDomainError,
+  ColumnRepository,
+} from '../../../domain';
 import { err, Result, ok } from 'neverthrow';
 
 @CommandHandler(ChangeColumnBoardCommand)
-export class ChangeBoardCommandHandler
+export class ChangeColumnBoardCommandHandler
   implements ICommandHandler<ChangeColumnBoardCommand>
 {
   constructor(private readonly columnRepository: ColumnRepository) {}
@@ -27,10 +31,9 @@ export class ChangeBoardCommandHandler
         return err(new ColumnNotFoundDomainError(command.columnId.value));
       }
 
-      await this.columnRepository.changeBoard(
-        command.columnId,
-        command.boardId,
-      );
+      column.changeBoard(new BoardIdVO(command.boardId.value));
+
+      await this.columnRepository.save(column);
 
       return ok();
     } catch (error) {

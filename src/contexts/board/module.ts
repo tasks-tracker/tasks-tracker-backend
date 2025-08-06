@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BoardController } from './presentation';
+import { BoardController, ColumnController } from './presentation';
 import {
   commandHandlersProviders,
   queryHandlersProviders,
@@ -8,12 +8,12 @@ import {
 } from './module.providers';
 
 @Module({
-  controllers: [BoardController],
+  controllers: [BoardController, ColumnController],
   providers: [
     ...commandHandlersProviders,
     ...repositoriesProviders,
-    ...queryHandlersProviders,
     ...queryRepositoriesProviders,
+    ...queryHandlersProviders,
   ],
 })
 export class BoardModule {}

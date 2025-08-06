@@ -2,9 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ChangeColumnOwnerCommand } from '../../commands';
 import { ColumnNotFoundDomainError, ColumnRepository } from '../../../domain';
 import { err, Result, ok } from 'neverthrow';
+import { UserIdVO } from '@contexts/auth';
 
 @CommandHandler(ChangeColumnOwnerCommand)
-export class ChangeOwnerCommandHandler
+export class ChangeColumnOwnerCommandHandler
   implements ICommandHandler<ChangeColumnOwnerCommand>
 {
   constructor(private readonly columnRepository: ColumnRepository) {}
@@ -27,10 +28,9 @@ export class ChangeOwnerCommandHandler
         return err(new ColumnNotFoundDomainError(command.columnId.value));
       }
 
-      await this.columnRepository.changeOwner(
-        command.columnId,
-        command.ownerId,
-      );
+      column.changeCreator(new UserIdVO(command.ownerId.value));
+
+      await this.columnRepository.save(column);
 
       return ok();
     } catch (e) {
