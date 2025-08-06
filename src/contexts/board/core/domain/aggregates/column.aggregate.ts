@@ -112,18 +112,10 @@ export class Column extends AggregateRoot {
     this.apply(new ColumnRenameEvent(title));
   }
 
-  changeCreator(
-    currentCreatorId: ColumnOwnerIdVO,
-    newCreatorId: ColumnOwnerIdVO,
-  ) {
-    if (currentCreatorId.value === this.#creatorId.value) {
-      this.#creatorId = newCreatorId;
-      this.#updatedAt = new Date();
-      this.apply(new ColumnChangeOwnerEvent(currentCreatorId, newCreatorId));
-      return;
-    }
-
-    throw new Error('Current creator does not match the column creator');
+  changeCreator(newCreatorId: UserIdVO) {
+    this.#creatorId = new ColumnOwnerIdVO(newCreatorId.value);
+    this.#updatedAt = new Date();
+    this.apply(new ColumnChangeOwnerEvent(this.#creatorId, newCreatorId));
   }
 
   changeOrder(order: ColumnOrderVO) {

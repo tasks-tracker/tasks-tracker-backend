@@ -17,11 +17,19 @@ export class RemoveColumnCommandHandler
         command.columnId,
       );
 
-      if (columnResult.isErr() || columnResult.value.isDeleted) {
+      if (columnResult.isErr()) {
         return err(new ColumnNotFoundDomainError(command.columnId.value));
       }
 
-      await this.columnRepository.removeColumn(command.columnId);
+      const column = columnResult.value;
+
+      if (column.isDeleted) {
+        return err(new ColumnNotFoundDomainError(command.columnId.value));
+      }
+
+      column.delete();
+
+      await this.columnRepository.save(column);
 
       return ok(undefined);
     } catch (error) {
