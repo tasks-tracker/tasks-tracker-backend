@@ -7,7 +7,15 @@ import {
   TaskOwnerIdVO,
   TaskTitleVO,
 } from '../value-objects';
-import { TaskCreatedEvent } from '../events';
+import {
+  TaskChangeColumnEvent,
+  TaskChangeDescriptionEvent,
+  TaskChangeOrderEvent,
+  TaskChangeOwnerEvent,
+  TaskChangeTitleEvent,
+  TaskCreatedEvent,
+  TaskRemovedEvent,
+} from '../events';
 
 export class Task extends AggregateRoot {
   #id: TaskIdVO;
@@ -18,6 +26,7 @@ export class Task extends AggregateRoot {
   #createdAt: Date;
   #updatedAt: Date;
   #assignerId: TaskOwnerIdVO;
+  #isRemoved: boolean;
 
   constructor(
     id: TaskIdVO,
@@ -38,6 +47,7 @@ export class Task extends AggregateRoot {
     this.#createdAt = createdAt;
     this.#updatedAt = updatedAt;
     this.#assignerId = assignerId;
+    this.#isRemoved = false;
   }
 
   get id() {
@@ -95,5 +105,45 @@ export class Task extends AggregateRoot {
 
     task.apply(new TaskCreatedEvent(id));
     return task;
+  }
+
+  changeColumn(columnId: ColumnIdVO) {
+    this.#columnId = columnId;
+    this.apply(new TaskChangeColumnEvent(this.#id, columnId));
+  }
+
+  changeDescription(description: TaskDescriptionVO) {
+    this.#description = description;
+    this.apply(new TaskChangeDescriptionEvent(this.#id, description));
+  }
+
+  changeOrder(order: TaskOrderVO) {
+    this.#order = order;
+    this.apply(new TaskChangeOrderEvent(this.#id, order));
+  }
+
+  changeAssigner(assignerId: TaskOwnerIdVO) {
+    if (this.#assignerId && this.#assignerId.value !== assignerId.value) {
+      throw new Error('Task already has an assigner');
+    }
+    this.#assignerId = assignerId;
+    this.apply(new TaskChangeOwnerEvent(this.#id, assignerId));
+  }
+
+  changeTitle(title: TaskTitleVO) {
+    if (!this.#isRemoved) {
+      throw new Error('Task is removed');
+    }
+
+    this.#title = title;
+    this.apply(new TaskChangeTitleEvent(this.#id, title));
+  }
+
+  remove() {
+    if (this.#isRemoved) {
+      throw new Error('Task already removed');
+    }
+    this.#isRemoved = true;
+    this.apply(new TaskRemovedEvent(this.#id.value));
   }
 }
