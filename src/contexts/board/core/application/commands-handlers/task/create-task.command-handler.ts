@@ -37,6 +37,7 @@ export class CreateTaskCommandHandler
         new Date(),
         new Date(),
         command.ownerId,
+        false,
       );
 
       await this.taskRepository.save(newTask);

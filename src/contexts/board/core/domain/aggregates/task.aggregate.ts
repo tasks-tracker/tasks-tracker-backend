@@ -37,6 +37,7 @@ export class Task extends AggregateRoot {
     createdAt: Date,
     updatedAt: Date,
     assignerId: TaskOwnerIdVO,
+    isRemoved: boolean,
   ) {
     super();
     this.#id = id;
@@ -47,7 +48,7 @@ export class Task extends AggregateRoot {
     this.#createdAt = createdAt;
     this.#updatedAt = updatedAt;
     this.#assignerId = assignerId;
-    this.#isRemoved = false;
+    this.#isRemoved = isRemoved;
   }
 
   get id() {
@@ -82,6 +83,10 @@ export class Task extends AggregateRoot {
     return this.#assignerId;
   }
 
+  get isRemoved() {
+    return this.#isRemoved;
+  }
+
   static create(
     id: TaskIdVO,
     title: TaskTitleVO,
@@ -91,6 +96,7 @@ export class Task extends AggregateRoot {
     createdAt: Date,
     updatedAt: Date,
     assignerId: TaskOwnerIdVO,
+    isRemoved: boolean,
   ) {
     const task = new Task(
       id,
@@ -101,6 +107,7 @@ export class Task extends AggregateRoot {
       createdAt,
       updatedAt,
       assignerId,
+      isRemoved,
     );
 
     task.apply(new TaskCreatedEvent(id));
