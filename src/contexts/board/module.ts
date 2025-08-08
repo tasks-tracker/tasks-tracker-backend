@@ -6,9 +6,10 @@ import {
   queryRepositoriesProviders,
   repositoriesProviders,
 } from './module.providers';
+import { TaskController } from './presentation/task.controller';
 
 @Module({
-  controllers: [BoardController, ColumnController],
+  controllers: [BoardController, ColumnController, TaskController],
   providers: [
     ...commandHandlersProviders,
     ...repositoriesProviders,
