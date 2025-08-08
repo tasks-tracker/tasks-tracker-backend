@@ -12,3 +12,4 @@ export * from './change-column-owner.dtos';
 export * from './remove-column.dtos';
 export * from './rename-column.dtos';
 export * from './get-column-info-by-id.dtos';
+export * from './delete-task.dtos';
