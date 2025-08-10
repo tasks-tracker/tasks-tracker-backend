@@ -62,7 +62,7 @@ export class TaskRepositoryImpl implements TaskRepository {
         new TaskIdVO(result.id),
         new TaskTitleVO(result.title),
         new TaskDescriptionVO(result.description),
-        new TaskOrderVO(result.order),
+        new TaskOrderVO(result.order_number),
         new ColumnIdVO(result.column_id),
         new Date(result.created_at),
         new Date(result.updated_at),
@@ -122,7 +122,7 @@ export class TaskRepositoryImpl implements TaskRepository {
   private async saveChangeOrderEvent(task: Task) {
     const SQL = this.knex<TaskSchema>('tasks')
       .update({
-        order: task.order.value,
+        order_number: task.order.value,
       })
       .where('id', task.id.value)
       .toSQL()
@@ -161,7 +161,7 @@ export class TaskRepositoryImpl implements TaskRepository {
         id: task.id.value,
         title: task.title.value,
         description: task.description.value,
-        order: task.order.value,
+        order_number: task.order.value,
         column_id: task.columnId.value,
         owner_id: task.assignerId.value,
         created_at: task.createdAt,

@@ -47,7 +47,7 @@ export class TaskQueryRepositoryImpl implements TaskQueryRepository {
         new TaskIdVO(result.id),
         new TaskTitleVO(result.title),
         new TaskDescriptionVO(result.description),
-        new TaskOrderVO(result.order),
+        new TaskOrderVO(result.order_number),
         new ColumnIdVO(result.column_id),
         new Date(result.created_at),
         new Date(result.updated_at),
