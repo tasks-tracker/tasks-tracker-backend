@@ -44,7 +44,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
       new Column(
         new ColumnIdVO(result.id),
         new ColumnTitleVO(result.title),
-        new ColumnOrderVO(result.order),
+        new ColumnOrderVO(result.order_number),
         new BoardIdVO(result.board_id),
         new ColumnOwnerIdVO(result.owner_id),
         new Date(result.created_at),
@@ -93,7 +93,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
           new Column(
             new ColumnIdVO(r.id),
             new ColumnTitleVO(r.title),
-            new ColumnOrderVO(r.order),
+            new ColumnOrderVO(r.order_number),
             new BoardIdVO(r.board_id),
             new ColumnOwnerIdVO(r.owner_id),
             new Date(r.created_at),
@@ -125,7 +125,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
           new Column(
             new ColumnIdVO(r.id),
             new ColumnTitleVO(r.title),
-            new ColumnOrderVO(r.order),
+            new ColumnOrderVO(r.order_number),
             new BoardIdVO(r.board_id),
             new ColumnOwnerIdVO(r.owner_id),
             new Date(r.created_at),

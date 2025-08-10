@@ -10,7 +10,7 @@ export interface BoardSchema {
 export interface ColumnSchema {
   id: string;
   title: string;
-  order: number;
+  order_number: number;
   board_id: string;
   owner_id: string;
   created_at: Date;
@@ -22,7 +22,7 @@ export interface TaskSchema {
   id: string;
   title: string;
   description: string;
-  order: number;
+  order_number: number;
   column_id: string;
   owner_id: string;
   created_at: Date;

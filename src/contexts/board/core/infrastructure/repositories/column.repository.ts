@@ -54,7 +54,7 @@ export class ColumnRepositoryImpl implements ColumnRepository {
       .insert({
         id: column.id.value,
         title: column.title.value,
-        order: column.order.value,
+        order_number: column.order.value,
         board_id: column.boardId.value,
         owner_id: column.creatorId.value,
         created_at: column.craetedAt,
@@ -142,7 +142,7 @@ export class ColumnRepositoryImpl implements ColumnRepository {
       new Column(
         new ColumnIdVO(result.id),
         new ColumnTitleVO(result.title),
-        new ColumnOrderVO(result.order),
+        new ColumnOrderVO(result.order_number),
         new BoardIdVO(result.board_id),
         new ColumnOwnerIdVO(result.owner_id),
         new Date(result.created_at),
