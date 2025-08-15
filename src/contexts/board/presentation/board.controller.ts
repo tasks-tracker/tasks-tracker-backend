@@ -178,10 +178,7 @@ export class BoardController {
 
     try {
       const result = await this.commandBus.execute(
-        new RemoveBoardCommand(
-          new BoardIdVO(body.boardId),
-          new UserIdVO(userId.value),
-        ),
+        new RemoveBoardCommand(new BoardIdVO(body.boardId)),
       );
 
       if (result.isOk()) return;
