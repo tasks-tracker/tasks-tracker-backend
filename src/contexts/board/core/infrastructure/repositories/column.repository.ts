@@ -45,12 +45,13 @@ export class ColumnRepositoryImpl implements ColumnRepository {
       return await this.saveRenamedEvent(column);
     } else if (events.some((event) => event instanceof ColumnRemovedEvent)) {
       return await this.saveRemovedEvent(column);
+    } else {
+      throw new Error('Unknown event');
     }
   }
 
   private async saveCreatedEvent(column: Column): Promise<void> {
-    const SQL = this.knex
-      .insert<ColumnSchema>('columns')
+    const SQL = this.knex<ColumnSchema>('columns')
       .insert({
         id: column.id.value,
         title: column.title.value,

@@ -29,8 +29,6 @@ export class BoardRepositoryImpl implements BoardRepository {
 
   public async save(board: Board): Promise<void> {
     const events = board.getUncommittedEvents();
-
-    console.log(events);
     if (events.some((event) => event instanceof BoardCreatedEvent)) {
       return await this.saveCreatedEvent(board);
     } else if (events.some((event) => event instanceof BoardRenameEvent)) {
