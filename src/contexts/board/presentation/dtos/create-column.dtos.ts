@@ -19,11 +19,6 @@ export class CreateColumnBodyDto {
   @ApiProperty({
     example: '1234-5678-9012-3456',
   })
-  id: string;
-
-  @ApiProperty({
-    example: '1234-5678-9012-3456',
-  })
   ownerId: string;
 }
 

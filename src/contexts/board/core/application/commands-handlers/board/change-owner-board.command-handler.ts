@@ -16,11 +16,11 @@ export class ChangeBoardOwnerCommandHandler
   ): Promise<Result<void, DomainError>> {
     const boardResult = await this.boardRepository.findById(command.boardId);
 
-    if (!boardResult) {
+    if (boardResult.isErr()) {
       return err(new BoardIsNotFoundDomainError(command.boardId.value));
     }
 
-    const board = boardResult;
+    const board = boardResult.value;
 
     board.changeOwner(command.currentOwnerId, command.newOwnerId);
 

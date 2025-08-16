@@ -8,10 +8,7 @@ import {
 } from '../events';
 import { UserIdVO } from '@contexts/auth';
 import { err, ok, Result } from 'neverthrow';
-import {
-  BoardIsNotFoundDomainError,
-  BoardIsNotOwnerDomainError,
-} from '../domain-errors';
+import { BoardIsNotOwnerDomainError } from '../domain-errors';
 
 export class Board extends AggregateRoot {
   #id: BoardIdVO;
@@ -68,15 +65,16 @@ export class Board extends AggregateRoot {
     ownerId: BoardOwnerIdVO,
     createdAt: Date,
     updatedAt: Date,
+    isDeleted: boolean,
   ) {
-    const isDeleted = false;
+    const isRemoved = isDeleted || false;
     const board = new Board(
       id,
       title,
       ownerId,
       createdAt,
       updatedAt,
-      isDeleted,
+      isRemoved,
     );
     board.apply(new BoardCreatedEvent(id));
     return board;
@@ -106,11 +104,12 @@ export class Board extends AggregateRoot {
     throw new Error('Current owner does not match the board owner');
   }
 
-  remove(userId: UserIdVO): Result<null, BoardIsNotFoundDomainError> {
-    if (this.#ownerId.value !== userId.value)
-      return err(new BoardIsNotFoundDomainError(userId.value));
+  remove(): Result<null, Error> {
+    if (this.#isDeleted) {
+      throw new Error('Board already removed');
+    }
     this.#isDeleted = true;
-    this.apply(new BoardRemovedEvent(this.#id.value));
+    this.apply(new BoardRemovedEvent(this.#id));
     return ok(null);
   }
 }

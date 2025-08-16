@@ -52,7 +52,7 @@ export class TaskQueryRepositoryImpl implements TaskQueryRepository {
         new Date(result.created_at),
         new Date(result.updated_at),
         new TaskOwnerIdVO(result.owner_id),
-        result.is_removed,
+        result.is_deleted,
       ),
     );
   }

@@ -67,13 +67,14 @@ export class TaskRepositoryImpl implements TaskRepository {
         new Date(result.created_at),
         new Date(result.updated_at),
         new TaskOwnerIdVO(result.owner_id),
-        result.is_removed,
+        result.is_deleted,
       ),
     );
   }
 
   public async save(task: Task): Promise<void> {
     const events = task.getUncommittedEvents();
+
     if (events.some((event) => event instanceof TaskChangeColumnEvent)) {
       return await this.saveChangeColumnEvent(task);
     } else if (
@@ -166,7 +167,7 @@ export class TaskRepositoryImpl implements TaskRepository {
         owner_id: task.assignerId.value,
         created_at: task.createdAt,
         updated_at: task.updatedAt,
-        is_removed: task.isRemoved,
+        is_deleted: task.isRemoved,
       })
       .toSQL()
       .toNative();
@@ -177,7 +178,7 @@ export class TaskRepositoryImpl implements TaskRepository {
   private async saveRemovedEvent(task: Task) {
     const SQL = this.knex<TaskSchema>('tasks')
       .update({
-        is_removed: true,
+        is_deleted: true,
       })
       .where('id', task.id.value)
       .toSQL()

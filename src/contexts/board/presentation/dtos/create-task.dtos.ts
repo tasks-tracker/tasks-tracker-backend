@@ -110,6 +110,11 @@ export class ChangeTaskOwnerBodyDto {
     example: '1234-5678-9012-3456',
   })
   taskId: string;
+
+  @ApiProperty({
+    example: '1234-5678-9012-3456',
+  })
+  assignerId: string;
 }
 
 export class ChangeTaskOwnerResponseDto {

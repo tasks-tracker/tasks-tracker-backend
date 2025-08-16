@@ -7,6 +7,7 @@ import {
   ColumnRepository,
 } from '../../../domain';
 import { err, Result, ok } from 'neverthrow';
+import { randomUUID } from 'crypto';
 
 @CommandHandler(CreateColumnCommand)
 export class CreateColumnCommandHandler
@@ -16,16 +17,12 @@ export class CreateColumnCommandHandler
 
   async execute(
     command: CreateColumnCommand,
-  ): Promise<Result<void, ColumnAlreadyExistDomainError>> {
+  ): Promise<Result<ColumnIdVO, ColumnAlreadyExistDomainError>> {
     try {
-      const columnResult = await this.columnRepository.findById(command.id);
-
-      if (columnResult.isOk() && !columnResult.value.isDeleted) {
-        return err(new ColumnAlreadyExistDomainError(command.title.value));
-      }
+      const id = new ColumnIdVO(randomUUID());
 
       const newColumn = Column.create(
-        new ColumnIdVO(command.id.value),
+        id,
         command.title,
         command.order,
         command.boardId,
@@ -36,7 +33,8 @@ export class CreateColumnCommandHandler
 
       await this.columnRepository.save(newColumn);
 
-      return ok();
+      newColumn.commit();
+      return ok(newColumn.id);
     } catch (error) {
       return err(error);
     }

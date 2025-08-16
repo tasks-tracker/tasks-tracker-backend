@@ -30,6 +30,7 @@ export class FindBoardsByUserIdQueryHandler
         new BoardOwnerIdVO(board.ownerId.value),
         new Date(board.createdAt),
         new Date(board.updatedAt),
+        board.isDeleted,
       ),
     );
   }

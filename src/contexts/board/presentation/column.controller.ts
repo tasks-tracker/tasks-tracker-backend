@@ -81,11 +81,11 @@ export class ColumnController {
           new ColumnTitleVO(body.title),
           new ColumnOrderVO(body.order),
           new BoardIdVO(body.boardId),
-          new ColumnIdVO(body.id),
           new UserIdVO(userId.value),
         ),
       );
-      if (result.isOk()) return { id: result.value };
+
+      if (result.isOk()) return { id: result.value.value };
       throw new BadRequestException('UNKNOWN_ERROR');
     } catch (error) {
       console.error(error);
@@ -290,7 +290,10 @@ export class ColumnController {
       const result = await this.queryBus.execute(
         new GetColumnInfoByIdQuery(new ColumnIdVO(query.columnId)),
       );
-      if (result) return { id: result.id.value };
+
+      console.log(result);
+
+      if (result) return result;
       throw new BadRequestException('UNKNOWN_ERROR');
     } catch (error) {
       console.error(error);

@@ -29,6 +29,8 @@ export class ChangeTaskOwnerCommandHandler
 
       await this.taskRepository.save(task);
 
+      task.commit();
+
       return ok();
     } catch (error) {
       console.log(error);

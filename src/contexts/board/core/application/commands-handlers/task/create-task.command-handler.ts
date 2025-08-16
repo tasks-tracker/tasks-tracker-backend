@@ -18,15 +18,9 @@ export class CreateTaskCommandHandler
 
   async execute(
     command: CreateTaskCommand,
-  ): Promise<Result<void, ColumnAlreadyExistDomainError>> {
+  ): Promise<Result<string, ColumnAlreadyExistDomainError>> {
     try {
-      const taskResult = await this.taskRepository.findById(command.title);
-
       const taskId = randomUUID();
-
-      if (taskResult.isOk()) {
-        return err(new TaskAlreadyExistDomainError(command.title.value));
-      }
 
       const newTask = Task.create(
         new TaskIdVO(taskId),
@@ -42,7 +36,9 @@ export class CreateTaskCommandHandler
 
       await this.taskRepository.save(newTask);
 
-      return ok();
+      newTask.commit();
+
+      return ok(newTask.id.value);
     } catch (error) {
       console.log(error);
       return err(new TaskAlreadyExistDomainError(command.title.value));

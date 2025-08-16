@@ -3,6 +3,7 @@ import {
   Board,
   BoardCreatedEvent,
   BoardIdVO,
+  BoardIsNotFoundDomainError,
   BoardOwnerChangedEvent,
   BoardOwnerIdVO,
   BoardRemovedEvent,
@@ -15,6 +16,8 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
 import { randomUUID } from 'crypto';
 import { BoardSchema } from '@adapters/database-adapter';
+import { err, ok, Result } from 'neverthrow';
+import { DomainError } from '@libs/domain-error';
 
 @Injectable()
 export class BoardRepositoryImpl implements BoardRepository {
@@ -36,6 +39,8 @@ export class BoardRepositoryImpl implements BoardRepository {
       return await this.saveChangedOwnerEvent(board);
     } else if (events.some((event) => event instanceof BoardRemovedEvent)) {
       return await this.saveRemovedEvent(board);
+    } else {
+      throw new Error('Unknown event');
     }
   }
 
@@ -55,7 +60,9 @@ export class BoardRepositoryImpl implements BoardRepository {
     await this.txHost.tx.none(SQL.sql, SQL.bindings);
   }
 
-  public async findById(boardId: BoardIdVO): Promise<Board | null> {
+  public async findById(
+    boardId: BoardIdVO,
+  ): Promise<Result<Board, DomainError>> {
     const SQL = this.knex<BoardSchema>('boards')
       .select('id', 'title', 'owner_id', 'created_at', 'updated_at')
       .where('id', boardId.value)
@@ -67,14 +74,17 @@ export class BoardRepositoryImpl implements BoardRepository {
       SQL.bindings,
     );
 
-    if (!dbBoard) return null;
+    if (!dbBoard) return err(new BoardIsNotFoundDomainError(boardId.value));
 
-    return Board.create(
-      new BoardIdVO(dbBoard.id),
-      new BoardTitleVO(dbBoard.title),
-      new BoardOwnerIdVO(dbBoard.owner_id),
-      dbBoard.created_at,
-      dbBoard.updated_at,
+    return ok(
+      new Board(
+        new BoardIdVO(dbBoard.id),
+        new BoardTitleVO(dbBoard.title),
+        new BoardOwnerIdVO(dbBoard.owner_id),
+        dbBoard.created_at,
+        dbBoard.updated_at,
+        false,
+      ),
     );
   }
 
@@ -115,5 +125,39 @@ export class BoardRepositoryImpl implements BoardRepository {
       .toNative();
 
     await this.txHost.tx.none(SQL.sql, SQL.bindings);
+  }
+
+  public async existById(id: BoardIdVO): Promise<boolean> {
+    const SQL = this.knex<BoardSchema>('boards')
+      .select('id')
+      .where('id', id.value)
+      .toSQL()
+      .toNative();
+
+    const dbBoard = await this.txHost.tx.oneOrNone<BoardSchema>(
+      SQL.sql,
+      SQL.bindings,
+    );
+
+    return !!dbBoard;
+  }
+
+  public async findByTitle(
+    title: BoardTitleVO,
+  ): Promise<Result<BoardIdVO, DomainError>> {
+    const SQL = this.knex<BoardSchema>('boards')
+      .select('id')
+      .where('title', title.value)
+      .toSQL()
+      .toNative();
+
+    const dbBoard = await this.txHost.tx.oneOrNone<BoardSchema>(
+      SQL.sql,
+      SQL.bindings,
+    );
+
+    if (!dbBoard) return err(new BoardIsNotFoundDomainError(title.value));
+
+    return ok(new BoardIdVO(dbBoard.id));
   }
 }

@@ -1,15 +1,10 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetTaskInfoByIdQuery } from '../../queries';
-import {
-  TaskIdVO,
-  TaskTitleVO,
-  TaskDescriptionVO,
-  TaskOrderVO,
-  ColumnIdVO,
-} from '../../../domain/value-objects';
-import { TaskNotFoundDomainError, TaskOwnerIdVO } from '../../../domain';
+import { TaskIdVO } from '../../../domain/value-objects';
+import { TaskNotFoundDomainError } from '../../../domain';
 import { TaskQueryRepository } from '../../query-repositories';
 import { Task } from '../../../domain/aggregates/task.aggregate';
+import { TaskInterface } from '@contexts/board/core/domain/interfaces/task.interface';
 
 @QueryHandler(GetTaskInfoByIdQuery)
 export class GetTaskInfoByIdQueryHandler
@@ -17,7 +12,7 @@ export class GetTaskInfoByIdQueryHandler
 {
   constructor(private readonly taskQueryRepository: TaskQueryRepository) {}
 
-  async execute(query: GetTaskInfoByIdQuery): Promise<Task> {
+  async execute(query: GetTaskInfoByIdQuery): Promise<TaskInterface> {
     const result = await this.taskQueryRepository.findById(
       new TaskIdVO(query.taskId.value),
     );
@@ -28,16 +23,15 @@ export class GetTaskInfoByIdQueryHandler
 
     const task = result.value;
 
-    return Task.create(
-      new TaskIdVO(task.id.value),
-      new TaskTitleVO(task.title.value),
-      new TaskDescriptionVO(task.description.value),
-      new TaskOrderVO(task.order.value),
-      new ColumnIdVO(task.columnId.value),
-      new Date(task.createdAt),
-      new Date(task.updatedAt),
-      new TaskOwnerIdVO(task.assignerId.value),
-      false,
-    );
+    return {
+      id: task.id.value,
+      ownerId: task.assignerId.value,
+      columnId: task.columnId.value,
+      description: task.description.value,
+      order: task.order.value,
+      title: task.title.value,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+    };
   }
 }
