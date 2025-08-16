@@ -27,5 +27,5 @@ export interface TaskSchema {
   owner_id: string;
   created_at: Date;
   updated_at: Date;
-  is_removed: boolean;
+  is_deleted: boolean;
 }

@@ -370,7 +370,7 @@ export class TaskController {
     description: 'Validation error',
   })
   async getTaskInfoById(
-    @Query('taskId') taskId: GetTaskInfoByIdQueryDto,
+    @Query() query: GetTaskInfoByIdQueryDto,
     @SessionToken() sessionToken: string | null,
   ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
@@ -379,10 +379,10 @@ export class TaskController {
 
     try {
       const result = await this.queryBus.execute(
-        new GetTaskInfoByIdQuery(new TaskIdVO(taskId.id)),
+        new GetTaskInfoByIdQuery(new TaskIdVO(query.id)),
       );
 
-      if (result) return { id: result.id.value };
+      if (result) return result;
       throw new BadRequestException('UNKNOWN_ERROR');
     } catch (error) {
       console.error(error);
