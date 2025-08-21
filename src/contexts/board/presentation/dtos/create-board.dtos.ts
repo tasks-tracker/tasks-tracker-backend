@@ -13,3 +13,10 @@ export class CreateBoardResponseDto {
   })
   id: string;
 }
+
+export class CreateDefaultBoardBodyDto {
+  @ApiProperty({
+    example: '26241415-39b0-413e-8759-66d5ddde4b45',
+  })
+  userId: string;
+}
