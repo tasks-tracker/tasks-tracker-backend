@@ -25,6 +25,7 @@ import {
   ExistByTitleQueryDto,
   ExistByUserIdQueryDto,
   FindByUserIdQueryDto,
+  GetFullBoardQueryDto,
   RemoveBoardBodyDto,
   RenameBoardBodyDto,
 } from './dtos';
@@ -43,6 +44,7 @@ import {
   ExistByTitleBoardQuery,
   ExistByUserIdQuery,
   FindByUserIdQuery,
+  GetFullBoardQuery,
   RemoveBoardCommand,
   RenameBoardCommand,
 } from '../core';
@@ -374,10 +376,39 @@ export class BoardController {
         new CreateDefaultBoardCommand(new BoardOwnerIdVO(body.userId)),
       );
 
-      console.log(result);
-
       if (result.isOk()) return;
       throw new BadRequestException('UNKNOWN_ERROR');
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        throw new UnprocessableEntityException();
+      }
+      throw err;
+    }
+  }
+
+  @Get('get-full-board')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Full board',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'Validation error',
+  })
+  async getFullBoard(@Query() query: GetFullBoardQueryDto) {
+    try {
+      const result = await this.queryBus.execute(
+        new GetFullBoardQuery(new BoardUserIdVO(query.userId)),
+      );
+      return result;
     } catch (err) {
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();

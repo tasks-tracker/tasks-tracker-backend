@@ -4,6 +4,7 @@ export type ColumnInterface = {
   order: number;
   boardId: string;
   creatorId: string;
+  ownerId: string;
   createdAt: Date;
   updatedAt: Date;
   isDeleted: boolean;

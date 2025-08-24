@@ -7,3 +7,11 @@ export class GetBoardInfoByIdQueryDto {
   })
   boardId: string;
 }
+
+export class GetFullBoardQueryDto {
+  @ApiProperty({
+    example: '1234-5678-9012-3456',
+    description: 'User ID',
+  })
+  userId: string;
+}

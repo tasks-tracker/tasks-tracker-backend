@@ -39,6 +39,7 @@ import { ColumnQueryRepositoryImpl } from './core/infrastructure/query-repositor
 import { TaskRepository } from './core/domain/repositories/task.repository';
 import { TaskRepositoryImpl } from './core/infrastructure/repositories/task.repository';
 import { TaskQueryRepositoryImpl } from './core/infrastructure/query-repositories/task.query-repository';
+import { GetFullBoardQueryHandler } from './core/application/queries-handlers/board/get-full-board.query-handler';
 
 export const commandHandlersProviders = [
   CreateBoardCommandHandler,
@@ -82,6 +83,7 @@ export const queryHandlersProviders = [
   ExistByUserIdQueryHandler,
   GetColumnInfoByIdQueryHandler,
   GetTaskInfoByIdQueryHandler,
+  GetFullBoardQueryHandler,
 ];
 
 export const queryRepositoriesProviders = [
