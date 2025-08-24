@@ -37,11 +37,12 @@ describe('LogoutSessionCommandHandler', () => {
 
   it('should hash the password and create a user', async () => {
     const command = new LogoutSessionCommand(
-      new SessionTokenVO('test-session-token-0')
+      new SessionTokenVO('test-session-token-0'),
     );
     await handler.execute(command);
 
-    const lastCall = (sessionRepository.deleteSession as jest.Mock).mock.calls[0];
+    const lastCall = (sessionRepository.deleteSession as jest.Mock).mock
+      .calls[0];
     const firstArg = lastCall[0];
     expect(firstArg.value).toBe('test-session-token-0');
   });
