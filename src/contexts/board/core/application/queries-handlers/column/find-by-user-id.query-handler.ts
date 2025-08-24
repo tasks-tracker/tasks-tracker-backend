@@ -1,21 +1,21 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { FindColumnsByUserIdQuery } from '../../queries';
 import { ColumnQueryRepository } from '../../query-repositories';
-import { Column } from '../../../domain';
+import { ColumnInterface } from '../../../domain/interfaces';
 
 @QueryHandler(FindColumnsByUserIdQuery)
 export class FindColumnsByUserIdQueryHandler
-  implements IQueryHandler<FindColumnsByUserIdQuery, Column[]>
+  implements IQueryHandler<FindColumnsByUserIdQuery, ColumnInterface[]>
 {
   constructor(private readonly columnQueryRepository: ColumnQueryRepository) {}
 
-  async execute(query: FindColumnsByUserIdQuery) {
-    const result = await this.columnQueryRepository.findColumnsByUserId(
+  async execute(query: FindColumnsByUserIdQuery): Promise<ColumnInterface[]> {
+    const columns = await this.columnQueryRepository.findColumnsByUserId(
       query.userId,
     );
 
-    if (result.isErr()) return [];
+    if (columns.isErr()) throw columns.error;
 
-    return result.value;
+    return columns.value;
   }
 }

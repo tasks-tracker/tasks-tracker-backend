@@ -7,6 +7,7 @@ import {
   UserIsNotFoundDomainError,
 } from '../../domain';
 import { BoardIdVO, ColumnIdVO, ColumnTitleVO } from '../../domain';
+import { ColumnInterface } from '../../domain/interfaces';
 
 export abstract class ColumnQueryRepository {
   public abstract findById(
@@ -27,5 +28,5 @@ export abstract class ColumnQueryRepository {
 
   public abstract findColumnsByUserId(
     userId: ColumnOwnerIdVO,
-  ): Promise<Result<Column[], UserIsNotFoundDomainError>>;
+  ): Promise<Result<ColumnInterface[], UserIsNotFoundDomainError>>;
 }

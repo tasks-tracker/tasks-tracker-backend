@@ -30,6 +30,7 @@ export class GetColumnInfoByIdQueryHandler
       id: column.id.value,
       boardId: column.boardId.value,
       createdAt: column.craetedAt,
+      ownerId: column.creatorId.value,
       order: column.order.value,
       title: column.title.value,
       updatedAt: column.updatedAt,

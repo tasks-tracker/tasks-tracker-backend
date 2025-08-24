@@ -16,6 +16,7 @@ import {
   ColumnOrderVO,
 } from '../../domain';
 import { ColumnSchema } from '@adapters/database-adapter';
+import { ColumnInterface } from '../../domain/interfaces';
 
 @Injectable()
 export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
@@ -106,7 +107,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
 
   public async findColumnsByUserId(
     userId: ColumnOwnerIdVO,
-  ): Promise<Result<Column[], UserIsNotFoundDomainError>> {
+  ): Promise<Result<ColumnInterface[], UserIsNotFoundDomainError>> {
     const SQL = this.knex<ColumnSchema>('columns')
       .select('*')
       .where('owner_id', userId.value)
@@ -120,19 +121,17 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
 
     if (!result) return err(new UserIsNotFoundDomainError());
     return ok(
-      result.map(
-        (r) =>
-          new Column(
-            new ColumnIdVO(r.id),
-            new ColumnTitleVO(r.title),
-            new ColumnOrderVO(r.order_number),
-            new BoardIdVO(r.board_id),
-            new ColumnOwnerIdVO(r.owner_id),
-            new Date(r.created_at),
-            new Date(r.updated_at),
-            r.is_deleted,
-          ),
-      ),
+      result.map((r) => ({
+        id: r.id,
+        title: r.title,
+        order: r.order_number,
+        boardId: r.board_id,
+        ownerId: r.owner_id,
+        createdAt: r.created_at,
+        updatedAt: r.updated_at,
+        isDeleted: r.is_deleted,
+        creatorId: r.owner_id,
+      })),
     );
   }
 
