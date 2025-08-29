@@ -66,33 +66,35 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            # Останавливаем текущий контейнер
-            docker stop task-tracker-backend || true
-            docker rm task-tracker-backend || true
+            echo "=== Начинаем деплой через docker-compose ==="
             
-            # Удаляем старый образ
-            docker rmi ghcr.io/${{ github.repository_owner }}/backend:latest || true
+            # Переходим в директорию проекта
+            cd /path/to/your/project || echo "Директория не найдена"
             
             # Логинимся в GHCR
+            echo "Логинимся в GitHub Container Registry..."
             echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Запускаем новый контейнер
-            docker run -d \
-              --name task-tracker-backend \
-              --restart unless-stopped \
-              -p 8000:3000 \
-              -e NODE_ENV=production \
-              -e SWAGGER_CONFIG_FILE_PATH=configs/backend/dev.swagger.config.yml \
-              ghcr.io/${{ github.repository_owner }}/backend:latest
+            # Останавливаем и запускаем контейнеры
+            echo "Перезапускаем контейнеры..."
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
             
-            # Ждем запуска приложения
-            sleep 10
+            # Ждем запуска
+            echo "Ждем запуска приложения..."
+            sleep 15
+            
+            # Проверяем статус
+            echo "Статус контейнеров:"
+            docker-compose ps
             
             # Проверяем логи
-            docker logs task-tracker-backend
+            echo "Логи приложения:"
+            docker-compose logs backend
             
-            # Проверяем, что приложение отвечает
+            # Проверяем доступность
+            echo "Проверяем Swagger..."
             curl -f http://localhost:8000/swagger || echo "Swagger недоступен"
             
-            # Очищаем неиспользуемые образы
-            docker image prune -f
+            echo "=== Деплой завершен ==="
