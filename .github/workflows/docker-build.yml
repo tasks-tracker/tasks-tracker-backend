@@ -68,9 +68,19 @@ jobs:
             docker run -d \
               --name task-tracker-backend \
               --restart unless-stopped \
-              -p 3000:3000 \
+              -p 8000:3000 \
               -e NODE_ENV=production \
+              -e SWAGGER_CONFIG_FILE_PATH=configs/backend/dev.swagger.config.yml \
               ghcr.io/${{ github.repository_owner }}/backend:latest
+            
+            # Ждем запуска приложения
+            sleep 10
+            
+            # Проверяем логи
+            docker logs task-tracker-backend
+            
+            # Проверяем, что приложение отвечает
+            curl -f http://localhost:8000/swagger || echo "Swagger недоступен"
             
             # Очищаем неиспользуемые образы
             docker image prune -f
