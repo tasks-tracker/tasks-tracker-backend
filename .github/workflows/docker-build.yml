@@ -30,8 +30,16 @@ jobs:
 
       - name: Build Docker image
         run: |
+          echo "=== Начинаем сборку Docker образа ==="
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/backend
+          echo "Имя образа: $IMAGE_NAME"
+          echo "Тег: ${{ env.IMAGE_TAG }}"
+          echo "Текущая директория: $(pwd)"
+          echo "Содержимое директории:"
+          ls -la
+          echo "Собираем образ..."
           docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ env.IMAGE_TAG }} .
+          echo "=== Сборка завершена ==="
 
       - name: Push Docker image
         run: |
