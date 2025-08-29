@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class RegisterByLoginBodyDto {
   @ApiProperty({
     description: 'Login must have at least 3 characters',
-    example: 'login',
+    example: 'login123',
   })
   login: string;
 
