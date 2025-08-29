@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-docker:
     name: Build and Push Docker Image
@@ -19,7 +23,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Set image tag
         run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)-$(date +%s)" >> $GITHUB_ENV
