@@ -33,6 +33,8 @@ jobs:
                   - "8000:8000"
                 environment:
                   - NODE_ENV=production
+                volumes:
+                  - ./configs:/app/configs 
             EOF
             
             # Остановить текущий контейнер
