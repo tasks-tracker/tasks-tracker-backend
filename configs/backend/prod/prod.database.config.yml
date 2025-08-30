@@ -1,7 +1,0 @@
-ssl: false
-host: ${DATABASE_HOST}
-port: 5432
-username: username
-password: password
-database: database
-poolSize: 20

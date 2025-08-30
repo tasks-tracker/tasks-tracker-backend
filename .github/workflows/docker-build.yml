@@ -34,3 +34,8 @@ jobs:
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/backend
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ env.IMAGE_TAG }}
+  deploy: 
+    needs: build-docker
+    runs-on: ubuntu-latest
+    steps:
+      
