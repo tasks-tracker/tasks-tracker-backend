@@ -74,43 +74,62 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            echo "=== Начинаем деплой через docker-compose ==="
-            
-            # Переходим в директорию проекта
-            cd /root/task-tracker-backend || echo "Директория не найдена"
-            
-            # Обновляем код из репозитория
-            echo "Обновляем код из репозитория..."
-            if [ -d ".git" ]; then
-              git pull origin master
-            else
-              git clone https://github.com/${{ github.repository }}.git .
-            fi
-            
-            # Логинимся в GHCR
-            echo "Логинимся в GitHub Container Registry..."
-            echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            # Останавливаем и запускаем контейнеры
-            echo "Перезапускаем контейнеры..."
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d
-            
-            # Ждем запуска
-            echo "Ждем запуска приложения..."
-            sleep 15
-            
-            # Проверяем статус
-            echo "Статус контейнеров:"
-            docker-compose ps
-            
-            # Проверяем логи
-            echo "Логи приложения:"
-            docker-compose logs backend
-            
-            # Проверяем доступность
-            echo "Проверяем Swagger..."
-            curl -f http://localhost:8000/swagger || echo "Swagger недоступен"
-            
-            echo "=== Деплой завершен ==="
+                echo "=== Начинаем деплой с нуля ==="
+                
+                # Создаем директорию проекта
+                echo "Создаем директорию проекта..."
+                mkdir -p /opt/task-tracker
+                cd /opt/task-tracker
+                
+                # Очищаем директорию полностью
+                echo "Очищаем директорию..."
+                rm -rf * .*
+                
+                # Клонируем репозиторий
+                echo "Клонируем репозиторий..."
+                git clone https://github.com/${{ github.repository }}.git .
+                
+                # Создаем .env файл для продакшна
+                echo "Создаем .env файл для продакшна..."
+                cat > .env << EOF
+                POSTGRES_USER=username
+                POSTGRES_PASSWORD=password
+                POSTGRES_DB=database
+                GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
+                EOF
+                
+                # Проверяем, что файлы на месте
+                echo "Проверяем файлы..."
+                ls -la
+                echo "Docker compose файлы:"
+                ls -la docker-compose*
+                
+                # Логинимся в GHCR
+                echo "Логинимся в GitHub Container Registry..."
+                echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+                
+                # Останавливаем старые контейнеры если есть
+                echo "Останавливаем старые контейнеры..."
+                docker-compose -f docker-compose.prod.yml down || echo "Контейнеры не запущены"
+                
+                # Запускаем новые контейнеры
+                echo "Запускаем новые контейнеры..."
+                docker-compose -f docker-compose.prod.yml up -d
+                
+                # Ждем запуска
+                echo "Ждем запуска приложения..."
+                sleep 30
+                
+                # Проверяем статус
+                echo "Статус контейнеров:"
+                docker-compose -f docker-compose.prod.yml ps
+                
+                # Проверяем логи
+                echo "Логи приложения:"
+                docker-compose -f docker-compose.prod.yml logs backend
+                
+                # Проверяем доступность
+                echo "Проверяем доступность приложения..."
+                curl -f http://localhost:8000/health || echo "Приложение недоступно"
+                
+                echo "=== Деплой завершен ==="
