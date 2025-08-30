@@ -1,71 +1,99 @@
-name: Docker Build
+name: Docker Build and Deploy
 
 on:
   push:
     branches:
       - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
 
-permissions:
-  contents: read
-  packages: write
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-docker:
-    name: Build and Push Docker Image
+  build-and-test:
+    name: Build and Test Docker Image
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set image tag
-        run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)-$(date +%s)" >> $GITHUB_ENV
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build Docker image
-        run: |
-          echo "=== Начинаем сборку Docker образа ==="
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/backend
-          echo "Имя образа: $IMAGE_NAME"
-          echo "Тег: ${{ env.IMAGE_TAG }}"
-          echo "Текущая директория: $(pwd)"
-          echo "Содержимое директории:"
-          ls -la
-          echo "Собираем образ..."
-          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ env.IMAGE_TAG }} .
-          echo "=== Сборка завершена ==="
+      - name: Build and push Docker image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Push Docker image
-        run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/backend
-          docker push $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:${{ env.IMAGE_TAG }}
+      - name: Build Docker image (PR)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-  deploy:
-    name: Deploy to prod
+  deploy-to-production:
+    name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: build-docker
+    needs: build-and-test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    environment: production
     
     steps:
-      - name: Test connection first
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
-          script: |
-            echo "=== Тест подключения в основном workflow ==="
-            echo "Пользователь: $(whoami)"
-            echo "Docker: $(docker --version)"
-            echo "=== Тест завершен ==="
-            
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -74,62 +102,109 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-                echo "=== Начинаем деплой с нуля ==="
-                
-                # Создаем директорию проекта
-                echo "Создаем директорию проекта..."
-                mkdir -p /root/task-tracker-backend
-                cd /root/task-tracker-backend
-                
-                # Очищаем директорию полностью
-                echo "Очищаем директорию..."
-                rm -rf * .*
-                
-                # Клонируем репозиторий
-                echo "Клонируем репозиторий..."
-                git clone https://github.com/${{ github.repository }}.git .
-                
-                # Создаем .env файл для продакшна
-                echo "Создаем .env файл для продакшна..."
-                cat > .env << EOF
-                POSTGRES_USER=username
-                POSTGRES_PASSWORD=password
-                POSTGRES_DB=database
-                GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
-                EOF
-                
-                # Проверяем, что файлы на месте
-                echo "Проверяем файлы..."
-                ls -la
-                echo "Docker compose файлы:"
-                ls -la docker-compose*
-                
-                # Логинимся в GHCR
-                echo "Логинимся в GitHub Container Registry..."
-                echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-                
-                # Останавливаем старые контейнеры если есть
-                echo "Останавливаем старые контейнеры..."
-                docker-compose -f docker-compose.prod.yml down || echo "Контейнеры не запущены"
-                
-                # Запускаем новые контейнеры
-                echo "Запускаем новые контейнеры..."
-                docker-compose -f docker-compose.prod.yml up -d
-                
-                # Ждем запуска
-                echo "Ждем запуска приложения..."
-                sleep 30
-                
-                # Проверяем статус
-                echo "Статус контейнеров:"
-                docker-compose -f docker-compose.prod.yml ps
-                
-                # Проверяем логи
-                echo "Логи приложения:"
-                docker-compose -f docker-compose.prod.yml logs backend
-                
-                # Проверяем доступность
-                echo "Проверяем доступность приложения..."
-                curl -f http://localhost:8000/health || echo "Приложение недоступно"
-                
-                echo "=== Деплой завершен ==="
+            echo "=== Начинаем деплой на продакшн ==="
+            
+            # Создаем директорию проекта
+            PROJECT_DIR="/root/task-tracker-backend"
+            echo "Рабочая директория: $PROJECT_DIR"
+            mkdir -p $PROJECT_DIR
+            cd $PROJECT_DIR
+            
+            # Очищаем директорию
+            echo "Очищаем рабочую директорию..."
+            rm -rf * .*
+            
+            # Клонируем репозиторий
+            echo "Клонируем репозиторий..."
+            git clone https://github.com/${{ github.repository }}.git .
+            
+            # Создаем .env файл для продакшна
+            echo "Создаем .env файл для продакшна..."
+            cat > .env << EOF
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            NODE_ENV=production
+            GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
+            EOF
+            
+            # Проверяем файлы
+            echo "Проверяем структуру проекта..."
+            ls -la
+            echo "Docker файлы:"
+            ls -la docker*
+            
+            # Логинимся в GHCR
+            echo "Логинимся в GitHub Container Registry..."
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Останавливаем старые контейнеры
+            echo "Останавливаем старые контейнеры..."
+            docker-compose -f docker-compose.prod.yml down --remove-orphans || echo "Контейнеры не запущены"
+            
+            # Удаляем старые образы
+            echo "Удаляем старые образы..."
+            docker image prune -f
+            
+            # Запускаем новые контейнеры
+            echo "Запускаем новые контейнеры..."
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # Ждем запуска сервисов
+            echo "Ждем запуска сервисов..."
+            sleep 45
+            
+            # Проверяем статус контейнеров
+            echo "Статус контейнеров:"
+            docker-compose -f docker-compose.prod.yml ps
+            
+            # Проверяем логи backend
+            echo "Логи backend сервиса:"
+            docker-compose -f docker-compose.prod.yml logs --tail=50 backend
+            
+            # Проверяем доступность приложения
+            echo "Проверяем доступность приложения..."
+            for i in {1..5}; do
+              if curl -f http://localhost:8000/health; then
+                echo "Приложение успешно запущено!"
+                break
+              else
+                echo "Попытка $i: приложение недоступно, ждем..."
+                sleep 10
+              fi
+            done
+            
+            # Проверяем статус базы данных
+            echo "Проверяем статус базы данных..."
+            docker-compose -f docker-compose.prod.yml exec -T database pg_isready -U ${{ secrets.POSTGRES_USER }} || echo "База данных недоступна"
+            
+            # Проверяем Redis
+            echo "Проверяем Redis..."
+            docker-compose -f docker-compose.prod.yml exec -T redis redis-cli ping || echo "Redis недоступен"
+            
+            echo "=== Деплой завершен ==="
+
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    needs: deploy-to-production
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    
+    steps:
+      - name: Wait for deployment
+        run: sleep 60
+        
+      - name: Check application health
+        run: |
+          echo "Проверяем доступность приложения..."
+          for i in {1..10}; do
+            if curl -f ${{ secrets.APP_URL }}/health; then
+              echo "✅ Приложение доступно!"
+              exit 0
+            else
+              echo "⏳ Попытка $i: приложение недоступно, ждем..."
+              sleep 30
+            fi
+          done
+          echo "❌ Приложение недоступно после всех попыток"
+          exit 1
