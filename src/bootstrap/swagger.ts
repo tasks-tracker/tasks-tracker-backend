@@ -17,7 +17,7 @@ export const enableSwagger = async (
   logger.setContext('Swagger');
   logger.debug(`Swagger is enabled on ${options.swaggerPrefix}`);
   const config = new DocumentBuilder()
-    .setTitle('Task Tracker API v1')
+    .setTitle('Task Tracker API')
     .setDescription('API для управления задачами и досками')
     .setVersion('1.0')
     .addCookieAuth('session_token')
