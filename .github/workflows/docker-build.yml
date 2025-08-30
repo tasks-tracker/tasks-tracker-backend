@@ -77,7 +77,15 @@ jobs:
             echo "=== Начинаем деплой через docker-compose ==="
             
             # Переходим в директорию проекта
-            cd /path/to/your/project || echo "Директория не найдена"
+            cd /root/task-tracker-backend || echo "Директория не найдена"
+            
+            # Обновляем код из репозитория
+            echo "Обновляем код из репозитория..."
+            if [ -d ".git" ]; then
+              git pull origin master
+            else
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
             
             # Логинимся в GHCR
             echo "Логинимся в GitHub Container Registry..."
