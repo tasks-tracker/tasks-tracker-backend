@@ -19,7 +19,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Set image tag
         run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)-$(date +%s)" >> $GITHUB_ENV
@@ -29,6 +29,16 @@ jobs:
           echo "Repository: ${{ github.repository }}"
           echo "Repository Owner: ${{ github.repository_owner }}"
           echo "Actor: ${{ github.actor }}"
+          echo "Token type: ${{ secrets.CR_PAT != '' && 'CR_PAT' || 'GITHUB_TOKEN' }}"
+
+      - name: Check GHCR access
+        run: |
+          echo "Проверяем доступ к GHCR..."
+          if [ -z "${{ secrets.CR_PAT }}" ]; then
+            echo "⚠️ CR_PAT не настроен, используем GITHUB_TOKEN"
+          else
+            echo "✅ CR_PAT настроен"
+          fi
 
       - name: Build Docker image
         run: |
