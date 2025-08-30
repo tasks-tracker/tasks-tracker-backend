@@ -78,8 +78,8 @@ jobs:
                 
                 # Создаем директорию проекта
                 echo "Создаем директорию проекта..."
-                mkdir -p /opt/task-tracker
-                cd /opt/task-tracker
+                mkdir -p /root/task-tracker-backend
+                cd /root/task-tracker-backend
                 
                 # Очищаем директорию полностью
                 echo "Очищаем директорию..."
