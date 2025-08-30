@@ -1,0 +1,34 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Docker Build"]
+    types: [completed]
+    branches: [master]
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/backend
+            
+            # Остановить текущий контейнер
+            docker-compose down
+            
+            # Получить новый образ
+            docker-compose pull
+            
+            # Запустить новый контейнер
+            docker-compose up -d
+            
+            # Показать статус
+            docker-compose ps
