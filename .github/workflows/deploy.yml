@@ -101,10 +101,10 @@ jobs:
             EOF
             
             # Создать production конфиги
-            mkdir -p configs/backend
+            mkdir -p configs
             
             # Kafka конфиг
-            cat > configs/backend/prod.kafka.config.yml << 'EOF'
+            cat > configs/prod.kafka.config.yml << 'EOF'
             clientId: 'backend-prod'
             brokers: ['kafka1:29092']
             groupId: 'backend-group'
@@ -119,7 +119,7 @@ jobs:
             EOF
             
             # CORS конфиг
-            cat > configs/backend/prod.cors.config.yml << 'EOF'
+            cat > configs/prod.cors.config.yml << 'EOF'
             origin: 
               - 'http://138.124.16.107:4200'
               - 'http://138.124.16.107:3000'
@@ -146,30 +146,30 @@ jobs:
             EOF
             
             # Service конфиг
-            cat > configs/backend/service.config.yml << 'EOF'
+            cat > configs/service.config.yml << 'EOF'
             port: 8000
             host: 0.0.0.0
             EOF
             
             # Environment файл
-            cat > configs/backend/.env << 'EOF'
+            cat > configs/.env << 'EOF'
             NODE_ENV=production
             DATABASE_HOST=database
             CACHE_HOST=redis
             KAFKA_BROKERS=['kafka1:29092']
-            KAFKA_CONFIG_FILE_PATH=configs/backend/kafka.config.yml
-            CORS_CONFIG_FILE_PATH=configs/backend/cors.config.yml
-            SERVICE_CONFIG_FILE_PATH=configs/backend/service.config.yml
+            KAFKA_CONFIG_FILE_PATH=configs/kafka.config.yml
+            CORS_CONFIG_FILE_PATH=configs/cors.config.yml
+            SERVICE_CONFIG_FILE_PATH=configs/service.config.yml
             EOF
             
             # session-cooke конфиг
-            cat > configs/backend/session-cookie.config.yml << 'EOF'
+            cat > configs/session-cookie.config.yml << 'EOF'
             maxAge: 1000000000
             secure: false
             EOF
 
             # swagger конфиг
-            cat > configs/backend/swagger.config.yml << 'EOF'
+            cat > configs/swagger.config.yml << 'EOF'
             enabled: true
             swaggerPrefix: /swagger
             EOF
