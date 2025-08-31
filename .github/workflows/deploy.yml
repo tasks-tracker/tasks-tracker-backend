@@ -25,6 +25,55 @@ jobs:
             cat > docker-compose.yml << 'EOF'
             version: '3.8'
             services:
+              redis:
+                image: redis:6.2
+                container_name: redis
+                restart: unless-stopped
+                volumes:
+                  - redis_data:/data
+                command: ["redis-server", "--appendonly", "yes"]
+
+              database:
+                image: postgres:17.4
+                container_name: database
+                restart: unless-stopped
+                environment:
+                  POSTGRES_USER: username
+                  POSTGRES_PASSWORD: password
+                  POSTGRES_DB: database
+                volumes:
+                  - pgdata:/var/lib/postgresql/data
+
+              zookeeper:
+                image: confluentinc/cp-zookeeper:7.6.5
+                container_name: zookeeper
+                restart: unless-stopped
+                environment:
+                  ZOOKEEPER_CLIENT_PORT: 2181
+                  ZOOKEEPER_TICK_TIME: 2000
+                volumes:
+                  - zookeeper_data:/var/lib/zookeeper/data
+                  - zookeeper_logs:/var/lib/zookeeper/log
+
+              kafka1:
+                image: confluentinc/cp-kafka:7.6.5
+                container_name: kafka1
+                restart: unless-stopped
+                depends_on:
+                  - zookeeper
+                ports:
+                  - "9092:9092"
+                environment:
+                  KAFKA_BROKER_ID: 1
+                  KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+                  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+                  KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:29092,PLAINTEXT_HOST://localhost:9092
+                  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+                  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+                  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+                volumes:
+                  - kafka1_data:/var/lib/kafka/data
+
               backend:
                 image: ghcr.io/${{ github.repository_owner }}/backend:latest
                 container_name: backend
@@ -33,18 +82,113 @@ jobs:
                   - "8000:8000"
                 environment:
                   - NODE_ENV=production
+                  - DATABASE_HOST=database
+                  - CACHE_HOST=redis
+                  - KAFKA_BROKERS=['kafka1:29092']
                 volumes:
-                  - ./configs:/app/configs 
+                  - ./configs:/app/configs
+                depends_on:
+                  - database
+                  - redis
+                  - kafka1
+
+            volumes:
+              redis_data:
+              pgdata:
+              zookeeper_data:
+              zookeeper_logs:
+              kafka1_data:
             EOF
             
-            # Остановить текущий контейнер
+            # Создать production конфиги
+            mkdir -p configs/backend
+            
+            # Kafka конфиг
+            cat > configs/backend/prod.kafka.config.yml << 'EOF'
+            clientId: 'backend-prod'
+            brokers: ['kafka1:29092']
+            groupId: 'backend-group'
+            sessionTimeout: 30000
+            heartbeatInterval: 3000
+            retry: {
+              initialRetryTime: 100,
+              retries: 8
+            }
+            ssl: false
+            sasl: false
+            EOF
+            
+            # CORS конфиг
+            cat > configs/backend/prod.cors.config.yml << 'EOF'
+            origin: 
+              - 'http://138.124.16.107:4200'
+              - 'http://138.124.16.107:3000'
+              - 'http://138.124.16.107'
+            methods: 
+              - 'GET'
+              - 'POST'
+              - 'PUT'
+              - 'DELETE'
+              - 'PATCH'
+              - 'OPTIONS'
+            allowedHeaders:
+              - 'Content-Type'
+              - 'Authorization'
+              - 'X-Requested-With'
+              - 'Accept'
+              - 'Origin'
+            exposedHeaders:
+              - 'Set-Cookie'
+              - 'X-Total-Count'
+            credentials: true
+            preflightContinue: false
+            optionsSuccessStatus: 204
+            EOF
+            
+            # Service конфиг
+            cat > configs/backend/service.config.yml << 'EOF'
+            port: 8000
+            host: 0.0.0.0
+            EOF
+            
+            # Environment файл
+            cat > configs/backend/.env << 'EOF'
+            NODE_ENV=production
+            DATABASE_HOST=database
+            CACHE_HOST=redis
+            KAFKA_BROKERS=['kafka1:29092']
+            KAFKA_CONFIG_FILE_PATH=configs/backend/kafka.config.yml
+            CORS_CONFIG_FILE_PATH=configs/backend/cors.config.yml
+            SERVICE_CONFIG_FILE_PATH=configs/backend/service.config.yml
+            EOF
+            
+            # session-cooke конфиг
+            cat > configs/backend/session-cookie.config.yml << 'EOF'
+            maxAge: 1000000000
+            secure: false
+            EOF
+
+            # swagger конфиг
+            cat > configs/backend/swagger.config.yml << 'EOF'
+            enabled: true
+            swaggerPrefix: /swagger
+            EOF
+
+            # Остановить текущие контейнеры
             docker-compose down
             
-            # Получить новый образ
-            docker-compose pull
+            # Получить новый образ backend'а
+            docker-compose pull backend
             
-            # Запустить новый контейнер
+            # Запустить все сервисы
             docker-compose up -d
+            
+            # Подождать немного для инициализации сервисов
+            sleep 30
             
             # Показать статус
             docker-compose ps
+            
+            # Проверить логи backend'а
+            echo "=== Backend logs ==="
+            docker-compose logs --tail=20 backend
