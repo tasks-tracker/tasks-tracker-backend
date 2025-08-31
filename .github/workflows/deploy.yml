@@ -236,6 +236,7 @@ jobs:
             sleep 30
             
             # Запустить миграции
+            docker-compose pull db-migrations
             docker-compose up db-migrations
             echo "Migrations completed"
             
