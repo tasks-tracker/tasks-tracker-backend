@@ -74,6 +74,21 @@ jobs:
                 volumes:
                   - kafka1_data:/var/lib/kafka/data
 
+              db-migrations:
+                image: ghcr.io/${{ github.repository_owner }}/backend:latest
+                container_name: db-migrations
+                working_dir: /app
+                volumes:
+                  - ./configs:/app/configs
+                command: sh -c "npm run migration:dev up"
+                depends_on:
+                  - database
+                environment:
+                  - NODE_ENV=production
+                  - DATABASE_HOST=database
+                  - DATABASE_CONFIG_FILE_PATH=configs/database.config.yml
+                restart: "no"
+
               backend:
                 image: ghcr.io/${{ github.repository_owner }}/backend:latest
                 container_name: backend
@@ -91,6 +106,7 @@ jobs:
                   - database
                   - redis
                   - kafka1
+                  - db-migrations
 
             volumes:
               redis_data:
@@ -214,7 +230,16 @@ jobs:
             # Получить новый образ backend'а
             docker-compose pull backend
             
-            # Запустить все сервисы
+            # Запустить базу данных и дождаться готовности
+            docker-compose up -d database
+            echo "Waiting for database to be ready..."
+            sleep 30
+            
+            # Запустить миграции
+            docker-compose up db-migrations
+            echo "Migrations completed"
+            
+            # Запустить все остальные сервисы
             docker-compose up -d
             
             # Подождать немного для инициализации сервисов
