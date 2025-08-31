@@ -161,6 +161,8 @@ jobs:
             KAFKA_CONFIG_FILE_PATH=configs/kafka.config.yml
             CORS_CONFIG_FILE_PATH=configs/cors.config.yml
             SERVICE_CONFIG_FILE_PATH=configs/service.config.yml
+            METRICS_AUTH_TOKEN=dev-token
+            METRICS_CONFIG_FILE_PATH=configs/metrics.config.yml
             EOF
             
             # logger конфиг
@@ -197,6 +199,13 @@ jobs:
             database: database
             poolSize: 10
             ssl: false
+            EOF
+
+            # metrics конфиг
+            cat > configs/metrics.config.yml << 'EOF'
+            enabled: true
+            path: /metrics
+            authToken: ${METRICS_AUTH_TOKEN}
             EOF
 
             # Остановить текущие контейнеры
