@@ -11,43 +11,5 @@ RUN npm install
 # Копируем исходный код
 COPY . .
 
-# Собираем проект
-RUN npm run build
-
-# Создаем production образ для миграций
-FROM node:22-alpine AS migration-runner
-
-WORKDIR /app
-
-# Копируем package файлы
-COPY package*.json ./
-
-# Устанавливаем ВСЕ зависимости (включая dev для миграций)
-RUN npm install
-
-# Копируем собранный код
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/tsconfig*.json ./
-COPY --from=builder /app/tsconfig-paths ./
-
-# Устанавливаем глобально необходимые пакеты
-RUN npm install -g cross-env ts-node tsconfig-paths
-
-# Создаем скрипт для запуска миграций
-RUN echo '#!/bin/sh\n\
-if [ "$1" = "up" ]; then\n\
-  cross-env ENV_PATH=./configs/.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register dist/adapters/database-adapter/scripts/migration.ts up\n\
-elif [ "$1" = "down" ]; then\n\
-  cross-env ENV_PATH=./configs/.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register dist/adapters/database-adapter/scripts/migration.ts down\n\
-elif [ "$1" = "status" ]; then\n\
-  cross-env ENV_PATH=./configs/.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register dist/adapters/database-adapter/scripts/migration.ts status\n\
-else\n\
-  echo "Usage: $0 {up|down|status}"\n\
-  exit 1\n\
-fi' > /usr/local/bin/migrate && chmod +x /usr/local/bin/migrate
-
-# Устанавливаем рабочую директорию
-WORKDIR /app
-
 # Команда по умолчанию
-CMD ["migrate", "up"]
+CMD ["npm", "run", "migration:up"]
