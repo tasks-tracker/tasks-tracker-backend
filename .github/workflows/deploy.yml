@@ -182,6 +182,12 @@ jobs:
             swaggerPrefix: /swagger
             EOF
 
+            # cache конфиг
+            cat > configs/cache.config.yml << 'EOF'
+            port: 6379
+            host: ${CACHE_HOST}
+            EOF
+
             # Остановить текущие контейнеры
             docker-compose down
             
