@@ -188,6 +188,17 @@ jobs:
             host: ${CACHE_HOST}
             EOF
 
+            #database конфиг
+            cat > configs/database.config.yml << 'EOF'
+            host: ${DATABASE_HOST}
+            port: 5432
+            username: username
+            password: password
+            database: database
+            poolSize: 10
+            ssl: false
+            EOF
+
             # Остановить текущие контейнеры
             docker-compose down
             
