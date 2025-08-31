@@ -101,10 +101,11 @@ jobs:
             EOF
             
             # Создать production конфиги
+            rm -rf configs
             mkdir -p configs
             
             # Kafka конфиг
-            cat > configs/prod.kafka.config.yml << 'EOF'
+            cat > configs/kafka.config.yml << 'EOF'
             clientId: 'backend-prod'
             brokers: ['kafka1:29092']
             groupId: 'backend-group'
@@ -119,7 +120,7 @@ jobs:
             EOF
             
             # CORS конфиг
-            cat > configs/prod.cors.config.yml << 'EOF'
+            cat > configs/cors.config.yml << 'EOF'
             origin: 
               - 'http://138.124.16.107:4200'
               - 'http://138.124.16.107:3000'
@@ -162,6 +163,13 @@ jobs:
             SERVICE_CONFIG_FILE_PATH=configs/service.config.yml
             EOF
             
+            # logger конфиг
+            cat > configs/logger.config.yml << 'EOF'
+            logLevel: DEBUG
+            colors: true
+            space: 0
+            EOF
+
             # session-cooke конфиг
             cat > configs/session-cookie.config.yml << 'EOF'
             maxAge: 1000000000
