@@ -75,14 +75,10 @@ jobs:
                   - kafka1_data:/var/lib/kafka/data
 
               db-migrations:
-                build:
-                  context: .
-                  dockerfile: Dockerfile.migration
+                image: ghcr.io/${{ github.repository_owner }}/migration-backend:latest
                 container_name: db-migrations
-                working_dir: /app
                 volumes:
                   - ./configs:/app/configs
-                command: migrate up
                 depends_on:
                   - database
                 environment:
@@ -238,7 +234,7 @@ jobs:
             sleep 30
             
             # Собрать и запустить миграции
-            docker-compose build db-migrations
+            docker-compose pull db-migrations
             docker-compose up db-migrations
             echo "Migrations completed"
             
