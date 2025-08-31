@@ -80,7 +80,7 @@ jobs:
                 working_dir: /app
                 volumes:
                   - ./configs:/app/configs
-                command: sh -c "npm run migration:dev up"
+                command: sh -c "npm run migration:up"
                 depends_on:
                   - database
                 environment:
