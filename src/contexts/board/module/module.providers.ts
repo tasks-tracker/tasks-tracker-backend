@@ -16,30 +16,22 @@ import {
   RenameBoardCommandHandler,
   RenameColumnCommandHandler,
   RenameTaskCommandHandler,
-} from './core/application/commands-handlers';
-import { BoardRepository } from './core/domain/repositories/board.repository';
-import { BoardRepositoryImpl } from './core/infrastructure/repositories/board.repository';
+} from '../core';
 import {
   GetBoardInfoByIdQueryHandler,
   FindBoardsByUserIdQueryHandler,
   ExistByTitleBoardQueryHandler,
   ExistByUserIdQueryHandler,
   GetTaskInfoByIdQueryHandler,
-} from './core/application/queries-handlers';
-import { BoardQueryRepositoryImpl } from './core/infrastructure/query-repositories/board.query-repository';
-import {
-  BoardQueryRepository,
-  ColumnQueryRepository,
-  TaskQueryRepository,
-} from './core/application/query-repositories';
-import { ColumnRepository } from './core/domain/repositories/column.repository';
-import { ColumnRepositoryImpl } from './core/infrastructure/repositories/column.repository';
-import { GetColumnInfoByIdQueryHandler } from './core/application/queries-handlers/column/get-column-info-by-id.query-handler';
-import { ColumnQueryRepositoryImpl } from './core/infrastructure/query-repositories/column.query-repository';
-import { TaskRepository } from './core/domain/repositories/task.repository';
-import { TaskRepositoryImpl } from './core/infrastructure/repositories/task.repository';
-import { TaskQueryRepositoryImpl } from './core/infrastructure/query-repositories/task.query-repository';
-import { GetFullBoardQueryHandler } from './core/application/queries-handlers/board/get-full-board.query-handler';
+  GetColumnInfoByIdQueryHandler,
+  GetFullBoardQueryHandler,
+} from '../core';
+import { BoardRepository, BoardRepositoryImpl } from '../core';
+import { ColumnRepository, ColumnRepositoryImpl } from '../core';
+import { TaskRepository, TaskRepositoryImpl } from '../core';
+import { BoardQueryRepository, BoardQueryRepositoryImpl } from '../core';
+import { ColumnQueryRepository, ColumnQueryRepositoryImpl } from '../core';
+import { TaskQueryRepository, TaskQueryRepositoryImpl } from '../core';
 
 export const commandHandlersProviders = [
   CreateBoardCommandHandler,

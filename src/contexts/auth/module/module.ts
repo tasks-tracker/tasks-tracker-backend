@@ -3,7 +3,7 @@ import { Global } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheConfig } from '@adapters/config-adapter';
 import { CacheAdapterModule } from '@adapters/cache-adapter';
-import { AuthController } from './presentation/auth.controller';
+import { AuthController } from '../presentation';
 import { helpersProviders } from './module.providers';
 import { queryHandlersProviders } from './module.providers';
 import { commandHandlersProviders } from './module.providers';
