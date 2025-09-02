@@ -1,5 +1,5 @@
 import { Query } from '@nestjs/cqrs';
-import { BoardTitleVO } from '@contexts/board/core/domain/value-objects';
+import { BoardTitleVO } from '../../../domain';
 
 export class ExistByTitleBoardQuery extends Query<boolean> {
   constructor(public readonly title: BoardTitleVO) {

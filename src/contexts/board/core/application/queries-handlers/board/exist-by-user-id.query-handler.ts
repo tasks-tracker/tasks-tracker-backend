@@ -1,5 +1,5 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ExistByUserIdQuery } from '../../queries/board';
+import { ExistByUserIdQuery } from '../../queries';
 import { BoardQueryRepository } from '../../query-repositories';
 
 @QueryHandler(ExistByUserIdQuery)

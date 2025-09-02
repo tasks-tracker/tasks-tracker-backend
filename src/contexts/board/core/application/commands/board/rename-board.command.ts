@@ -1,11 +1,7 @@
 import { Command } from '@nestjs/cqrs';
 import { Result } from 'neverthrow';
 import { DomainError } from '@libs/domain-error';
-import {
-  BoardIdVO,
-  BoardTitleVO,
-} from '@contexts/board/core/domain/value-objects';
-import { UserIdVO } from '@contexts/auth';
+import { BoardIdVO, BoardTitleVO, UserIdVO } from '../../../domain';
 
 export class RenameBoardCommand extends Command<
   Result<BoardIdVO, DomainError>

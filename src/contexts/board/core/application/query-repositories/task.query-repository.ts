@@ -1,9 +1,9 @@
 import { Result } from 'neverthrow';
 import { TaskNotFoundDomainError } from '../../domain';
-import { TaskIdVO } from '../../domain/value-objects';
-import { Task } from '../../domain/aggregates/task.aggregate';
-import { UserIdVO } from '@contexts/auth';
-import { TaskInterface } from '../../domain/interfaces';
+import { TaskIdVO } from '../../domain';
+import { Task } from '../../domain';
+import { UserIdVO } from '../../domain';
+import { TaskInterface } from '../../domain';
 
 export abstract class TaskQueryRepository {
   public abstract findById(

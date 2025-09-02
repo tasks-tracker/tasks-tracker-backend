@@ -3,9 +3,9 @@ import type { DomainError } from '@libs/domain-error';
 
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RenameBoardCommand } from '../../commands';
-import { BoardIdVO } from '@contexts/board/core/domain/value-objects';
-import { BoardRepository } from '@contexts/board/core/domain/repositories/board.repository';
-import { BoardIsNotFoundDomainError } from '@contexts/board/core/domain/domain-errors';
+import { BoardIdVO } from '../../../domain';
+import { BoardRepository } from '../../../domain';
+import { BoardIsNotFoundDomainError } from '../../../domain';
 
 @CommandHandler(RenameBoardCommand)
 export class RenameBoardCommandHandler

@@ -1,8 +1,8 @@
-import { ColumnOwnerIdVO } from '../../value-objects';
+import { UserIdVO } from '../../value-objects';
 
 export class ColumnChangeOwnerEvent {
   constructor(
-    readonly id: ColumnOwnerIdVO,
-    readonly ownerId: ColumnOwnerIdVO,
+    readonly id: UserIdVO,
+    readonly ownerId: UserIdVO,
   ) {}
 }

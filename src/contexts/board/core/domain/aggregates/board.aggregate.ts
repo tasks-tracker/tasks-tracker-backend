@@ -1,19 +1,18 @@
 import { AggregateRoot } from '@nestjs/cqrs';
-import { BoardIdVO, BoardOwnerIdVO, BoardTitleVO } from '../value-objects';
+import { BoardIdVO, UserIdVO, BoardTitleVO } from '../value-objects';
 import {
   BoardCreatedEvent,
   BoardOwnerChangedEvent,
   BoardRemovedEvent,
   BoardRenameEvent,
 } from '../events';
-import { UserIdVO } from '@contexts/auth';
 import { err, ok, Result } from 'neverthrow';
 import { BoardIsNotOwnerDomainError } from '../domain-errors';
 
 export class Board extends AggregateRoot {
   #id: BoardIdVO;
   #title: BoardTitleVO;
-  #ownerId: BoardOwnerIdVO;
+  #ownerId: UserIdVO;
   #createdAt: Date;
   #updatedAt: Date;
   #isDeleted: boolean;
@@ -21,7 +20,7 @@ export class Board extends AggregateRoot {
   constructor(
     id: BoardIdVO,
     title: BoardTitleVO,
-    ownerId: BoardOwnerIdVO,
+    ownerId: UserIdVO,
     createdAt: Date,
     updatedAt: Date,
     isDeleted: boolean,
@@ -62,7 +61,7 @@ export class Board extends AggregateRoot {
   static create(
     id: BoardIdVO,
     title: BoardTitleVO,
-    ownerId: BoardOwnerIdVO,
+    ownerId: UserIdVO,
     createdAt: Date,
     updatedAt: Date,
     isDeleted: boolean,
@@ -84,7 +83,7 @@ export class Board extends AggregateRoot {
     newTitle: BoardTitleVO,
     userId: UserIdVO,
   ): Result<null, BoardIsNotOwnerDomainError> {
-    if (this.#ownerId.value !== userId.value) {
+    if (this.#ownerId.equals(userId)) {
       return err(new BoardIsNotOwnerDomainError());
     }
     this.#title = newTitle;
@@ -93,8 +92,8 @@ export class Board extends AggregateRoot {
     return ok(null);
   }
 
-  changeOwner(currentOwnerId: BoardOwnerIdVO, newOwnerId: BoardOwnerIdVO) {
-    if (currentOwnerId.value === this.#ownerId.value) {
+  changeOwner(currentOwnerId: UserIdVO, newOwnerId: UserIdVO) {
+    if (currentOwnerId.equals(this.#ownerId)) {
       this.#ownerId = newOwnerId;
       this.#updatedAt = new Date();
       this.apply(new BoardOwnerChangedEvent(currentOwnerId));

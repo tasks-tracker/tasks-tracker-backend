@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateBoardCommand } from '../../commands/board';
-import { BoardRepository } from '@contexts/board/core/domain/repositories/board.repository';
-import { BoardIdVO } from '@contexts/board/core/domain/value-objects';
+import { CreateBoardCommand } from '../../commands';
+import { BoardRepository } from '../../../domain';
+import { BoardIdVO } from '../../../domain';
 import { DomainError } from '@libs/domain-error';
 import { err, ok, Result } from 'neverthrow';
-import { Board } from '@contexts/board/core/domain/aggregates';
-import { BoardAlreadyExistDomainError } from '@contexts/board/core/domain/domain-errors';
+import { Board } from '../../../domain';
+import { BoardAlreadyExistDomainError } from '../../../domain';
 
 @CommandHandler(CreateBoardCommand)
 export class CreateBoardCommandHandler

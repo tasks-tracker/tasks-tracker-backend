@@ -12,10 +12,9 @@ import {
   TaskOrderVO,
   TaskTitleVO,
   ColumnIdVO,
-  TaskOwnerIdVO,
+  UserIdVO,
 } from '../../domain';
 import { TaskSchema } from '@adapters/database-adapter';
-import { UserIdVO } from '@contexts/auth';
 import { TaskInterface } from '../../domain/interfaces';
 
 @Injectable()
@@ -87,7 +86,7 @@ export class TaskQueryRepositoryImpl implements TaskQueryRepository {
         new ColumnIdVO(result.column_id),
         new Date(result.created_at),
         new Date(result.updated_at),
-        new TaskOwnerIdVO(result.owner_id),
+        new UserIdVO(result.owner_id),
         result.is_deleted,
       ),
     );

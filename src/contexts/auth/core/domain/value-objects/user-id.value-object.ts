@@ -12,4 +12,8 @@ export class UserIdVO {
       throw new ValidationException(errors);
     }
   }
+
+  equals(vo: UserIdVO): boolean {
+    return this.value === vo.value;
+  }
 }

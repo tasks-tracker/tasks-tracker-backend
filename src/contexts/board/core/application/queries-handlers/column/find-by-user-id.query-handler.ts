@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { FindColumnsByUserIdQuery } from '../../queries';
 import { ColumnQueryRepository } from '../../query-repositories';
-import { ColumnInterface } from '../../../domain/interfaces';
+import { ColumnInterface } from '../../../domain';
 
 @QueryHandler(FindColumnsByUserIdQuery)
 export class FindColumnsByUserIdQueryHandler

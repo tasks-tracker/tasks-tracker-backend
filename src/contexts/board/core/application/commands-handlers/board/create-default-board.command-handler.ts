@@ -2,25 +2,23 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
   Board,
   BoardIdVO,
-  BoardOwnerIdVO,
-  BoardQueryRepository,
+  UserIdVO,
   BoardRepository,
   BoardTitleVO,
   Column,
   ColumnIdVO,
   ColumnOrderVO,
-  ColumnOwnerIdVO,
   ColumnRepository,
   ColumnTitleVO,
-  CreateDefaultBoardCommand,
   Task,
   TaskDescriptionVO,
   TaskIdVO,
   TaskOrderVO,
-  TaskOwnerIdVO,
   TaskRepository,
   TaskTitleVO,
-} from '@contexts/board/core';
+} from '../../../domain';
+import { BoardQueryRepository } from '../../query-repositories';
+import { CreateDefaultBoardCommand } from '../../commands';
 import { err, Result } from 'neverthrow';
 import { DomainError } from '@libs/domain-error';
 import { randomUUID } from 'node:crypto';
@@ -28,7 +26,7 @@ import {
   BOARD_ALREADY_EXISTS,
   DEFAULT_BOARD,
 } from '@contexts/board/core/domain/constants';
-import { defaultColumnsWithTasks } from '@contexts/board/core/domain/constants';
+import { defaultColumnsWithTasks } from '../../../domain';
 import { ok } from 'neverthrow';
 
 @CommandHandler(CreateDefaultBoardCommand)
@@ -57,7 +55,7 @@ export class CreateDefaultBoardCommandHandler
       const board = Board.create(
         new BoardIdVO(randomUUID()),
         new BoardTitleVO(DEFAULT_BOARD),
-        new BoardOwnerIdVO(command.ownerId.value),
+        new UserIdVO(command.ownerId.value),
         new Date(),
         new Date(),
         false,
@@ -73,7 +71,7 @@ export class CreateDefaultBoardCommandHandler
           new BoardIdVO(board.id.value),
           new Date(),
           new Date(),
-          new ColumnOwnerIdVO(command.ownerId.value),
+          new UserIdVO(command.ownerId.value),
         );
 
         await this.columnRepository.save(column);
@@ -89,7 +87,7 @@ export class CreateDefaultBoardCommandHandler
             new ColumnIdVO(column.id.value),
             new Date(),
             new Date(),
-            new TaskOwnerIdVO(command.ownerId.value),
+            new UserIdVO(command.ownerId.value),
             false,
           );
 

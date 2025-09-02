@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ChangeBoardOwnerCommand } from '../../commands/board';
-import { BoardRepository } from '@contexts/board/core/domain/repositories/board.repository';
+import { ChangeBoardOwnerCommand } from '../../commands';
+import { BoardRepository } from '../../../domain';
 import { DomainError } from '@libs/domain-error';
 import { err, ok, Result } from 'neverthrow';
-import { BoardIsNotFoundDomainError } from '@contexts/board/core/domain/domain-errors';
+import { BoardIsNotFoundDomainError } from '../../../domain';
 
 @CommandHandler(ChangeBoardOwnerCommand)
 export class ChangeBoardOwnerCommandHandler

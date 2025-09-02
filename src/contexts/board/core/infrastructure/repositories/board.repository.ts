@@ -5,7 +5,7 @@ import {
   BoardIdVO,
   BoardIsNotFoundDomainError,
   BoardOwnerChangedEvent,
-  BoardOwnerIdVO,
+  UserIdVO,
   BoardRemovedEvent,
   BoardRenameEvent,
   BoardRepository,
@@ -80,7 +80,7 @@ export class BoardRepositoryImpl implements BoardRepository {
       new Board(
         new BoardIdVO(dbBoard.id),
         new BoardTitleVO(dbBoard.title),
-        new BoardOwnerIdVO(dbBoard.owner_id),
+        new UserIdVO(dbBoard.owner_id),
         dbBoard.created_at,
         dbBoard.updated_at,
         false,
