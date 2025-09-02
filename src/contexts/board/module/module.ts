@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BoardController, ColumnController } from './presentation';
+import { BoardController, ColumnController } from '../presentation';
 import {
   commandHandlersProviders,
   queryHandlersProviders,
   queryRepositoriesProviders,
   repositoriesProviders,
 } from './module.providers';
-import { TaskController } from './presentation/task.controller';
+import { TaskController } from '../presentation';
 
 @Module({
   controllers: [BoardController, ColumnController, TaskController],
