@@ -38,7 +38,7 @@ import {
   TaskDescriptionVO,
   TaskIdVO,
   TaskOrderVO,
-  TaskOwnerIdVO,
+  UserIdVO,
   TaskTitleVO,
   ChangeTaskColumnCommand,
   ChangeTaskDescriptionCommand,
@@ -91,7 +91,7 @@ export class TaskController {
           new TaskDescriptionVO(body.description),
           new TaskOrderVO(body.order),
           new ColumnIdVO(body.columnId),
-          new TaskOwnerIdVO(userId.value),
+          new UserIdVO(userId.value),
         ),
       );
 
@@ -338,7 +338,7 @@ export class TaskController {
       const result = await this.commandBus.execute(
         new ChangeTaskOwnerCommand(
           new TaskIdVO(body.taskId),
-          new TaskOwnerIdVO(userId.value),
+          new UserIdVO(userId.value),
         ),
       );
 

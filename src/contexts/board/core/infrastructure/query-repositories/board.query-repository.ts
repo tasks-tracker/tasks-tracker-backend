@@ -10,7 +10,7 @@ import {
   BoardTitleVO,
   BoardIsNotFoundDomainError,
   Board,
-  BoardUserIdVO,
+  UserIdVO,
   BoardIdVO,
 } from '../../domain';
 
@@ -58,7 +58,7 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
   }
 
   public async findBoardsByUserId(
-    userId: BoardUserIdVO,
+    userId: UserIdVO,
   ): Promise<Result<Board[], BoardIsNotFoundDomainError>> {
     const SQL = this.knex<BoardSchema>('boards')
       .select('id', 'title', 'owner_id', 'created_at', 'updated_at')
@@ -79,7 +79,7 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
           new Board(
             new BoardIdVO(board.id),
             new BoardTitleVO(board.title),
-            new BoardUserIdVO(board.owner_id),
+            new UserIdVO(board.owner_id),
             board.created_at,
             board.updated_at,
             false,
@@ -108,7 +108,7 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
       new Board(
         new BoardIdVO(result.id),
         new BoardTitleVO(result.title),
-        new BoardUserIdVO(result.owner_id),
+        new UserIdVO(result.owner_id),
         result.created_at,
         result.updated_at,
         false,

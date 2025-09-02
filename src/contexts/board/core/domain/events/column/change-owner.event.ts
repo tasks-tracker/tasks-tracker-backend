@@ -1,5 +1,5 @@
-import type { BoardOwnerIdVO } from '../../value-objects';
+import type { UserIdVO } from '../../value-objects';
 
 export class BoardOwnerChangedEvent {
-  constructor(readonly ownerId: BoardOwnerIdVO) {}
+  constructor(readonly ownerId: UserIdVO) {}
 }

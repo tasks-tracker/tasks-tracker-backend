@@ -4,10 +4,10 @@ import {
   TaskTitleVO,
   TaskDescriptionVO,
   TaskOrderVO,
+  UserIdVO,
 } from '../../../domain';
 import { Result } from 'neverthrow';
 import { DomainError } from '@libs/domain-error';
-import { UserIdVO } from '@contexts/auth';
 
 export class CreateTaskCommand extends Command<Result<string, DomainError>> {
   constructor(

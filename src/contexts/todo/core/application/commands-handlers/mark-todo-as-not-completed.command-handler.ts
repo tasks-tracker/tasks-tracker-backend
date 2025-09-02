@@ -5,7 +5,7 @@ import type { DomainError } from '@libs/domain-error';
 import { CommandHandler } from '@nestjs/cqrs';
 import { ok } from 'neverthrow';
 import { err } from 'neverthrow';
-import { MarkTodoAsNotCompletedCommand } from '../commands/mark-todo-as-not-completed.command';
+import { MarkTodoAsNotCompletedCommand } from '../commands';
 import { TodoNotFoundDomainError } from '../../domain';
 import { TodoRepository } from '../../domain';
 

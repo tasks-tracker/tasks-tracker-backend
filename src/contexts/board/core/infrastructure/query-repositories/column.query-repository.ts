@@ -10,7 +10,7 @@ import {
   BoardIdVO,
   BoardIsNotFoundDomainError,
   Column,
-  ColumnOwnerIdVO,
+  UserIdVO,
   UserIsNotFoundDomainError,
   ColumnIdVO,
   ColumnOrderVO,
@@ -47,7 +47,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
         new ColumnTitleVO(result.title),
         new ColumnOrderVO(result.order_number),
         new BoardIdVO(result.board_id),
-        new ColumnOwnerIdVO(result.owner_id),
+        new UserIdVO(result.owner_id),
         new Date(result.created_at),
         new Date(result.updated_at),
         result.is_deleted,
@@ -96,7 +96,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
             new ColumnTitleVO(r.title),
             new ColumnOrderVO(r.order_number),
             new BoardIdVO(r.board_id),
-            new ColumnOwnerIdVO(r.owner_id),
+            new UserIdVO(r.owner_id),
             new Date(r.created_at),
             new Date(r.updated_at),
             r.is_deleted,
@@ -106,7 +106,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
   }
 
   public async findColumnsByUserId(
-    userId: ColumnOwnerIdVO,
+    userId: UserIdVO,
   ): Promise<Result<ColumnInterface[], UserIsNotFoundDomainError>> {
     const SQL = this.knex<ColumnSchema>('columns')
       .select('*')
@@ -136,7 +136,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
   }
 
   public async getUserColumnIds(
-    userId: ColumnOwnerIdVO,
+    userId: UserIdVO,
   ): Promise<Result<ColumnIdVO[], UserIsNotFoundDomainError>> {
     const SQL = this.knex<ColumnSchema>('columns')
       .select('id')

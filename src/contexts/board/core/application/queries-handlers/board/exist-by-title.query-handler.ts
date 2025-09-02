@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ExistByTitleBoardQuery } from '../../queries/board';
+import { ExistByTitleBoardQuery } from '../../queries';
 import { BoardQueryRepository } from '../../query-repositories';
-import { BoardTitleVO } from '@contexts/board/core/domain/value-objects';
+import { BoardTitleVO } from '../../../domain';
 
 @QueryHandler(ExistByTitleBoardQuery)
 export class ExistByTitleBoardQueryHandler

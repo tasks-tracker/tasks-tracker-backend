@@ -11,7 +11,6 @@ import { UnprocessableEntityException } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import { ForbiddenException } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
-// import { UseInterceptors } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -44,8 +43,6 @@ import { MarkAsCompletedBodyDto } from './dtos';
 import { UpdateTodoBodyDto } from './dtos';
 import { DeleteTodoByIdBodyDto } from './dtos';
 import { UserIdVO } from '../core';
-// import { createTrackStatusesInterceptor } from '@adapters/metrics-adapter';
-// import { createTrackExecutionTimeInterceptor } from '@adapters/metrics-adapter';
 
 @ApiTags('Todo')
 @Controller('todo')

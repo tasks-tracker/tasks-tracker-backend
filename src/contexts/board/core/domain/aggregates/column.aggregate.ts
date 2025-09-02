@@ -3,7 +3,7 @@ import {
   BoardIdVO,
   ColumnIdVO,
   ColumnOrderVO,
-  ColumnOwnerIdVO,
+  UserIdVO,
   ColumnTitleVO,
 } from '../value-objects';
 import {
@@ -14,7 +14,6 @@ import {
   ColumnChangeBoardEvent,
   ColumnRemovedEvent,
 } from '../events';
-import { UserIdVO } from '@contexts/auth';
 import { DomainError } from '@libs/domain-error';
 
 export class Column extends AggregateRoot {
@@ -22,7 +21,7 @@ export class Column extends AggregateRoot {
   #title: ColumnTitleVO;
   #order: ColumnOrderVO;
   #boardId: BoardIdVO;
-  #creatorId: ColumnOwnerIdVO;
+  #creatorId: UserIdVO;
   #createdAt: Date;
   #updatedAt: Date;
   #isDeleted: boolean;
@@ -32,7 +31,7 @@ export class Column extends AggregateRoot {
     title: ColumnTitleVO,
     order: ColumnOrderVO,
     boardId: BoardIdVO,
-    creatorId: ColumnOwnerIdVO,
+    creatorId: UserIdVO,
     createdAt: Date,
     updatedAt: Date,
     isDeleted: boolean,
@@ -87,7 +86,7 @@ export class Column extends AggregateRoot {
     boardId: BoardIdVO,
     createdAt: Date,
     updatedAt: Date,
-    creatorId: ColumnOwnerIdVO,
+    creatorId: UserIdVO,
   ): Column {
     const column = new Column(
       id,
@@ -104,7 +103,7 @@ export class Column extends AggregateRoot {
   }
 
   rename(userId: UserIdVO, title: ColumnTitleVO) {
-    if (userId.value !== this.#creatorId.value) {
+    if (userId.equals(this.#creatorId)) {
       throw new DomainError('USER_NOT_AUTHORIZED');
     }
     this.#title = title;
@@ -113,7 +112,7 @@ export class Column extends AggregateRoot {
   }
 
   changeCreator(newCreatorId: UserIdVO) {
-    this.#creatorId = new ColumnOwnerIdVO(newCreatorId.value);
+    this.#creatorId = new UserIdVO(newCreatorId.value);
     this.#updatedAt = new Date();
     this.apply(new ColumnChangeOwnerEvent(this.#creatorId, newCreatorId));
   }

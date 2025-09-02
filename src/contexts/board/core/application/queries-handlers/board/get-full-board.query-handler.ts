@@ -1,12 +1,12 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetFullBoardQuery } from '../../queries/board';
-import { FullBoardResponse } from '@contexts/board/core/domain/interfaces';
+import { GetFullBoardQuery } from '../../queries';
+import { FullBoardResponse } from '../../../domain';
 import {
   BoardQueryRepository,
   ColumnQueryRepository,
   TaskQueryRepository,
 } from '../../query-repositories';
-import { BoardIsNotFoundDomainError } from '@contexts/board/core/domain/domain-errors';
+import { BoardIsNotFoundDomainError } from '../../../domain';
 
 @QueryHandler(GetFullBoardQuery)
 export class GetFullBoardQueryHandler
