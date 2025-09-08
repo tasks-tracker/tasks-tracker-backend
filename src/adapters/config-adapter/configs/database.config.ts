@@ -10,7 +10,9 @@ import { IsInt } from 'class-validator';
 import { Yaml } from '@libs/yaml';
 
 @Yaml({
-  file: process.env.DATABASE_CONFIG_FILE_PATH || 'configs/database.config.yml',
+  file:
+    process.env.DATABASE_CONFIG_FILE_PATH ||
+    'configs/backend/dev.database.config.yml',
   encoding: 'utf-8',
 })
 export class DatabaseConfig implements DatabaseModuleOptions {

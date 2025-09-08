@@ -6,7 +6,9 @@ import { IsInt } from 'class-validator';
 import { Yaml } from '@libs/yaml';
 
 @Yaml({
-  file: process.env.SERVICE_CONFIG_FILE_PATH || 'configs/service.config.yml',
+  file:
+    process.env.SERVICE_CONFIG_FILE_PATH ||
+    'configs/backend/dev.service.config.yml',
   encoding: 'utf-8',
 })
 export class ServiceConfig {
