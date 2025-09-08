@@ -10,7 +10,9 @@ import { IsOptional } from 'class-validator';
 import { Yaml } from '@libs/yaml';
 
 @Yaml({
-  file: process.env.CACHE_CONFIG_FILE_PATH || 'configs/cache.config.yml',
+  file:
+    process.env.CACHE_CONFIG_FILE_PATH ||
+    'configs/backend/dev.cache.config.yml',
   encoding: 'utf-8',
 })
 export class CacheConfig implements CacheModuleOptions {

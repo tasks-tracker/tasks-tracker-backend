@@ -50,7 +50,7 @@ services:
     container_name: db-migrations
     volumes:
       - ./init-docker/wait-for-it.sh:/scripts/wait-for-it.sh
-    command: sh -c "sh /app/init-docker/wait-for-it.sh database 5432 -- npm run migration:up:dev"
+    command: sh -c "chmod +x /scripts/wait-for-it.sh && /scripts/wait-for-it.sh database 5432 -- npm run migration:up"
     depends_on:
       - database
     environment:

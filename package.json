@@ -16,13 +16,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration": "npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts",
-    "migration:up": "cross-env ENV_PATH=./configs/backend/prod/prod.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts up",
-    "migration:down": "cross-env ENV_PATH=./configs/backend/prod/prod.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts down",
-    "migration:up:dev": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts up",
-    "migration:down:dev": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts down"
+          "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+      "test:e2e": "jest --config ./test/jest-e2e.json",
+      "migration": "npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts",
+      "migration:up": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts up",
+      "migration:down": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts down"
   },
   "dependencies": {
     "@nestjs-cls/transactional": "2.5.1",

@@ -5,7 +5,9 @@ import { registerAs } from '@nestjs/config';
 import { Yaml } from '@libs/yaml';
 
 @Yaml({
-  file: process.env.SWAGGER_CONFIG_FILE_PATH || 'configs/swagger.config.yml',
+  file:
+    process.env.SWAGGER_CONFIG_FILE_PATH ||
+    'configs/backend/dev.swagger.config.yml',
   encoding: 'utf-8',
 })
 export class SwaggerConfig {

@@ -7,7 +7,9 @@ import { ArrayMinSize } from 'class-validator';
 import { Yaml } from '@libs/yaml';
 
 @Yaml({
-  file: process.env.KAFKA_CONFIG_FILE_PATH || 'configs/kafka.config.yml',
+  file:
+    process.env.KAFKA_CONFIG_FILE_PATH ||
+    'configs/backend/dev.kafka.config.yml',
   encoding: 'utf-8',
 })
 export class KafkaConfig implements KafkaModuleOptions {
