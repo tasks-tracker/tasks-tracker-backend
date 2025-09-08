@@ -3,7 +3,7 @@ import { GetColumnInfoByIdQuery } from '../../queries';
 import { ColumnQueryRepository } from '../../query-repositories';
 import { ColumnIdVO, ColumnNotFoundDomainError } from '../../../domain';
 import { Result } from 'neverthrow';
-import { ColumnInterface } from '@contexts/board/core/domain/interfaces';
+import { ColumnInterface } from '../../../domain';
 
 @QueryHandler(GetColumnInfoByIdQuery)
 export class GetColumnInfoByIdQueryHandler

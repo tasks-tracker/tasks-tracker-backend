@@ -1,8 +1,8 @@
 import { Query } from '@nestjs/cqrs';
-import { ColumnOwnerIdVO, ColumnIdVO } from '../../../domain';
+import { UserIdVO, ColumnIdVO } from '../../../domain';
 
 export class GetUserColumnIdsQuery extends Query<ColumnIdVO[]> {
-  constructor(public readonly userId: ColumnOwnerIdVO) {
+  constructor(public readonly userId: UserIdVO) {
     super();
   }
 }

@@ -4,7 +4,7 @@ import {
   TaskDescriptionVO,
   TaskIdVO,
   TaskOrderVO,
-  TaskOwnerIdVO,
+  UserIdVO,
   TaskTitleVO,
 } from '../value-objects';
 import {
@@ -25,7 +25,7 @@ export class Task extends AggregateRoot {
   #columnId: ColumnIdVO;
   #createdAt: Date;
   #updatedAt: Date;
-  #assignerId: TaskOwnerIdVO;
+  #assignerId: UserIdVO;
   #isRemoved: boolean;
 
   constructor(
@@ -36,7 +36,7 @@ export class Task extends AggregateRoot {
     columnId: ColumnIdVO,
     createdAt: Date,
     updatedAt: Date,
-    assignerId: TaskOwnerIdVO,
+    assignerId: UserIdVO,
     isRemoved: boolean,
   ) {
     super();
@@ -95,7 +95,7 @@ export class Task extends AggregateRoot {
     columnId: ColumnIdVO,
     createdAt: Date,
     updatedAt: Date,
-    assignerId: TaskOwnerIdVO,
+    assignerId: UserIdVO,
     isRemoved: boolean,
   ) {
     const task = new Task(
@@ -129,8 +129,8 @@ export class Task extends AggregateRoot {
     this.apply(new TaskChangeOrderEvent(this.#id, order));
   }
 
-  changeAssigner(assignerId: TaskOwnerIdVO) {
-    if (this.#assignerId && this.#assignerId.value !== assignerId.value) {
+  changeAssigner(assignerId: UserIdVO) {
+    if (this.#assignerId && this.#assignerId.equals(assignerId)) {
       throw new Error('Task already has an assigner');
     }
     this.#assignerId = assignerId;

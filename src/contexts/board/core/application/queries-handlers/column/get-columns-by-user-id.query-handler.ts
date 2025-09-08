@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetUserColumnIdsQuery } from '../../queries';
 import { ColumnQueryRepository } from '../../query-repositories';
-import { ColumnIdVO, ColumnOwnerIdVO } from '../../../domain';
+import { ColumnIdVO, UserIdVO } from '../../../domain';
 
 @QueryHandler(GetUserColumnIdsQuery)
 export class GetUserColumnIdsQueryHandler
@@ -11,7 +11,7 @@ export class GetUserColumnIdsQueryHandler
 
   async execute(query: GetUserColumnIdsQuery) {
     const result = await this.columnQueryRepository.getUserColumnIds(
-      new ColumnOwnerIdVO(query.userId.value),
+      new UserIdVO(query.userId.value),
     );
 
     if (result.isErr()) return [];

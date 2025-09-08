@@ -2,7 +2,7 @@ import { IsUUID } from 'class-validator';
 import { validateSync } from 'class-validator';
 import { ValidationException } from '@libs/validation-exception';
 
-export class ColumnOwnerIdVO {
+export class UserIdVO {
   @IsUUID()
   public readonly value: string;
   constructor(value: string) {
@@ -11,5 +11,9 @@ export class ColumnOwnerIdVO {
     if (errors.length > 0) {
       throw new ValidationException(errors);
     }
+  }
+
+  equals(vo: UserIdVO): boolean {
+    return this.value === vo.value;
   }
 }

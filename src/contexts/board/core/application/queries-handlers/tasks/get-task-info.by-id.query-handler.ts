@@ -1,10 +1,10 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetTaskInfoByIdQuery } from '../../queries';
-import { TaskIdVO } from '../../../domain/value-objects';
+import { TaskIdVO } from '../../../domain';
 import { TaskNotFoundDomainError } from '../../../domain';
 import { TaskQueryRepository } from '../../query-repositories';
-import { Task } from '../../../domain/aggregates/task.aggregate';
-import { TaskInterface } from '@contexts/board/core/domain/interfaces/task.interface';
+import { Task } from '../../../domain';
+import { TaskInterface } from '../../../domain';
 
 @QueryHandler(GetTaskInfoByIdQuery)
 export class GetTaskInfoByIdQueryHandler

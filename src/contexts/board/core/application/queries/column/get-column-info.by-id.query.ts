@@ -1,6 +1,6 @@
 import { Query } from '@nestjs/cqrs';
 import { ColumnIdVO } from '../../../domain';
-import { ColumnInterface } from '@contexts/board/core/domain/interfaces';
+import { ColumnInterface } from '../../../domain';
 
 export class GetColumnInfoByIdQuery extends Query<ColumnInterface> {
   constructor(public readonly columnId: ColumnIdVO) {

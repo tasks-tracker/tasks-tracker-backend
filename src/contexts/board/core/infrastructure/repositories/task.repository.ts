@@ -23,10 +23,10 @@ import { err } from 'neverthrow';
 import {
   ColumnIdVO,
   TaskDescriptionVO,
-  TaskOwnerIdVO,
+  UserIdVO,
 } from '../../domain/value-objects';
-import { TaskOrderVO } from '../../domain/value-objects';
-import { TaskTitleVO } from '../../domain/value-objects';
+import { TaskOrderVO } from '../../domain';
+import { TaskTitleVO } from '../../domain';
 
 @Injectable()
 export class TaskRepositoryImpl implements TaskRepository {
@@ -66,7 +66,7 @@ export class TaskRepositoryImpl implements TaskRepository {
         new ColumnIdVO(result.column_id),
         new Date(result.created_at),
         new Date(result.updated_at),
-        new TaskOwnerIdVO(result.owner_id),
+        new UserIdVO(result.owner_id),
         result.is_deleted,
       ),
     );

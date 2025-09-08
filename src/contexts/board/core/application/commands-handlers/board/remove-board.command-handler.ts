@@ -3,8 +3,8 @@ import { DomainError } from '@libs/domain-error';
 
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RemoveBoardCommand } from '../../commands';
-import { BoardRepository } from '@contexts/board/core/domain/repositories/board.repository';
-import { BoardIsNotFoundDomainError } from '@contexts/board/core/domain/domain-errors';
+import { BoardRepository } from '../../../domain';
+import { BoardIsNotFoundDomainError } from '../../../domain';
 
 @CommandHandler(RemoveBoardCommand)
 export class RemoveBoardCommandHandler

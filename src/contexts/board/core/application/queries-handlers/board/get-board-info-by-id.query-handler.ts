@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetBoardInfoByIdQuery } from '../../queries/board';
+import { GetBoardInfoByIdQuery } from '../../queries';
 import { BoardQueryRepository } from '../../query-repositories';
-import { BoardIsNotFoundDomainError } from '@contexts/board/core/domain/domain-errors';
+import { BoardIsNotFoundDomainError } from '../../../domain';
 
 @QueryHandler(GetBoardInfoByIdQuery)
 export class GetBoardInfoByIdQueryHandler

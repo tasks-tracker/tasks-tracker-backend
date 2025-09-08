@@ -1,12 +1,8 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { FindByUserIdQuery } from '../../queries/board';
+import { FindByUserIdQuery } from '../../queries';
 import { BoardQueryRepository } from '../../query-repositories';
-import { Board } from '@contexts/board/core/domain/aggregates';
-import {
-  BoardIdVO,
-  BoardOwnerIdVO,
-  BoardTitleVO,
-} from '@contexts/board/core/domain/value-objects';
+import { Board } from '../../../domain';
+import { BoardIdVO, UserIdVO, BoardTitleVO } from '../../../domain';
 
 @QueryHandler(FindByUserIdQuery)
 export class FindBoardsByUserIdQueryHandler
@@ -27,7 +23,7 @@ export class FindBoardsByUserIdQueryHandler
       Board.create(
         new BoardIdVO(board.id.value),
         new BoardTitleVO(board.title.value),
-        new BoardOwnerIdVO(board.ownerId.value),
+        new UserIdVO(board.ownerId.value),
         new Date(board.createdAt),
         new Date(board.updatedAt),
         board.isDeleted,

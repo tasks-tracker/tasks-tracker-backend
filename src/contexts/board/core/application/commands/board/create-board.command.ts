@@ -1,8 +1,4 @@
-import {
-  BoardIdVO,
-  BoardOwnerIdVO,
-  BoardTitleVO,
-} from '@contexts/board/core/domain/value-objects';
+import { BoardIdVO, UserIdVO, BoardTitleVO } from '../../../domain';
 import { DomainError } from '@libs/domain-error';
 import { Command } from '@nestjs/cqrs';
 import { Result } from 'neverthrow';
@@ -12,7 +8,7 @@ export class CreateBoardCommand extends Command<
 > {
   constructor(
     public readonly title: BoardTitleVO,
-    public readonly ownerId: BoardOwnerIdVO,
+    public readonly ownerId: UserIdVO,
   ) {
     super();
   }

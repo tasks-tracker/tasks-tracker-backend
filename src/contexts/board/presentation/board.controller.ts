@@ -34,10 +34,8 @@ import {
   BoardIdVO,
   BoardIsNotFoundDomainError,
   BoardIsNotOwnerDomainError,
-  BoardOwnerIdVO,
-  BoardOwnerVO,
+  UserIdVO,
   BoardTitleVO,
-  BoardUserIdVO,
   ChangeBoardOwnerCommand,
   CreateBoardCommand,
   CreateDefaultBoardCommand,
@@ -49,7 +47,6 @@ import {
   RenameBoardCommand,
 } from '../core';
 import { ValidationException } from '@libs/validation-exception';
-import { UserIdVO } from '@contexts/auth/core';
 
 @ApiTags('Board')
 @Controller('board')
@@ -91,7 +88,7 @@ export class BoardController {
       const result = await this.commandBus.execute(
         new CreateBoardCommand(
           new BoardTitleVO(body.title),
-          new BoardOwnerIdVO(userId.value),
+          new UserIdVO(userId.value),
         ),
       );
       if (result.isOk()) return { id: result.value.value };
@@ -134,8 +131,8 @@ export class BoardController {
       const result = await this.commandBus.execute(
         new ChangeBoardOwnerCommand(
           new BoardIdVO(body.boardId),
-          new BoardOwnerVO(userId.value),
-          new BoardOwnerVO(body.newOwnerId),
+          new UserIdVO(userId.value),
+          new UserIdVO(body.newOwnerId),
         ),
       );
       if (result.isOk()) return;
@@ -335,7 +332,7 @@ export class BoardController {
   async findByUserId(@Query() query: FindByUserIdQueryDto) {
     try {
       const result = await this.queryBus.execute(
-        new FindByUserIdQuery(new BoardUserIdVO(query.userId)),
+        new FindByUserIdQuery(new UserIdVO(query.userId)),
       );
       return { boards: result };
     } catch (err) {
@@ -373,7 +370,7 @@ export class BoardController {
 
     try {
       const result = await this.commandBus.execute(
-        new CreateDefaultBoardCommand(new BoardOwnerIdVO(body.userId)),
+        new CreateDefaultBoardCommand(new UserIdVO(body.userId)),
       );
 
       if (result.isOk()) return;
@@ -406,7 +403,7 @@ export class BoardController {
   async getFullBoard(@Query() query: GetFullBoardQueryDto) {
     try {
       const result = await this.queryBus.execute(
-        new GetFullBoardQuery(new BoardUserIdVO(query.userId)),
+        new GetFullBoardQuery(new UserIdVO(query.userId)),
       );
       return result;
     } catch (err) {

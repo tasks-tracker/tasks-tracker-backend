@@ -44,11 +44,11 @@ services:
       KAFKA_BROKERS: "['kafka1:9092', 'kafka2:9093']"
 
   db-migrations:
-    image: node:22-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.migration
     container_name: db-migrations
-    working_dir: /app
     volumes:
-      - .:/app
       - ./init-docker/wait-for-it.sh:/scripts/wait-for-it.sh
     command: sh -c "chmod +x /scripts/wait-for-it.sh && /scripts/wait-for-it.sh database 5432 -- npm run migration:up"
     depends_on:

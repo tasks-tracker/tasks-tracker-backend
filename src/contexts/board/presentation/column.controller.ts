@@ -27,16 +27,11 @@ import {
   RemoveColumnResponseDto,
   RenameColumnBodyDto,
 } from './dtos';
-import { CreateColumnCommand } from '../core/application/commands/column/create-column.command';
-import {
-  BoardIdVO,
-  ColumnIdVO,
-  ColumnOrderVO,
-  ColumnTitleVO,
-} from '../core/domain';
-import { ChangeColumnBoardCommand } from '../core/application/commands/column/change-board.command';
-import { ChangeColumnOwnerCommand } from '../core/application/commands/column/change-owner.command';
-import { RemoveColumnCommand } from '../core/application/commands/column/remove-column.command';
+import { CreateColumnCommand } from '../core';
+import { BoardIdVO, ColumnIdVO, ColumnOrderVO, ColumnTitleVO } from '../core';
+import { ChangeColumnBoardCommand } from '../core';
+import { ChangeColumnOwnerCommand } from '../core';
+import { RemoveColumnCommand } from '../core';
 import { GetColumnInfoByIdQuery, RenameColumnCommand } from '../core';
 
 @ApiTags('Column')

@@ -3,11 +3,11 @@ import {
   BoardIsNotFoundDomainError,
   Column,
   ColumnNotFoundDomainError,
-  ColumnOwnerIdVO,
+  UserIdVO,
   UserIsNotFoundDomainError,
 } from '../../domain';
 import { BoardIdVO, ColumnIdVO, ColumnTitleVO } from '../../domain';
-import { ColumnInterface } from '../../domain/interfaces';
+import { ColumnInterface } from '../../domain';
 
 export abstract class ColumnQueryRepository {
   public abstract findById(
@@ -19,7 +19,7 @@ export abstract class ColumnQueryRepository {
   ): Promise<Result<boolean, ColumnNotFoundDomainError>>;
 
   public abstract getUserColumnIds(
-    userId: ColumnOwnerIdVO,
+    userId: UserIdVO,
   ): Promise<Result<ColumnIdVO[], UserIsNotFoundDomainError>>;
 
   public abstract findColumnsByBoardId(
@@ -27,6 +27,6 @@ export abstract class ColumnQueryRepository {
   ): Promise<Result<Column[], BoardIsNotFoundDomainError>>;
 
   public abstract findColumnsByUserId(
-    userId: ColumnOwnerIdVO,
+    userId: UserIdVO,
   ): Promise<Result<ColumnInterface[], UserIsNotFoundDomainError>>;
 }

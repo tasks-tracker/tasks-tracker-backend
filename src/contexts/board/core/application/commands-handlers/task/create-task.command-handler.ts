@@ -7,7 +7,7 @@ import {
   TaskRepository,
 } from '../../../domain';
 import { err, Result, ok } from 'neverthrow';
-import { Task } from '../../../domain/aggregates/task.aggregate';
+import { Task } from '../../../domain';
 import { randomUUID } from 'crypto';
 
 @CommandHandler(CreateTaskCommand)
