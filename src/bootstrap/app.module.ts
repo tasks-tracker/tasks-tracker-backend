@@ -4,6 +4,7 @@ import type { KafkaConfig } from '@adapters/config-adapter';
 import type { MetricsConfig } from '@adapters/config-adapter';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigAdapterModule } from '@adapters/config-adapter';
 import { CqrsAdapterModule } from '@adapters/cqrs-adapter';
 import { LoggerModule } from '@libs/logger';
@@ -20,6 +21,7 @@ import { BoardModule } from '@contexts/board';
 @Module({
   imports: [
     ConfigAdapterModule,
+    ScheduleModule.forRoot(),
     LoggerModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>

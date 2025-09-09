@@ -4,7 +4,7 @@
 
 import type { UserRepository } from '../../domain';
 import type { Result } from 'neverthrow';
-import type { UserSchema } from '@adapters/database-adapter';
+import type { OutboxRepository, UserSchema } from '@adapters/database-adapter';
 
 import { Injectable } from '@nestjs/common';
 import { TransactionHost } from '@nestjs-cls/transactional';
@@ -30,6 +30,7 @@ export class UserRepositoryImpl implements UserRepository {
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
     private readonly redis: Redis,
+    private readonly outboxRepository: OutboxRepository,
   ) {}
 
   public nextId(): UserIdVO {
@@ -41,7 +42,20 @@ export class UserRepositoryImpl implements UserRepository {
   ): Promise<Result<null, UserLoginAlreadyUsedDomainError>> {
     const events = user.getUncommittedEvents();
     if (events.some((event) => event instanceof UserRegisteredByLoginEvent)) {
-      return await this.saveRegisteredByLoginEvent(user);
+      return await this.txHost.withTransaction(async () => {
+        await this.outboxRepository.saveEvent({
+          aggregate_id: user.id.value,
+          aggregate_type: 'User',
+          event_type: 'UserRegisteredByLogin',
+          event_data: JSON.stringify({
+            id: user.id.value,
+            login: user.login.value,
+            passwordHash: user.passwordHash.value,
+            registeredAt: user.registeredAt,
+          }),
+        });
+        return await this.saveRegisteredByLoginEvent(user);
+      });
     } else if (events.some((event) => event instanceof SessionAddedEvent)) {
       const sessionAddedEvent = events.find(
         (event) => event instanceof SessionAddedEvent,

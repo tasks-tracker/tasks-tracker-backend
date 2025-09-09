@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BoardController, ColumnController } from '../presentation';
 import {
   commandHandlersProviders,
+  consumersProviders,
   queryHandlersProviders,
   queryRepositoriesProviders,
   repositoriesProviders,
@@ -15,6 +16,7 @@ import { TaskController } from '../presentation';
     ...repositoriesProviders,
     ...queryRepositoriesProviders,
     ...queryHandlersProviders,
+    ...consumersProviders,
   ],
 })
 export class BoardModule {}

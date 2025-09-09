@@ -18,6 +18,7 @@ import { KAFKA_PRODUCER } from './module.constants';
 import { Kafka } from 'kafkajs';
 import { logLevel } from 'kafkajs';
 import { Logger } from '@libs/logger';
+import { OutboxEventProcessor } from '../processors';
 
 @Module({})
 export class KafkaModule implements OnModuleInit {
@@ -101,8 +102,9 @@ export class KafkaModule implements OnModuleInit {
         },
         kafka,
         producer,
+        OutboxEventProcessor,
       ],
-      exports: [kafka, producer],
+      exports: [kafka, producer, OutboxEventProcessor],
     };
   }
 
@@ -133,8 +135,13 @@ export class KafkaModule implements OnModuleInit {
       global: options.isGlobal,
       module: KafkaModule,
       imports: options.imports || [],
-      providers: [...this.createAsyncProviders(options), kafka, producer],
-      exports: [kafka, producer],
+      providers: [
+        ...this.createAsyncProviders(options),
+        kafka,
+        producer,
+        OutboxEventProcessor,
+      ],
+      exports: [kafka, producer, OutboxEventProcessor],
     };
   }
 

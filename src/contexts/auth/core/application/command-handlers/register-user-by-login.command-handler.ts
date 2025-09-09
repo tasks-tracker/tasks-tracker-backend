@@ -29,6 +29,7 @@ export class RegisterUserByLoginCommandHandler
     this.eventPublisher.mergeObjectContext(user);
     const saveResult = await this.userRepository.save(user);
     if (saveResult.isErr()) return saveResult;
+
     user.commit();
     return ok(null);
   }

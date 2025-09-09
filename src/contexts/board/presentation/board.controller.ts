@@ -21,7 +21,6 @@ import {
   ChangeOwnerBoardBodyDto,
   CreateBoardBodyDto,
   CreateBoardResponseDto,
-  CreateDefaultBoardBodyDto,
   ExistByTitleQueryDto,
   ExistByUserIdQueryDto,
   FindByUserIdQueryDto,
@@ -38,7 +37,6 @@ import {
   BoardTitleVO,
   ChangeBoardOwnerCommand,
   CreateBoardCommand,
-  CreateDefaultBoardCommand,
   ExistByTitleBoardQuery,
   ExistByUserIdQuery,
   FindByUserIdQuery,
@@ -335,46 +333,6 @@ export class BoardController {
         new FindByUserIdQuery(new UserIdVO(query.userId)),
       );
       return { boards: result };
-    } catch (err) {
-      if (err instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-      throw err;
-    }
-  }
-
-  @Post('create-default-board')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: 'Default board created successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNPROCESSABLE_ENTITY,
-    description: 'Validation error',
-  })
-  async createDefaultBoard(
-    @Body() body: CreateDefaultBoardBodyDto,
-    @SessionToken() sessionToken: string | null,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    try {
-      const result = await this.commandBus.execute(
-        new CreateDefaultBoardCommand(new UserIdVO(body.userId)),
-      );
-
-      if (result.isOk()) return;
-      throw new BadRequestException('UNKNOWN_ERROR');
     } catch (err) {
       if (err instanceof ValidationException) {
         throw new UnprocessableEntityException();
