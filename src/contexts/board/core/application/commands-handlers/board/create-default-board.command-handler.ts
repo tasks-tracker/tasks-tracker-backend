@@ -28,7 +28,6 @@ import {
 } from '@contexts/board/core/domain/constants';
 import { defaultColumnsWithTasks } from '../../../domain';
 import { ok } from 'neverthrow';
-import { OutboxRepository } from '@adapters/database-adapter';
 
 @CommandHandler(CreateDefaultBoardCommand)
 export class CreateDefaultBoardCommandHandler
@@ -39,7 +38,6 @@ export class CreateDefaultBoardCommandHandler
     private readonly boardQueryRepository: BoardQueryRepository,
     private readonly columnRepository: ColumnRepository,
     private readonly taskRepository: TaskRepository,
-    private readonly outboxRepository: OutboxRepository,
   ) {}
 
   async execute(

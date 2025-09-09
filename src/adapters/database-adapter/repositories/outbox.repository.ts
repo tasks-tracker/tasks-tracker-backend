@@ -17,7 +17,7 @@ export class OutboxRepository {
       'id' | 'created_at' | 'processed_at' | 'retry_count' | 'status'
     >,
   ): Promise<void> {
-    const SQL = this.knex<OutboxSchema>('outbox_events')
+    const SQL = this.knex<OutboxSchema>('outbox')
       .insert({
         aggregate_id: event.aggregate_id,
         aggregate_type: event.aggregate_type,
@@ -33,7 +33,7 @@ export class OutboxRepository {
   }
 
   public async getPendingEvents(): Promise<OutboxSchema[]> {
-    const SQL = this.knex<OutboxSchema>('outbox_events')
+    const SQL = this.knex<OutboxSchema>('outbox')
       .select('*')
       .where('status', 'pending')
       .toSQL()
@@ -43,7 +43,7 @@ export class OutboxRepository {
   }
 
   public async markAsProcessed(event: OutboxSchema): Promise<void> {
-    const SQL = this.knex<OutboxSchema>('outbox_events')
+    const SQL = this.knex<OutboxSchema>('outbox')
       .update({
         processed_at: new Date(),
         status: 'completed',
@@ -59,7 +59,7 @@ export class OutboxRepository {
     event: OutboxSchema,
     retryCount: number,
   ): Promise<void> {
-    const SQL = this.knex<OutboxSchema>('outbox_events')
+    const SQL = this.knex<OutboxSchema>('outbox')
       .update({
         processed_at: new Date(),
         status: 'failed',
@@ -73,7 +73,7 @@ export class OutboxRepository {
   }
 
   public async incrementRetryCount(event: OutboxSchema): Promise<void> {
-    const SQL = this.knex<OutboxSchema>('outbox_events')
+    const SQL = this.knex<OutboxSchema>('outbox')
       .update({
         retry_count: event.retry_count + 1,
         status: 'pending',

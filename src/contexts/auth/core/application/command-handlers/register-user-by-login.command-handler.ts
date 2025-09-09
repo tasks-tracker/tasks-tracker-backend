@@ -6,7 +6,6 @@ import { User } from '../../domain';
 import { CryptoPort } from '../../domain';
 import { UserRepository } from '../../domain';
 import { ok } from 'neverthrow';
-import { OutboxRepository } from '@adapters/database-adapter';
 
 @CommandHandler(RegisterUserByLoginCommand)
 export class RegisterUserByLoginCommandHandler
@@ -16,7 +15,6 @@ export class RegisterUserByLoginCommandHandler
     private readonly cryptoPort: CryptoPort,
     private readonly userRepository: UserRepository,
     private readonly eventPublisher: EventPublisher,
-    private readonly outboxRepository: OutboxRepository,
   ) {}
   async execute(command: RegisterUserByLoginCommand) {
     const passwordHash = await this.cryptoPort.hashPassword(command.password);
@@ -31,18 +29,6 @@ export class RegisterUserByLoginCommandHandler
     this.eventPublisher.mergeObjectContext(user);
     const saveResult = await this.userRepository.save(user);
     if (saveResult.isErr()) return saveResult;
-
-    await this.outboxRepository.saveEvent({
-      aggregate_id: user.id.value,
-      aggregate_type: 'User',
-      event_type: 'UserRegisteredByLogin',
-      event_data: JSON.stringify({
-        id: user.id.value,
-        login: user.login.value,
-        passwordHash: user.passwordHash.value,
-        registeredAt: currentDate,
-      }),
-    });
 
     user.commit();
     return ok(null);

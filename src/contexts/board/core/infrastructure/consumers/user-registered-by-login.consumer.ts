@@ -1,7 +1,10 @@
+import type { EachMessagePayload } from 'kafkajs';
 import { CreateDefaultBoardCommand } from '@contexts/board';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Consumer, Kafka } from 'kafkajs';
+import { UserIdVO } from '@contexts/board';
+import { Logger } from '@libs/logger';
 
 @Injectable()
 export class UserRegisteredByLoginConsumer implements OnModuleInit {
@@ -10,19 +13,45 @@ export class UserRegisteredByLoginConsumer implements OnModuleInit {
   constructor(
     private readonly kafka: Kafka,
     private readonly commandBus: CommandBus,
-  ) {}
+    private readonly logger: Logger,
+  ) {
+    this.logger.setContext(UserRegisteredByLoginConsumer.name);
+  }
 
   public async onModuleInit(): Promise<void> {
     this.consumer = this.kafka.consumer({ groupId: 'board-group' });
     await this.consumer.subscribe({
-      topic: 'UserRegisteredByLogin',
+      topic: 'User.UserRegisteredByLogin',
       fromBeginning: true,
     });
     await this.consumer.run({
-      eachMessage: async ({ message }) => {
-        const event = JSON.parse(message.value!.toString());
-        await this.commandBus.execute(new CreateDefaultBoardCommand(event.id));
+      autoCommit: false,
+      eachMessage: async (message: EachMessagePayload) => {
+        if (!message.message.value) {
+          return await this.commitOffset(message);
+        }
+        const event = JSON.parse(message.message.value.toString());
+        const result = await this.commandBus.execute(
+          new CreateDefaultBoardCommand(new UserIdVO(event.id)),
+        );
+        if (result.isErr()) {
+          this.logger.error(
+            `Error creating default board for user ${event.id}: ${result.error.message}`,
+          );
+          return;
+        }
+        await this.commitOffset(message);
       },
     });
+  }
+
+  async commitOffset(message: EachMessagePayload): Promise<void> {
+    return await this.consumer.commitOffsets([
+      {
+        topic: message.topic,
+        partition: message.partition,
+        offset: (Number(message.message.offset) + 1).toString(),
+      },
+    ]);
   }
 }

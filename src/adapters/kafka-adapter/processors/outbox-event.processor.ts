@@ -2,15 +2,22 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Producer } from 'kafkajs';
 import { OutboxRepository } from '../../database-adapter/repositories';
 import { OutboxSchema } from '../../database-adapter/schemas/outbox.schema';
+import { Kafka } from 'kafkajs';
 
 @Injectable()
 export class OutboxEventProcessor {
   private readonly logger = new Logger(OutboxEventProcessor.name);
+  private kafkaProducer: Producer;
 
   constructor(
     private readonly outboxRepository: OutboxRepository,
-    private readonly kafkaProducer: Producer,
+    private readonly kafka: Kafka,
   ) {}
+
+  async onModuleInit() {
+    this.kafkaProducer = this.kafka.producer();
+    await this.kafkaProducer.connect();
+  }
 
   public async processEvents(): Promise<void> {
     const events = await this.outboxRepository.getPendingEvents();
@@ -26,8 +33,9 @@ export class OutboxEventProcessor {
 
       const eventData = JSON.parse(event.event_data) as Record<string, any>;
 
+      const topic = `${event.aggregate_type}.${event.event_type}`;
       await this.kafkaProducer.send({
-        topic: `${event.aggregate_type}.${event.event_type}`,
+        topic,
         messages: [
           {
             key: event.aggregate_id,
