@@ -16,6 +16,7 @@ import {
   RenameBoardCommandHandler,
   RenameColumnCommandHandler,
   RenameTaskCommandHandler,
+  UserRegisteredByLoginConsumer,
 } from '../core';
 import {
   GetBoardInfoByIdQueryHandler,
@@ -52,6 +53,8 @@ export const commandHandlersProviders = [
   ChangeTaskOrderCommandHandler,
   ChangeTaskOwnerCommandHandler,
 ];
+
+export const consumersProviders = [UserRegisteredByLoginConsumer];
 
 export const repositoriesProviders = [
   {

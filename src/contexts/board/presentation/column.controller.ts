@@ -286,8 +286,6 @@ export class ColumnController {
         new GetColumnInfoByIdQuery(new ColumnIdVO(query.columnId)),
       );
 
-      console.log(result);
-
       if (result) return result;
       throw new BadRequestException('UNKNOWN_ERROR');
     } catch (error) {

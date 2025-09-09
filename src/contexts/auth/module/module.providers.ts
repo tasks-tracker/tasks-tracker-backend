@@ -12,6 +12,10 @@ import { SessionRepository } from '../core';
 import { SessionRepositoryImpl } from '../core';
 import { UserQueryRepository } from '../core';
 import { UserQueryRepositoryImpl } from '../core';
+import { TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
+import { Redis } from 'ioredis';
+import { OutboxRepository } from '@adapters/database-adapter';
 
 export const helpersProviders = [AuthHelper];
 
@@ -36,7 +40,14 @@ export const portsProviders = [
 export const repositoriesProviders = [
   {
     provide: UserRepository,
-    useClass: UserRepositoryImpl,
+    useFactory: (
+      transactionHost: TransactionHost<TransactionalAdapterPgPromise>,
+      redis: Redis,
+      outboxRepository: OutboxRepository,
+    ) => {
+      return new UserRepositoryImpl(transactionHost, redis, outboxRepository);
+    },
+    inject: [TransactionHost, Redis, OutboxRepository],
   },
   {
     provide: SessionRepository,

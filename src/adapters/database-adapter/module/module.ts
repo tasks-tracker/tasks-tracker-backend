@@ -10,6 +10,8 @@ import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter
 
 import { PG_PROMISE } from '../pg-promise';
 import { PgPromiseModule } from '../pg-promise';
+import { OutboxRepository } from '../repositories/outbox.repository';
+import { OutboxSchedulerService } from '../schedulers/outbox.scheduler.js';
 
 @Module({})
 export class DatabaseModule {
@@ -34,8 +36,8 @@ export class DatabaseModule {
         }),
       ],
       module: DatabaseModule,
-      providers: [],
-      exports: [pgPromiseModule, ClsModule],
+      providers: [OutboxRepository, OutboxSchedulerService],
+      exports: [pgPromiseModule, ClsModule, OutboxRepository],
     };
   }
 
@@ -58,8 +60,13 @@ export class DatabaseModule {
         }),
       ],
       module: DatabaseModule,
-      providers: [],
-      exports: [pgPromiseModule, ClsModule],
+      providers: [OutboxRepository, OutboxSchedulerService],
+      exports: [
+        pgPromiseModule,
+        ClsModule,
+        OutboxRepository,
+        OutboxSchedulerService,
+      ],
     };
   }
 }
