@@ -12,13 +12,16 @@ import {
   Board,
   UserIdVO,
   BoardIdVO,
+  FullBoardResponse,
 } from '../../domain';
+import { BoardCacheService } from '../services';
 
 @Injectable()
 export class BoardQueryRepositoryImpl implements BoardQueryRepository {
   private readonly knex = knex({ client: 'pg' });
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
+    private readonly boardCacheService: BoardCacheService,
   ) {}
 
   public async existByUserId(
@@ -59,7 +62,12 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
 
   public async findBoardsByUserId(
     userId: UserIdVO,
-  ): Promise<Result<Board[], BoardIsNotFoundDomainError>> {
+  ): Promise<
+    Result<
+      Pick<FullBoardResponse, 'board'>['board'][],
+      BoardIsNotFoundDomainError
+    >
+  > {
     const SQL = this.knex<BoardSchema>('boards')
       .select('id', 'title', 'owner_id', 'created_at', 'updated_at')
       .where('owner_id', userId.value)
@@ -71,20 +79,28 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
       SQL.bindings,
     );
 
+    const cachedBoards = await this.boardCacheService.getBoardsByUserId(
+      new UserIdVO(userId.value),
+    );
+
+    if (cachedBoards && cachedBoards.length > 0) {
+      return ok(cachedBoards.map((board) => board.board));
+    }
+
     if (!result) return err(new BoardIsNotFoundDomainError(userId.value));
 
     return ok(
-      result.map(
-        (board) =>
-          new Board(
-            new BoardIdVO(board.id),
-            new BoardTitleVO(board.title),
-            new UserIdVO(board.owner_id),
-            board.created_at,
-            board.updated_at,
-            false,
-          ),
-      ),
+      result.map((board) => {
+        return {
+          id: board.id,
+          title: board.title,
+          owner: board.owner_id,
+          ownerId: board.owner_id,
+          createdAt: board.created_at.toISOString(),
+          updatedAt: board.updated_at.toISOString(),
+          userId: board.owner_id,
+        };
+      }),
     );
   }
 

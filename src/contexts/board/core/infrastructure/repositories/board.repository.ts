@@ -18,6 +18,7 @@ import { randomUUID } from 'crypto';
 import { BoardSchema } from '@adapters/database-adapter';
 import { err, ok, Result } from 'neverthrow';
 import { DomainError } from '@libs/domain-error';
+import { BoardCacheService } from '../services';
 
 @Injectable()
 export class BoardRepositoryImpl implements BoardRepository {
@@ -25,6 +26,7 @@ export class BoardRepositoryImpl implements BoardRepository {
 
   constructor(
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
+    private readonly boardCacheService: BoardCacheService,
   ) {}
 
   public async save(board: Board): Promise<void> {
@@ -89,6 +91,17 @@ export class BoardRepositoryImpl implements BoardRepository {
   }
 
   private async saveCreatedEvent(board: Board): Promise<void> {
+    const newBoard = new Board(
+      new BoardIdVO(board.id.value),
+      new BoardTitleVO(board.title.value),
+      new UserIdVO(board.ownerId.value),
+      board.createdAt,
+      board.updatedAt,
+      board.isDeleted,
+    );
+
+    await this.boardCacheService.setBoard(newBoard);
+
     const SQL = this.knex<BoardSchema>('boards')
       .insert({
         id: board.id.value,
