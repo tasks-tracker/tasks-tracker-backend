@@ -1,8 +1,10 @@
 import { Query } from '@nestjs/cqrs';
-import { Board } from '../../../domain';
 import { UserIdVO } from '../../../domain';
+import { FullBoardResponse } from '../../../domain';
 
-export class FindByUserIdQuery extends Query<Board[]> {
+export class FindByUserIdQuery extends Query<
+  Pick<FullBoardResponse, 'board'>['board'][]
+> {
   constructor(public readonly userId: UserIdVO) {
     super();
   }
