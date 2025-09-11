@@ -33,6 +33,7 @@ import { TaskRepository, TaskRepositoryImpl } from '../core';
 import { BoardQueryRepository, BoardQueryRepositoryImpl } from '../core';
 import { ColumnQueryRepository, ColumnQueryRepositoryImpl } from '../core';
 import { TaskQueryRepository, TaskQueryRepositoryImpl } from '../core';
+import { BoardCacheService } from '../core/infrastructure/services';
 
 export const commandHandlersProviders = [
   CreateBoardCommandHandler,
@@ -70,6 +71,8 @@ export const repositoriesProviders = [
     useClass: TaskRepositoryImpl,
   },
 ];
+
+export const serviceProviders = [BoardCacheService];
 
 export const queryHandlersProviders = [
   GetBoardInfoByIdQueryHandler,

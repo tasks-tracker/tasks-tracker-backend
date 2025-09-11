@@ -1,12 +1,15 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { FindByUserIdQuery } from '../../queries';
 import { BoardQueryRepository } from '../../query-repositories';
-import { Board } from '../../../domain';
-import { BoardIdVO, UserIdVO, BoardTitleVO } from '../../../domain';
+import { FullBoardResponse } from '../../../domain';
 
 @QueryHandler(FindByUserIdQuery)
 export class FindBoardsByUserIdQueryHandler
-  implements IQueryHandler<FindByUserIdQuery, Board[]>
+  implements
+    IQueryHandler<
+      FindByUserIdQuery,
+      Pick<FullBoardResponse, 'board'>['board'][]
+    >
 {
   constructor(private readonly boardQueryRepository: BoardQueryRepository) {}
 
@@ -19,15 +22,6 @@ export class FindBoardsByUserIdQueryHandler
 
     const boards = result.value;
 
-    return boards.map((board) =>
-      Board.create(
-        new BoardIdVO(board.id.value),
-        new BoardTitleVO(board.title.value),
-        new UserIdVO(board.ownerId.value),
-        new Date(board.createdAt),
-        new Date(board.updatedAt),
-        board.isDeleted,
-      ),
-    );
+    return boards;
   }
 }

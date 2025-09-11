@@ -57,13 +57,13 @@ export class GetFullBoardQueryHandler
 
       return {
         board: {
-          id: board.id.value,
-          title: board.title.value,
-          owner: board.ownerId.value,
-          ownerId: board.ownerId.value,
-          createdAt: board.createdAt.toISOString(),
-          userId: board.ownerId.value,
-          updatedAt: board.updatedAt.toISOString(),
+          id: board.id,
+          title: board.title,
+          owner: board.ownerId,
+          ownerId: board.ownerId,
+          createdAt: board.createdAt,
+          userId: board.ownerId,
+          updatedAt: board.updatedAt,
         },
         columns: columnWithTasks,
       };

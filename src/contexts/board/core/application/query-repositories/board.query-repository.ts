@@ -1,4 +1,9 @@
-import { BoardIdVO, BoardTitleVO, UserIdVO } from '../../domain';
+import {
+  BoardIdVO,
+  BoardTitleVO,
+  FullBoardResponse,
+  UserIdVO,
+} from '../../domain';
 import { Board } from '../../domain';
 import { BoardIsNotFoundDomainError } from '../../domain';
 import { DomainError } from '@libs/domain-error';
@@ -15,7 +20,12 @@ export abstract class BoardQueryRepository {
 
   public abstract findBoardsByUserId(
     userId: UserIdVO,
-  ): Promise<Result<Board[], BoardIsNotFoundDomainError>>;
+  ): Promise<
+    Result<
+      Pick<FullBoardResponse, 'board'>['board'][],
+      BoardIsNotFoundDomainError
+    >
+  >;
 
   public abstract existByUserId(
     userId: string,

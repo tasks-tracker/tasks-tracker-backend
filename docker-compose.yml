@@ -1,16 +1,27 @@
-version: '3.8'
-
 services:
   redis:
     image: redis:6.2
     container_name: redis_container
     restart: always
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
-    command: ["redis-server", "--appendonly", "yes"]
-
+    command: ['redis-server', '--appendonly', 'yes']
+    networks:
+      - backend-network
+  redis-ui:
+    image: redis/redisinsight:latest
+    container_name: redis-ui
+    restart: always
+    depends_on:
+      - redis
+    ports:
+      - '5540:5540'
+    volumes:
+      - redis_insight:/data
+    networks:
+      - backend-network
   database:
     image: postgres:17.4
     container_name: database
@@ -20,7 +31,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: database
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -29,7 +40,7 @@ services:
     build:
       context: .
     volumes:
-      - ./configs:/app/configs 
+      - ./configs:/app/configs
     ports:
       - 8000:8000
     restart: always
@@ -133,4 +144,9 @@ services:
 
 volumes:
   redis_data:
+  redis_insight:
   pgdata:
+
+networks:
+  backend-network:
+    driver: bridge
