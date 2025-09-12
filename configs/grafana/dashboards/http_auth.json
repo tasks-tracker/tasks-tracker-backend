@@ -20,7 +20,12 @@
         "current": {
           "selected": true,
           "text": "All",
-          "value": ["auth_login", "auth_logout", "auth_me", "auth_register_by_login"]
+          "value": [
+            "auth_login",
+            "auth_logout",
+            "auth_me",
+            "auth_register_by_login"
+          ]
         }
       }
     ]
