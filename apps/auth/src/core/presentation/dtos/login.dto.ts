@@ -10,4 +10,5 @@ export class LoginDto {
     example: 'P@ssword123',
   })
   password: string;
+  requestId: string;
 }

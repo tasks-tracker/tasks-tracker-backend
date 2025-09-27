@@ -2,26 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { Logger } from 'libs/logger';
 import { EventEmitter } from 'events';
 
-export interface RegisterResponse {
-  login: string;
+export interface LoginResponse {
+  sessionToken?: string;
   status: string;
   message: string;
   requestId: string;
 }
 
 @Injectable()
-export class AuthService extends EventEmitter {
-  private readonly logger = new Logger({ context: 'AuthService' });
-  private responses = new Map<string, RegisterResponse>();
+export class LoginService extends EventEmitter {
+  private readonly logger = new Logger({ context: 'LoginService' });
+  private responses = new Map<string, LoginResponse>();
   private pendingRequests = new Map<
     string,
     {
-      resolve: (value: RegisterResponse) => void;
+      resolve: (value: LoginResponse) => void;
       reject: (reason?: any) => void;
     }
   >();
 
-  public saveResponse(requestId: string, response: RegisterResponse): void {
+  public saveResponse(requestId: string, response: LoginResponse): void {
     this.logger.log(`Saving response for request ${requestId}:`, response);
     this.responses.set(requestId, response);
 
@@ -42,7 +42,7 @@ export class AuthService extends EventEmitter {
     );
   }
 
-  public getResponse(requestId: string): RegisterResponse | null {
+  public getResponse(requestId: string): LoginResponse | null {
     const response = this.responses.get(requestId);
     if (response) {
       this.logger.log(`Retrieved response for request ${requestId}:`, response);
@@ -55,7 +55,7 @@ export class AuthService extends EventEmitter {
   public waitForResponse(
     requestId: string,
     timeout: number = 30000,
-  ): Promise<RegisterResponse> {
+  ): Promise<LoginResponse> {
     return new Promise((resolve, reject) => {
       const existingResponse = this.responses.get(requestId);
       if (existingResponse) {

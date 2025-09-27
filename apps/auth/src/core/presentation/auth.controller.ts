@@ -126,25 +126,44 @@ export class AuthController {
 
       if (result.isOk()) {
         const sessionToken = result.value;
-        return {
+        this.kafkaClient.emit('login-response', {
           sessionToken: sessionToken.value,
           message: 'USER_LOGGED_IN_SUCCESSFULLY',
           status: 'OK',
-        };
+          requestId: payload.requestId,
+        });
+        return;
       }
 
       const err = result.error;
       if (err instanceof UserWithLoginNotExistDomainError) {
-        throw new BadRequestException('USER_NOT_FOUND');
+        this.kafkaClient.emit('login-response', {
+          message: 'USER_NOT_FOUND',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
       } else if (err instanceof InvalidPasswordDomainError) {
-        throw new BadRequestException('INVALID_PASSWORD');
+        this.kafkaClient.emit('login-response', {
+          message: 'INVALID_PASSWORD',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
       }
-      throw new BadRequestException('UNKNOWN_ERROR');
+      this.kafkaClient.emit('login-response', {
+        message: 'UNKNOWN_ERROR',
+        status: 'BAD_REQUEST',
+        requestId: payload.requestId,
+      });
+      return;
     } catch (err) {
-      if (err instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-      throw err;
+      this.kafkaClient.emit('login-response', {
+        message: 'UNKNOWN_ERROR',
+        status: 'BAD_REQUEST',
+        requestId: payload.requestId,
+      });
+      return;
     }
   }
 

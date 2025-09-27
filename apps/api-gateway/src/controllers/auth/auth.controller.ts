@@ -11,7 +11,7 @@ import {
 import { Post, Inject, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { RegisterUserByLoginDto } from './dtos/register-user-by-login.dto';
-import { AuthService } from '../../services';
+import { AuthService, LoginService } from '../../services';
 import {
   createTrackExecutionTimeInterceptor,
   createTrackStatusesInterceptor,
@@ -22,15 +22,22 @@ import { UseInterceptors } from '@nestjs/common';
 import { GetUserInfoResponseDto, LoginBodyDto } from './dtos';
 import { SessionToken } from 'libs/session-token-decorator';
 import { Logger } from 'libs/logger';
+import { SessionCookieConfig } from 'adapters/config-adapter';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
+  private readonly sessionCookieConfig: SessionCookieConfig;
   constructor(
     private readonly authService: AuthService,
+    private readonly loginService: LoginService,
     private readonly logger: Logger,
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
+    configService: ConfigService,
   ) {
     logger.setContext(AuthController.name);
+    this.sessionCookieConfig =
+      configService.get<SessionCookieConfig>('sessionCookie')!;
   }
 
   @Post('register-by-login')
@@ -107,29 +114,56 @@ export class AuthController {
     status: HttpStatus.UNPROCESSABLE_ENTITY,
     description: 'Validation error',
   })
-  login(@Body() body: LoginBodyDto, @Res() res: Response) {
+  public async login(@Body() body: LoginBodyDto, @Res() res: Response) {
+    const requestId = crypto.randomUUID();
+    this.kafkaClient.emit('login', {
+      ...body,
+      requestId,
+    });
+
     try {
-      this.kafkaClient.emit('login', JSON.stringify(body));
-      res
-        .status(HttpStatus.ACCEPTED)
-        .json({
+      const result = await this.loginService.waitForResponse(requestId, 30000);
+
+      //TODO: должно быть через конфиг, разобраться почему не работает
+      if (result.status === 'OK') {
+        res.cookie('session-token', result.sessionToken, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 1000000000,
+        });
+        res.send({
           success: true,
           message: 'USER_LOGGED_IN_SUCCESSFULLY',
           status: 'OK',
-        })
-        .cookie('session-token', 'test', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 1000 * 60 * 60 * 24 * 30, // 30 дней
-          sameSite: 'lax',
         });
-    } catch (error) {
-      console.log('Login error:', error);
-      res.status(HttpStatus.BAD_REQUEST).json({
-        success: false,
-        message: 'USER_NOT_FOUND || INVALID_PASSWORD || UNKNOWN_ERROR',
-        status: 'BAD_REQUEST',
+
+        return {
+          success: true,
+          message: 'USER_LOGGED_IN_SUCCESSFULLY',
+          status: 'OK',
+        };
+      }
+
+      throw new BadRequestException({
+        message: result.message,
+        status: result.status,
       });
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for login response', error: String(error) },
+        'AuthController',
+      );
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      return {
+        success: false,
+        message: 'LOGIN_TIMEOUT',
+        status: 'TIMEOUT',
+        requestId,
+      };
     }
   }
 

@@ -13,6 +13,7 @@ import {
 import { MetricsModule } from 'adapters/metrics-adapter';
 import { AuthService } from '../services/auth.service';
 import { KafkaModule } from 'adapters/kafka-adapter';
+import { LoginService } from '../services/login.service';
 
 @Module({
   imports: [
@@ -54,6 +55,6 @@ import { KafkaModule } from 'adapters/kafka-adapter';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthConsumer],
+  providers: [AuthService, AuthConsumer, LoginService, ConfigService],
 })
 export class ApiGatewayModule {}

@@ -1,14 +1,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Logger } from 'libs/logger';
 import { Kafka, Consumer, EachMessagePayload } from 'kafkajs';
-import { AuthService } from '../services/auth.service';
-
-export interface RegisterResponse {
-  login: string;
-  status: string;
-  message: string;
-  requestId: string;
-}
+import { AuthService, RegisterResponse } from '../services/auth.service';
+import { LoginResponse, LoginService } from '../services';
 
 @Injectable()
 export class AuthConsumer implements OnModuleInit {
@@ -17,6 +11,7 @@ export class AuthConsumer implements OnModuleInit {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly loginService: LoginService,
     private readonly kafka: Kafka,
     private readonly logger: Logger,
   ) {
@@ -30,22 +25,46 @@ export class AuthConsumer implements OnModuleInit {
       fromBeginning: false,
     });
 
+    await this.consumer.subscribe({
+      topic: 'login-response',
+      fromBeginning: false,
+    });
+
     await this.consumer.run({
       autoCommit: false,
       eachMessage: async (message: EachMessagePayload) => {
         if (!message.message.value) {
           return await this.commitOffset(message);
         }
-        const event = JSON.parse(
-          message.message.value.toString(),
-        ) as RegisterResponse;
 
-        this.logger.log(
-          `Received response for request ${event.requestId}:`,
-          event,
-        );
-
-        await this.authService.saveResponse(event.requestId, event);
+        switch (message.topic) {
+          case 'register-by-login-response': {
+            const event = JSON.parse(
+              message.message.value.toString(),
+            ) as RegisterResponse;
+            this.logger.log(
+              `Received response for request ${event.requestId}:`,
+              event,
+            );
+            this.authService.saveResponse(event.requestId, event);
+            break;
+          }
+          case 'login-response': {
+            const loginEvent = JSON.parse(
+              message.message.value.toString(),
+            ) as LoginResponse;
+            this.logger.log(
+              `Received response for request ${loginEvent.requestId}:`,
+              loginEvent,
+            );
+            this.loginService.saveResponse(loginEvent.requestId, loginEvent);
+            break;
+          }
+          default: {
+            this.logger.error(`Unknown topic: ${message.topic}`);
+            break;
+          }
+        }
 
         await this.commitOffset(message);
       },
