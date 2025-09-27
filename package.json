@@ -7,17 +7,20 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "cross-env ENV_PATH=./configs/backend/dev.env nest start --watch",
     "start:dev": "cross-env ENV_PATH=./configs/backend/dev.env nest start --watch",
+    "start:api-gateway": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start api-gateway --watch",
+    "start:auth": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start auth --watch",
+    "start:board": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start board --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/apps/task-tracker/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./apps/task-tracker/test/jest-e2e.json",
     "migration": "npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts",
     "migration:up": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts up",
     "migration:down": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts down"
@@ -29,6 +32,7 @@
     "@nestjs/config": "4.0.1",
     "@nestjs/core": "11.0.1",
     "@nestjs/cqrs": "11.0.2",
+    "@nestjs/microservices": "^11.0.1",
     "@nestjs/platform-express": "11.0.1",
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/swagger": "11.0.7",
@@ -37,7 +41,7 @@
     "bcrypt": "5.0.1",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.1",
-    "cookie-parser": "1.4.7",
+    "cookie-parser": "^1.4.7",
     "cross-env": "7.0.3",
     "dotenv": "16.4.7",
     "ioredis": "5.6.0",
@@ -60,7 +64,7 @@
     "@swc/cli": "0.6.0",
     "@swc/core": "1.10.7",
     "@types/bcrypt": "5.0.2",
-    "@types/cookie-parser": "1.4.8",
+    "@types/cookie-parser": "^1.4.8",
     "@types/express": "5.0.0",
     "@types/jest": "29.5.14",
     "@types/node": "22.10.7",
@@ -87,7 +91,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -95,12 +99,15 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@adapters(|/.*)$": "<rootDir>/adapters/$1",
       "^@libs(|/.*)$": "<rootDir>/libs/$1",
       "^@contexts(|/.*)$": "<rootDir>/contexts/$1"
-    }
+    },
+    "roots": [
+      "<rootDir>/apps/"
+    ]
   }
 }
