@@ -56,7 +56,7 @@ export class AuthController {
       );
 
       if (result.isOk()) {
-        this.kafkaClient.emit('register-by-login', {
+        this.kafkaClient.emit('register-by-login-response', {
           login: payload.login,
           status: 'SUCCESS',
           message: 'USER_REGISTERED_SUCCESSFULLY',
@@ -73,17 +73,9 @@ export class AuthController {
           message: 'LOGIN_ALREADY_USED',
         });
         return;
-      } else {
-        this.kafkaClient.emit('register-by-login-response', {
-          login: payload.login,
-          requestId: payload.requestId,
-          status: 'BAD_REQUEST',
-          message: 'UNKNOWN_ERROR',
-        });
-        return;
       }
-    } catch (error) {
-      if (error instanceof ValidationException) {
+
+      if (err instanceof ValidationException) {
         this.kafkaClient.emit('register-by-login-response', {
           login: payload.login,
           requestId: payload.requestId,
@@ -92,26 +84,33 @@ export class AuthController {
         });
         return;
       }
-      if (error instanceof ConflictException) {
+
+      if (err instanceof ConflictException) {
         this.kafkaClient.emit('register-by-login-response', {
           login: payload.login,
           requestId: payload.requestId,
-          status: 'BAD_REQUEST',
+          status: 'CONFLICT',
           message: 'CONFLICT_ERROR',
         });
-        return;
       }
+
+      this.kafkaClient.emit('register-by-login-response', {
+        login: payload.login,
+        requestId: payload.requestId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+      });
+    } catch (error) {
       this.logger.error(
-        { message: 'Unknown error occurred', error: String(error) },
+        { message: 'Error registering user by login', error: String(error) },
         'AuthController',
       );
       this.kafkaClient.emit('register-by-login-response', {
         login: payload.login,
         requestId: payload.requestId,
         status: 'BAD_REQUEST',
-        message: 'INTERNAL_SERVER_ERROR',
+        message: 'VALIDATION_ERROR',
       });
-      return;
     }
   }
 

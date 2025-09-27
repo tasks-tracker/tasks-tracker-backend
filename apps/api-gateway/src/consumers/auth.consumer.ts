@@ -45,17 +45,11 @@ export class AuthConsumer implements OnModuleInit {
           event,
         );
 
-        if (event) {
-          this.saveResponse(event);
-        }
+        await this.authService.saveResponse(event.requestId, event);
 
         await this.commitOffset(message);
       },
     });
-  }
-
-  saveResponse(event: RegisterResponse) {
-    return event;
   }
 
   async commitOffset(message: EachMessagePayload): Promise<void> {

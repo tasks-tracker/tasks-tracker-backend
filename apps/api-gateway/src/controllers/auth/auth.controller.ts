@@ -1,6 +1,8 @@
 import {
   Body,
+  ConflictException,
   Controller,
+  BadRequestException,
   HttpCode,
   HttpStatus,
   Res,
@@ -19,16 +21,17 @@ import { ClientKafka } from '@nestjs/microservices';
 import { UseInterceptors } from '@nestjs/common';
 import { GetUserInfoResponseDto, LoginBodyDto } from './dtos';
 import { SessionToken } from 'libs/session-token-decorator';
-import { AuthConsumer } from '../../consumers/auth.consumer';
-import { RegisterResponse } from '../../consumers/auth.consumer';
+import { Logger } from 'libs/logger';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly authConsumer: AuthConsumer,
     private readonly authService: AuthService,
+    private readonly logger: Logger,
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
-  ) {}
+  ) {
+    logger.setContext(AuthController.name);
+  }
 
   @Post('register-by-login')
   @UseInterceptors(
@@ -43,26 +46,47 @@ export class AuthController {
     status: HttpStatus.ACCEPTED,
     description: 'REGISTRATION_REQUEST_ACCEPTED',
   })
-  async registerByLogin(@Body() body: RegisterUserByLoginDto) {
+  public async registerByLogin(@Body() body: RegisterUserByLoginDto) {
     const requestId = crypto.randomUUID();
-
     this.kafkaClient.emit('register-by-login', {
       ...body,
       requestId,
     });
 
-    const response = await this.authConsumer.saveResponse(requestId);
-    console.log('Response:', response);
-
-    if (response) {
-      return response;
+    try {
+      const response = await this.authService.waitForResponse(requestId, 30000);
+      if (response.status === 'SUCCESS') {
+        return {
+          success: true,
+          message: 'USER_REGISTERED_SUCCESSFULLY',
+          status: 'SUCCESS',
+        };
+      }
+      if (response.status === 'CONFLICT') {
+        throw new ConflictException(response.message);
+      }
+      if (response.status === 'BAD_REQUEST') {
+        throw new BadRequestException(response.message);
+      }
+      throw new Error(response.message);
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for response', error: String(error) },
+        'AuthController',
+      );
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException({
+          message: error.message,
+          status: 'BAD_REQUEST',
+        });
+      }
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
     }
-    return {
-      login: body.login,
-      status: 'PROCESSING',
-      message: 'REGISTRATION_REQUEST_ACCEPTED',
-      requestId,
-    };
   }
 
   @Post('login')

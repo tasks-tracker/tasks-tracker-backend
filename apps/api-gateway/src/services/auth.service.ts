@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Logger } from 'libs/logger';
+import { EventEmitter } from 'events';
 
 interface RegisterResponse {
   login: string;
@@ -9,13 +10,26 @@ interface RegisterResponse {
 }
 
 @Injectable()
-export class AuthService {
+export class AuthService extends EventEmitter {
   private readonly logger = new Logger({ context: 'AuthService' });
   private responses = new Map<string, RegisterResponse>();
+  private pendingRequests = new Map<
+    string,
+    {
+      resolve: (value: RegisterResponse) => void;
+      reject: (reason?: any) => void;
+    }
+  >();
 
   public saveResponse(requestId: string, response: RegisterResponse): void {
     this.logger.log(`Saving response for request ${requestId}:`, response);
     this.responses.set(requestId, response);
+
+    const pendingRequest = this.pendingRequests.get(requestId);
+    if (pendingRequest) {
+      pendingRequest.resolve(response);
+      this.pendingRequests.delete(requestId);
+    }
 
     setTimeout(
       () => {
@@ -36,6 +50,31 @@ export class AuthService {
     }
     this.logger.log(`No response found for request ${requestId}`);
     return null;
+  }
+
+  public waitForResponse(
+    requestId: string,
+    timeout: number = 30000,
+  ): Promise<RegisterResponse> {
+    return new Promise((resolve, reject) => {
+      const existingResponse = this.responses.get(requestId);
+      if (existingResponse) {
+        resolve(existingResponse);
+        return;
+      }
+
+      this.pendingRequests.set(requestId, { resolve, reject });
+
+      setTimeout(() => {
+        const pendingRequest = this.pendingRequests.get(requestId);
+        if (pendingRequest) {
+          pendingRequest.reject(
+            new Error(`Timeout waiting for response ${requestId}`),
+          );
+          this.pendingRequests.delete(requestId);
+        }
+      }, timeout);
+    });
   }
 
   deleteResponse(requestId: string): void {
