@@ -5,8 +5,9 @@ import { SessionCookieConfig } from 'adapters/config-adapter';
 import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 import { RegisterByLoginBodyDto } from './dtos/register-by-login.dto';
 import { Logger } from 'libs/logger';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
+  GetUserInfoQuery,
   LoginUserCommand,
   LogoutSessionCommand,
   RegisterUserByLoginCommand,
@@ -17,11 +18,12 @@ import {
   NotUsedSessionTokenDomainError,
   PasswordVO,
   SessionTokenVO,
+  UserIdVO,
   UserLoginAlreadyUsedDomainError,
   UserWithLoginNotExistDomainError,
 } from '../domain';
 import { ValidationException } from 'libs/validation-exception';
-import { LoginDto, LogoutDto } from './dtos';
+import { LoginDto, LogoutDto, UserPayloadDto } from './dtos';
 
 @Controller()
 export class AuthController {
@@ -31,6 +33,7 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     private readonly authHelper: AuthHelper,
     private readonly configService: ConfigService,
+    private readonly queryBus: QueryBus,
     private readonly logger: Logger,
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {
@@ -218,16 +221,62 @@ export class AuthController {
     }
   }
 
-  //   @MessagePattern('me')
-  //   async me(@Payload() payload: string, @Res() res: Response) {
-  //     try {
-  //       const userId = this.authHelper.getUserIdBySessionToken(payload);
+  @MessagePattern('me')
+  async me(@Payload() payload: UserPayloadDto) {
+    try {
+      if (!payload.sessionToken) {
+        this.kafkaClient.emit('me-response', {
+          message: 'SESSION_TOKEN_NOT_FOUND',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
+      }
 
-  //       if (!userId) {
-  //         throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
-  //       }
-  //       const userInfo
-  //     } catch (error) {}
-  //   }
-  // }
+      const userId = await this.authHelper.getUserIdBySessionToken(
+        payload.sessionToken,
+      );
+
+      if (!userId) {
+        this.kafkaClient.emit('me-response', {
+          message: 'SESSION_TOKEN_NOT_FOUND',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
+      }
+      const userInfo = await this.queryBus.execute(
+        new GetUserInfoQuery(new UserIdVO(userId.value)),
+      );
+      if (!userInfo) {
+        this.kafkaClient.emit('me-response', {
+          message: 'USER_NOT_FOUND',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
+      }
+      this.kafkaClient.emit('me-response', {
+        message: 'USER_FOUND',
+        status: 'OK',
+        requestId: payload.requestId,
+        userInfo: userInfo,
+      });
+    } catch (error) {
+      if (error instanceof ValidationException) {
+        this.kafkaClient.emit('me-response', {
+          message: 'UNKNOWN_ERROR',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
+      }
+      this.kafkaClient.emit('me-response', {
+        message: 'UNKNOWN_ERROR',
+        status: 'BAD_REQUEST',
+        requestId: payload.requestId,
+      });
+      return;
+    }
+  }
 }

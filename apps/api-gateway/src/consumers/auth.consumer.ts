@@ -6,6 +6,7 @@ import {
   AuthService,
   LoginResponse,
   LogoutResponse,
+  MeResponse,
   RegisterResponse,
 } from '../services';
 
@@ -36,6 +37,11 @@ export class AuthConsumer implements OnModuleInit {
 
     await this.consumer.subscribe({
       topic: 'logout-response',
+      fromBeginning: false,
+    });
+
+    await this.consumer.subscribe({
+      topic: 'me-response',
       fromBeginning: false,
     });
 
@@ -83,6 +89,19 @@ export class AuthConsumer implements OnModuleInit {
             this.authService.saveResponse(logoutEvent.requestId, logoutEvent);
             break;
           }
+
+          case 'me-response': {
+            const meEvent = JSON.parse(
+              message.message.value.toString(),
+            ) as MeResponse;
+            this.logger.log(
+              `Received response for request ${meEvent.requestId}:`,
+              meEvent,
+            );
+            this.authService.saveResponse(meEvent.requestId, meEvent);
+            break;
+          }
+
           default: {
             this.logger.error(`Unknown topic: ${message.topic}`);
             break;

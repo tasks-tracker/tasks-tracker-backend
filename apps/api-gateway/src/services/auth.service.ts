@@ -23,7 +23,18 @@ export interface LogoutResponse {
   sessionToken?: string;
 }
 
-export type AuthResponse = LoginResponse | LogoutResponse | RegisterResponse;
+export interface MeResponse {
+  status: string;
+  message: string;
+  requestId: string;
+  userInfo: Record<string, any>;
+}
+
+export type AuthResponse =
+  | LoginResponse
+  | LogoutResponse
+  | RegisterResponse
+  | MeResponse;
 
 @Injectable()
 export class AuthService extends EventEmitter {

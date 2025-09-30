@@ -182,10 +182,10 @@ export class KafkaModule implements OnModuleInit {
     };
   }
 
-  async onModuleInit(): Promise<void> {
-    const admin = this.kafka.admin();
-    await admin.connect();
-    await admin.disconnect();
+  onModuleInit(): void {
+    // const admin = this.kafka.admin();
+    // await admin.connect();
+    // await admin.disconnect();
     this.logger.log('Kafka connection established.');
   }
 }

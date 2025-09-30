@@ -11,7 +11,7 @@ import {
 import { Post, Inject, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { RegisterUserByLoginDto } from './dtos/register-user-by-login.dto';
-import { AuthService, LoginResponse } from '../../services';
+import { AuthService, LoginResponse, MeResponse } from '../../services';
 import {
   createTrackExecutionTimeInterceptor,
   createTrackStatusesInterceptor,
@@ -24,6 +24,7 @@ import { SessionToken } from 'libs/session-token-decorator';
 import { Logger } from 'libs/logger';
 import { SessionCookieConfig } from 'adapters/config-adapter';
 import { ConfigService } from '@nestjs/config';
+import { userInfo } from 'os';
 
 @Controller('auth')
 export class AuthController {
@@ -250,9 +251,47 @@ export class AuthController {
     status: HttpStatus.BAD_REQUEST,
     description: 'USER_INFO_NOT_FOUND',
   })
-  me(@SessionToken() sessionToken: string | null, @Res() res: Response) {
+  async me(@SessionToken() sessionToken: string | null, @Res() res: Response) {
+    const requestId = crypto.randomUUID();
+
+    console.log('sessionToken', sessionToken);
+
     if (!sessionToken) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
+    }
+
+    this.kafkaClient.emit('me', {
+      sessionToken,
+      requestId,
+    });
+
+    try {
+      const response = await this.authService.waitForResponse<MeResponse>(
+        requestId,
+        30000,
+      );
+      if (response.status === 'OK') {
+        res.status(HttpStatus.OK).json({
+          success: true,
+          message: 'USER_INFO_REQUEST_ACCEPTED',
+          status: 'OK',
+          userInfo: response.userInfo,
+        });
+        return {
+          success: true,
+          message: 'USER_INFO_REQUEST_ACCEPTED',
+          status: 'OK',
+        };
+      }
+      if (response.status === 'BAD_REQUEST') {
+        throw new BadRequestException(response.message);
+      }
+      throw new Error(response.message);
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for me response', error: String(error) },
+        'AuthController',
+      );
     }
     this.kafkaClient.emit('me', JSON.stringify(sessionToken));
     res.status(HttpStatus.OK).json({
