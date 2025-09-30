@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from '../controllers';
@@ -13,7 +13,7 @@ import {
 import { MetricsModule } from 'adapters/metrics-adapter';
 import { AuthService } from '../services/auth.service';
 import { KafkaModule } from 'adapters/kafka-adapter';
-import { LoginService } from '../services/login.service';
+import * as cookieParser from 'cookie-parser';
 
 @Module({
   imports: [
@@ -55,6 +55,12 @@ import { LoginService } from '../services/login.service';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthConsumer, LoginService, ConfigService],
+  providers: [AuthService, AuthConsumer, ConfigService],
 })
-export class ApiGatewayModule {}
+export class ApiGatewayModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(cookieParser())
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

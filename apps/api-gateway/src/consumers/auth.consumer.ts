@@ -1,17 +1,21 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Logger } from 'libs/logger';
 import { Kafka, Consumer, EachMessagePayload } from 'kafkajs';
-import { AuthService, RegisterResponse } from '../services/auth.service';
-import { LoginResponse, LoginService } from '../services';
+import {
+  AuthResponse,
+  AuthService,
+  LoginResponse,
+  LogoutResponse,
+  RegisterResponse,
+} from '../services';
 
 @Injectable()
 export class AuthConsumer implements OnModuleInit {
   private consumer: Consumer;
-  public registerByLoginResponse: RegisterResponse | null = null;
+  public response: AuthResponse | null = null;
 
   constructor(
     private readonly authService: AuthService,
-    private readonly loginService: LoginService,
     private readonly kafka: Kafka,
     private readonly logger: Logger,
   ) {
@@ -30,6 +34,11 @@ export class AuthConsumer implements OnModuleInit {
       fromBeginning: false,
     });
 
+    await this.consumer.subscribe({
+      topic: 'logout-response',
+      fromBeginning: false,
+    });
+
     await this.consumer.run({
       autoCommit: false,
       eachMessage: async (message: EachMessagePayload) => {
@@ -41,12 +50,15 @@ export class AuthConsumer implements OnModuleInit {
           case 'register-by-login-response': {
             const event = JSON.parse(
               message.message.value.toString(),
-            ) as RegisterResponse;
+            ) as AuthResponse;
             this.logger.log(
               `Received response for request ${event.requestId}:`,
               event,
             );
-            this.authService.saveResponse(event.requestId, event);
+            this.authService.saveResponse(
+              event.requestId,
+              event as RegisterResponse,
+            );
             break;
           }
           case 'login-response': {
@@ -57,7 +69,18 @@ export class AuthConsumer implements OnModuleInit {
               `Received response for request ${loginEvent.requestId}:`,
               loginEvent,
             );
-            this.loginService.saveResponse(loginEvent.requestId, loginEvent);
+            this.authService.saveResponse(loginEvent.requestId, loginEvent);
+            break;
+          }
+          case 'logout-response': {
+            const logoutEvent = JSON.parse(
+              message.message.value.toString(),
+            ) as LogoutResponse;
+            this.logger.log(
+              `Received response for request ${logoutEvent.requestId}:`,
+              logoutEvent,
+            );
+            this.authService.saveResponse(logoutEvent.requestId, logoutEvent);
             break;
           }
           default: {

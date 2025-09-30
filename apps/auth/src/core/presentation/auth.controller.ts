@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Controller,
-  Inject,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { ConflictException, Controller, Inject } from '@nestjs/common';
 import { AuthHelper } from '../../helpers';
 import { ConfigService } from '@nestjs/config';
 import { SessionCookieConfig } from 'adapters/config-adapter';
@@ -27,7 +21,7 @@ import {
   UserWithLoginNotExistDomainError,
 } from '../domain';
 import { ValidationException } from 'libs/validation-exception';
-import { LoginDto } from './dtos';
+import { LoginDto, LogoutDto } from './dtos';
 
 @Controller()
 export class AuthController {
@@ -157,7 +151,15 @@ export class AuthController {
         requestId: payload.requestId,
       });
       return;
-    } catch (err) {
+    } catch (error) {
+      if (error instanceof ValidationException) {
+        this.kafkaClient.emit('login-response', {
+          message: 'UNKNOWN_ERROR',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
+      }
       this.kafkaClient.emit('login-response', {
         message: 'UNKNOWN_ERROR',
         status: 'BAD_REQUEST',
@@ -168,29 +170,51 @@ export class AuthController {
   }
 
   @MessagePattern('logout')
-  async logout(@Payload() payload: string) {
+  async logout(@Payload() payload: LogoutDto) {
     try {
       const result = await this.commandBus.execute(
-        new LogoutSessionCommand(new SessionTokenVO(payload)),
+        new LogoutSessionCommand(new SessionTokenVO(payload.sessionToken)),
       );
 
       if (result.isOk()) {
-        return {
+        this.kafkaClient.emit('logout-response', {
           message: 'USER_LOGGED_OUT_SUCCESSFULLY',
           status: 'OK',
-        };
+          requestId: payload.requestId,
+        });
+        return;
       }
 
       const err = result.error;
       if (err instanceof NotUsedSessionTokenDomainError) {
-        throw new BadRequestException('SESSION_TOKEN_NOT_FOUND');
+        this.kafkaClient.emit('logout-response', {
+          message: 'SESSION_TOKEN_NOT_FOUND',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
       }
-      throw new BadRequestException('UNKNOWN_ERROR');
+      this.kafkaClient.emit('logout-response', {
+        message: 'UNKNOWN_ERROR',
+        status: 'BAD_REQUEST',
+        requestId: payload.requestId,
+      });
+      return;
     } catch (err) {
       if (err instanceof ValidationException) {
-        throw new UnprocessableEntityException();
+        this.kafkaClient.emit('logout-response', {
+          message: 'UNKNOWN_ERROR',
+          status: 'BAD_REQUEST',
+          requestId: payload.requestId,
+        });
+        return;
       }
-      throw err;
+      this.kafkaClient.emit('logout-response', {
+        message: 'UNKNOWN_ERROR',
+        status: 'BAD_REQUEST',
+        requestId: payload.requestId,
+      });
+      return;
     }
   }
 

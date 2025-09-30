@@ -11,7 +11,7 @@ import {
 import { Post, Inject, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { RegisterUserByLoginDto } from './dtos/register-user-by-login.dto';
-import { AuthService, LoginService } from '../../services';
+import { AuthService, LoginResponse } from '../../services';
 import {
   createTrackExecutionTimeInterceptor,
   createTrackStatusesInterceptor,
@@ -30,14 +30,13 @@ export class AuthController {
   private readonly sessionCookieConfig: SessionCookieConfig;
   constructor(
     private readonly authService: AuthService,
-    private readonly loginService: LoginService,
     private readonly logger: Logger,
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
     configService: ConfigService,
   ) {
     logger.setContext(AuthController.name);
     this.sessionCookieConfig =
-      configService.get<SessionCookieConfig>('sessionCookie')!;
+      configService.get<SessionCookieConfig>('session-cookie')!;
   }
 
   @Post('register-by-login')
@@ -122,14 +121,17 @@ export class AuthController {
     });
 
     try {
-      const result = await this.loginService.waitForResponse(requestId, 30000);
+      const result = await this.authService.waitForResponse<LoginResponse>(
+        requestId,
+        30000,
+      );
 
-      //TODO: должно быть через конфиг, разобраться почему не работает
+      this.logger.log('result', result, result.sessionToken);
       if (result.status === 'OK') {
         res.cookie('session-token', result.sessionToken, {
           httpOnly: true,
-          secure: true,
-          maxAge: 1000000000,
+          secure: this.sessionCookieConfig.secure,
+          maxAge: this.sessionCookieConfig.maxAge,
         });
         res.send({
           success: true,
@@ -189,27 +191,36 @@ export class AuthController {
     @SessionToken() sessionToken: string | null,
     @Res() res: Response,
   ) {
+    const requestId = crypto.randomUUID();
+    this.kafkaClient.emit('logout', {
+      sessionToken,
+      requestId,
+    });
+
     if (!sessionToken) {
-      res.status(HttpStatus.BAD_REQUEST).json({
-        success: false,
-        message: 'SESSION_TOKEN_NOT_FOUND',
-        status: 'BAD_REQUEST',
-      });
-      return;
+      throw new BadRequestException('SESSION_TOKEN_NOT_FOUND');
     }
 
     try {
-      // Отправляем запрос на logout и ждем ответ
-      await this.kafkaClient
-        .send('logout', JSON.stringify(sessionToken))
-        .toPromise();
+      const response = await this.authService.waitForResponse(requestId, 30000);
 
-      // Удаляем cookie из браузера
-      res.clearCookie('session-token');
-      res.status(HttpStatus.OK).json({
-        success: true,
-        message: 'USER_LOGGED_OUT_SUCCESSFULLY',
-        status: 'OK',
+      if (response.status === 'OK') {
+        res.clearCookie('session-token');
+        res.status(HttpStatus.OK).json({
+          success: true,
+          message: 'USER_LOGGED_OUT_SUCCESSFULLY',
+          status: 'OK',
+        });
+        return {
+          success: true,
+          message: 'USER_LOGGED_OUT_SUCCESSFULLY',
+          status: 'OK',
+        };
+      }
+
+      throw new BadRequestException({
+        message: response.message,
+        status: response.status,
       });
     } catch (error) {
       console.log('Logout error:', error);

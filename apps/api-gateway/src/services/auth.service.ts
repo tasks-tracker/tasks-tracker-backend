@@ -9,19 +9,38 @@ export interface RegisterResponse {
   requestId: string;
 }
 
+export interface LoginResponse {
+  sessionToken?: string;
+  status: string;
+  message: string;
+  requestId: string;
+}
+
+export interface LogoutResponse {
+  status: string;
+  message: string;
+  requestId: string;
+  sessionToken?: string;
+}
+
+export type AuthResponse = LoginResponse | LogoutResponse | RegisterResponse;
+
 @Injectable()
 export class AuthService extends EventEmitter {
   private readonly logger = new Logger({ context: 'AuthService' });
-  private responses = new Map<string, RegisterResponse>();
+  private responses = new Map<string, AuthResponse>();
   private pendingRequests = new Map<
     string,
     {
-      resolve: (value: RegisterResponse) => void;
+      resolve: (value: AuthResponse) => void;
       reject: (reason?: any) => void;
     }
   >();
 
-  public saveResponse(requestId: string, response: RegisterResponse): void {
+  public saveResponse<T extends AuthResponse>(
+    requestId: string,
+    response: T,
+  ): void {
     this.logger.log(`Saving response for request ${requestId}:`, response);
     this.responses.set(requestId, response);
 
@@ -42,8 +61,8 @@ export class AuthService extends EventEmitter {
     );
   }
 
-  public getResponse(requestId: string): RegisterResponse | null {
-    const response = this.responses.get(requestId);
+  public getResponse<T extends AuthResponse>(requestId: string): T | null {
+    const response = this.responses.get(requestId) as T;
     if (response) {
       this.logger.log(`Retrieved response for request ${requestId}:`, response);
       return response;
@@ -52,18 +71,23 @@ export class AuthService extends EventEmitter {
     return null;
   }
 
-  public waitForResponse(
+  public waitForResponse<T extends AuthResponse>(
     requestId: string,
     timeout: number = 30000,
-  ): Promise<RegisterResponse> {
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
-      const existingResponse = this.responses.get(requestId);
+      const existingResponse = this.responses.get(requestId) as T;
       if (existingResponse) {
         resolve(existingResponse);
         return;
       }
 
-      this.pendingRequests.set(requestId, { resolve, reject });
+      console.log('pendingRequests', this.pendingRequests, existingResponse);
+
+      this.pendingRequests.set(requestId, {
+        resolve: (value) => resolve(value as T),
+        reject,
+      });
 
       setTimeout(() => {
         const pendingRequest = this.pendingRequests.get(requestId);
