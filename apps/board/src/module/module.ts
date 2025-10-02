@@ -11,21 +11,21 @@ import { ConfigService } from '@nestjs/config';
 import { CacheConfig } from 'adapters/config-adapter';
 import { serviceProviders } from './module.providers';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { BoardController } from '../core/presentation';
 
 @Global()
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'AUTH_SERVICE',
+        name: 'KAFKA_SERVICE',
         transport: Transport.KAFKA,
         options: {
           client: {
-            clientId: 'auth',
             brokers: ['localhost:9092'],
           },
           consumer: {
-            groupId: 'board-group',
+            groupId: 'board-consumer-group',
           },
         },
       },
@@ -36,6 +36,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       inject: [ConfigService],
     }),
   ],
+  controllers: [BoardController],
   providers: [
     ...serviceProviders,
     ...commandHandlersProviders,

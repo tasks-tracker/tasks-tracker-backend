@@ -16,7 +16,7 @@ export async function bootstrap() {
           brokers: ['localhost:9092'],
         },
         consumer: {
-          groupId: 'board-group',
+          groupId: 'board-consumer-group',
         },
       },
     },

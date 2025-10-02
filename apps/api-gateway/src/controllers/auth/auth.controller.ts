@@ -16,7 +16,7 @@ import {
   createTrackExecutionTimeInterceptor,
   createTrackStatusesInterceptor,
 } from 'adapters/metrics-adapter';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClientKafka } from '@nestjs/microservices';
 import { UseInterceptors } from '@nestjs/common';
 import { GetUserInfoResponseDto, LoginBodyDto } from './dtos';
@@ -24,8 +24,8 @@ import { SessionToken } from 'libs/session-token-decorator';
 import { Logger } from 'libs/logger';
 import { SessionCookieConfig } from 'adapters/config-adapter';
 import { ConfigService } from '@nestjs/config';
-import { userInfo } from 'os';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   private readonly sessionCookieConfig: SessionCookieConfig;

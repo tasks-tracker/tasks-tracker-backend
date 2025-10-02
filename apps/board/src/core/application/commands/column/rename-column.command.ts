@@ -7,6 +7,7 @@ export class RenameColumnCommand extends Command<Result<void, DomainError>> {
   constructor(
     public readonly columnId: ColumnIdVO,
     public readonly newTitle: ColumnTitleVO,
+    public readonly userId: UserIdVO,
   ) {
     super();
   }

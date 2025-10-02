@@ -1,4 +1,4 @@
-import { Board } from '@contexts/board/core';
+import { Board } from '../aggregates';
 import { TaskInterface } from './task.interface';
 
 export interface DefaultBoardResponse {

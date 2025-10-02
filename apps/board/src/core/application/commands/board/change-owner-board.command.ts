@@ -7,6 +7,7 @@ export class ChangeBoardOwnerCommand extends Command<
   Result<void, DomainError>
 > {
   constructor(
+    public readonly currentOwnerId: UserIdVO,
     public readonly boardId: BoardIdVO,
     public readonly newOwnerId: UserIdVO,
   ) {

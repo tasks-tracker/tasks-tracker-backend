@@ -1,6 +1,6 @@
 import { IsUUID } from 'class-validator';
 import { validateSync } from 'class-validator';
-import { ValidationException } from '@libs/validation-exception';
+import { ValidationException } from 'libs/validation-exception';
 
 export class BoardIdVO {
   @IsUUID()

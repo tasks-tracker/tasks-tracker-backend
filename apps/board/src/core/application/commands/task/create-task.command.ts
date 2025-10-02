@@ -7,6 +7,7 @@ import {
 } from '../../../domain';
 import { Result } from 'neverthrow';
 import { DomainError } from 'libs/domain-error';
+import { UserIdVO } from 'apps/auth/src';
 
 export class CreateTaskCommand extends Command<Result<string, DomainError>> {
   constructor(
@@ -14,6 +15,7 @@ export class CreateTaskCommand extends Command<Result<string, DomainError>> {
     public readonly description: TaskDescriptionVO,
     public readonly order: TaskOrderVO,
     public readonly columnId: ColumnIdVO,
+    public readonly ownerId: UserIdVO,
   ) {
     super();
   }

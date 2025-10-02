@@ -1,58 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { Logger } from 'libs/logger';
 import { EventEmitter } from 'events';
+import { Logger } from 'libs/logger';
 
-export interface RegisterResponse {
-  login: string;
+export interface CreateBoardResponse {
   status: string;
   message: string;
   requestId: string;
+  boardId: string;
 }
 
-export interface LoginResponse {
-  sessionToken?: string;
-  status: string;
-  message: string;
-  requestId: string;
-}
-
-export interface LogoutResponse {
-  status: string;
-  message: string;
-  requestId: string;
-  sessionToken?: string;
-}
-
-export interface MeResponse {
-  status: string;
-  message: string;
-  requestId: string;
-  userInfo: Record<string, any>;
-}
-
-export type AuthResponse =
-  | LoginResponse
-  | LogoutResponse
-  | RegisterResponse
-  | MeResponse;
+export type BoardResponse = CreateBoardResponse;
 
 @Injectable()
-export class AuthService extends EventEmitter {
-  private readonly logger = new Logger({ context: 'AuthService' });
-  private responses = new Map<string, AuthResponse>();
+export class BoardService extends EventEmitter {
+  private readonly logger = new Logger({ context: 'BoardService' });
+  private responses = new Map<string, BoardResponse>();
   private pendingRequests = new Map<
     string,
     {
-      resolve: (value: AuthResponse) => void;
+      resolve: (value: BoardResponse) => void;
       reject: (reason?: any) => void;
     }
   >();
 
-  public saveResponse<T extends AuthResponse>(
-    requestId: string,
-    response: T,
-  ): void {
-    this.logger.log(`Saving response for request ${requestId}:`, response);
+  public saveResponse<T extends BoardResponse>(requestId: string, response: T) {
+    this.logger.log(
+      `Saving Board response for request ${requestId}:`,
+      response,
+    );
+
     this.responses.set(requestId, response);
 
     const pendingRequest = this.pendingRequests.get(requestId);
@@ -72,7 +48,7 @@ export class AuthService extends EventEmitter {
     );
   }
 
-  public getResponse<T extends AuthResponse>(requestId: string): T | null {
+  public getResponse<T extends BoardResponse>(requestId: string) {
     const response = this.responses.get(requestId) as T;
     if (response) {
       this.logger.log(`Retrieved response for request ${requestId}:`, response);
@@ -82,7 +58,7 @@ export class AuthService extends EventEmitter {
     return null;
   }
 
-  public waitForResponse<T extends AuthResponse>(
+  public waitForResponse<T extends BoardResponse>(
     requestId: string,
     timeout: number = 30000,
   ): Promise<T> {
@@ -110,7 +86,7 @@ export class AuthService extends EventEmitter {
     });
   }
 
-  deleteResponse(requestId: string): void {
+  public deleteResponse(requestId: string): void {
     this.responses.delete(requestId);
     this.logger.log(`Deleted response for request ${requestId}`);
   }

@@ -21,7 +21,7 @@ export class UserRegisteredByLoginConsumer implements OnModuleInit {
   public async onModuleInit(): Promise<void> {
     this.consumer = this.kafka.consumer({ groupId: 'board-group' });
     await this.consumer.subscribe({
-      topic: 'User.UserRegisteredByLogin',
+      topic: 'register-by-login',
       fromBeginning: true,
     });
     await this.consumer.run({

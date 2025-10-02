@@ -15,10 +15,25 @@ import { MiddlewareConsumer } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { BoardModule } from '../src/module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
     ConfigAdapterModule,
+    ClientsModule.register([
+      {
+        name: 'KAFKA_SERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            brokers: ['localhost:9092'],
+          },
+          consumer: {
+            groupId: 'board-consumer-group',
+          },
+        },
+      },
+    ]),
     ScheduleModule.forRoot(),
     LoggerModule.registerAsync({
       isGlobal: true,
