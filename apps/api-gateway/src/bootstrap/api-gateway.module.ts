@@ -17,6 +17,8 @@ import { AuthService } from '../services/auth.service';
 import { KafkaModule } from 'adapters/kafka-adapter';
 import { BoardController } from '../controllers';
 import { BoardService } from '../services';
+import { AuthHelper } from 'apps/auth/src';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { BoardService } from '../services';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CqrsModule,
     MetricsModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
@@ -64,6 +67,7 @@ import { BoardService } from '../services';
     ConfigService,
     BoardService,
     BoardConsumer,
+    AuthHelper,
   ],
 })
 export class ApiGatewayModule {

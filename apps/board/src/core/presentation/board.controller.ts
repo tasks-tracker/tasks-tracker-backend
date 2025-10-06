@@ -1,14 +1,28 @@
-import { Controller, Inject, UnauthorizedException } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 import { Logger } from 'libs/logger';
-import { CreateBoardCommand } from '../application';
+import {
+  ChangeBoardOwnerCommand,
+  CreateBoardCommand,
+  GetBoardInfoByIdQuery,
+  RemoveBoardCommand,
+  RenameBoardCommand,
+} from '../application';
 import {
   BoardAlreadyExistDomainError,
+  BoardIdVO,
+  BoardIsNotFoundDomainError,
   BoardTitleVO,
   UserIdVO,
 } from '../domain';
-import { CreateBoardDto } from './dtos';
+import {
+  ChangeOwnerDto,
+  CreateBoardDto,
+  GetBoardDto,
+  RemoveBoardDto,
+  RenameBoardDto,
+} from './dtos';
 import { ValidationException } from 'libs/validation-exception';
 
 @Controller()
@@ -22,7 +36,13 @@ export class BoardController {
   @MessagePattern('create-board')
   async createBoard(@Payload() payload: CreateBoardDto) {
     if (!payload.userId) {
-      throw new UnauthorizedException('UNAUTHARIZED');
+      this.kafkaClient.emit('create-board-response', {
+        boardTitle: payload.title,
+        status: 'UNAUTHORIZED',
+        message: 'UNAUTHORIZED',
+        requestId: payload.requestId,
+      });
+      return;
     }
 
     try {
@@ -81,6 +101,204 @@ export class BoardController {
         status: 'BAD_REQUEST',
         message: 'VALIDATION_ERROR',
         requestId: payload.requestId,
+      });
+    }
+  }
+
+  @MessagePattern('change-owner-board')
+  async changeOwner(@Payload() payload: ChangeOwnerDto) {
+    try {
+      const result = await this.commandBus.execute(
+        new ChangeBoardOwnerCommand(
+          new UserIdVO(payload.userId),
+          new BoardIdVO(payload.boardId),
+          new UserIdVO(payload.newOwnerId),
+        ),
+      );
+
+      if (result.isOk()) {
+        this.kafkaClient.emit('change-owner-response', {
+          boardId: payload.boardId,
+          status: 'SUCCESS',
+          message: 'BOARD_OWNER_CHANGED_SUCCESSFULLY',
+        });
+        return;
+      }
+
+      const err = result.error;
+
+      if (err instanceof BoardIsNotFoundDomainError) {
+        this.kafkaClient.emit('change-owner-response', {
+          boardId: payload.boardId,
+          status: 'NOT_FOUND',
+          message: 'BOARD_NOT_FOUND',
+        });
+        return;
+      }
+
+      if (err instanceof ValidationException) {
+        this.kafkaClient.emit('change-owner-response', {
+          boardId: payload.boardId,
+          status: 'UNPROCESSABLE_ENTITY',
+          message: 'VALIDATION_ERROR',
+        });
+      }
+
+      this.kafkaClient.emit('change-owner-response', {
+        boardId: payload.boardId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+      });
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error changing board owner', error: String(error) },
+        'BoardController',
+      );
+      this.kafkaClient.emit('change-owner-response', {
+        boardId: payload.boardId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+      });
+    }
+  }
+
+  @MessagePattern('rename-board')
+  async renameBoard(@Payload() payload: RenameBoardDto) {
+    try {
+      const result = await this.commandBus.execute(
+        new RenameBoardCommand(
+          new BoardIdVO(payload.boardId),
+          new BoardTitleVO(payload.newTitle),
+          new UserIdVO(payload.userId),
+        ),
+      );
+
+      if (result.isOk()) {
+        this.kafkaClient.emit('rename-board-response', {
+          boardId: payload.boardId,
+          status: 'SUCCESS',
+          message: 'BOARD_RENAMED_SUCCESSFULLY',
+        });
+        return;
+      }
+
+      const err = result.error;
+
+      if (err instanceof BoardIsNotFoundDomainError) {
+        this.kafkaClient.emit('rename-board-response', {
+          boardId: payload.boardId,
+          status: 'NOT_FOUND',
+          message: 'BOARD_NOT_FOUND',
+        });
+        return;
+      }
+
+      if (err instanceof ValidationException) {
+        this.kafkaClient.emit('rename-board-response', {
+          boardId: payload.boardId,
+          status: 'UNPROCESSABLE_ENTITY',
+          message: 'VALIDATION_ERROR',
+        });
+        return;
+      }
+
+      this.kafkaClient.emit('rename-board-response', {
+        boardId: payload.boardId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+      });
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error renaming board', error: String(error) },
+        'BoardController',
+      );
+    }
+  }
+
+  @MessagePattern('remove-board')
+  async removeBoard(@Payload() payload: RemoveBoardDto) {
+    try {
+      const result = await this.commandBus.execute(
+        new RemoveBoardCommand(new BoardIdVO(payload.boardId)),
+      );
+
+      if (result.isOk()) {
+        this.kafkaClient.emit('remove-board-response', {
+          boardId: payload.boardId,
+          status: 'SUCCESS',
+          message: 'BOARD_REMOVED_SUCCESSFULLY',
+        });
+        return;
+      }
+
+      const err = result.error;
+
+      if (err instanceof BoardIsNotFoundDomainError) {
+        this.kafkaClient.emit('remove-board-response', {
+          boardId: payload.boardId,
+          status: 'NOT_FOUND',
+          message: 'BOARD_NOT_FOUND',
+        });
+        return;
+      }
+
+      if (err instanceof ValidationException) {
+        this.kafkaClient.emit('remove-board-response', {
+          boardId: payload.boardId,
+          status: 'UNPROCESSABLE_ENTITY',
+          message: 'VALIDATION_ERROR',
+        });
+      }
+
+      this.kafkaClient.emit('remove-board-response', {
+        boardId: payload.boardId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+      });
+    } catch (error) {
+      if (error instanceof ValidationException) {
+        this.kafkaClient.emit('remove-board-response', {
+          boardId: payload.boardId,
+          status: 'UNPROCESSABLE_ENTITY',
+          message: 'VALIDATION_ERROR',
+        });
+      }
+
+      this.logger.error(
+        { message: 'Error removing board', error: String(error) },
+        'BoardController',
+      );
+      this.kafkaClient.emit('remove-board-response', {
+        boardId: payload.boardId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+      });
+    }
+  }
+
+  @MessagePattern('get-board-info')
+  async getBoard(@Payload() payload: GetBoardDto) {
+    try {
+      const result = await this.queryBus.execute(
+        new GetBoardInfoByIdQuery(new UserIdVO(payload.userId)),
+      );
+
+      if (result) {
+        this.kafkaClient.emit('get-board-response', {
+          status: 'SUCCESS',
+          message: 'BOARD_INFO_FETCHED_SUCCESSFULLY',
+          board: JSON.stringify(result),
+        });
+        return;
+      }
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error getting board', error: String(error) },
+        'BoardController',
+      );
+      this.kafkaClient.emit('get-board-response', {
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
       });
     }
   }

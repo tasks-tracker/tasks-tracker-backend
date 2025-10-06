@@ -11,7 +11,11 @@ import { ConfigService } from '@nestjs/config';
 import { CacheConfig } from 'adapters/config-adapter';
 import { serviceProviders } from './module.providers';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { BoardController } from '../core/presentation';
+import {
+  BoardController,
+  ColumnController,
+  TaskController,
+} from '../core/presentation';
 
 @Global()
 @Module({
@@ -36,7 +40,7 @@ import { BoardController } from '../core/presentation';
       inject: [ConfigService],
     }),
   ],
-  controllers: [BoardController],
+  controllers: [BoardController, ColumnController, TaskController],
   providers: [
     ...serviceProviders,
     ...commandHandlersProviders,
