@@ -254,8 +254,6 @@ export class AuthController {
   async me(@SessionToken() sessionToken: string | null, @Res() res: Response) {
     const requestId = crypto.randomUUID();
 
-    console.log('sessionToken', sessionToken);
-
     if (!sessionToken) {
       throw new UnauthorizedException('SESSION_TOKEN_NOT_FOUND');
     }

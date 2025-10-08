@@ -83,7 +83,7 @@ export class Board extends AggregateRoot {
     newTitle: BoardTitleVO,
     userId: UserIdVO,
   ): Result<null, BoardIsNotOwnerDomainError> {
-    if (this.#ownerId.equals(userId)) {
+    if (!this.#ownerId.equals(userId)) {
       return err(new BoardIsNotOwnerDomainError());
     }
     this.#title = newTitle;

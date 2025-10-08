@@ -1,32 +1,59 @@
 import * as cookieParser from 'cookie-parser';
 
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import {
+  Global,
+  MiddlewareConsumer,
+  Module,
+  RequestMethod,
+} from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthController } from '../controllers';
-import { AuthConsumer, BoardConsumer } from '../consumers';
 import { LoggerModule } from 'libs/logger';
 import {
+  CacheConfig,
   ConfigAdapterModule,
+  DatabaseConfig,
   KafkaConfig,
   LoggerConfig,
   MetricsConfig,
 } from 'adapters/config-adapter';
 import { MetricsModule } from 'adapters/metrics-adapter';
-import { AuthService } from '../services/auth.service';
 import { KafkaModule } from 'adapters/kafka-adapter';
-import { BoardController } from '../controllers';
-import { BoardService } from '../services';
-import { AuthHelper } from 'apps/auth/src';
-import { CqrsModule } from '@nestjs/cqrs';
+import { helpersProviders } from 'apps/auth/src';
+import { CacheAdapterModule } from 'adapters/cache-adapter';
+import {
+  consumersProviders,
+  controllersProviders,
+  queryHandlersProviders,
+  queryRepositoriesProviders,
+  repositoriesProviders,
+  servicesProviders,
+} from './api-gateway.module-providers';
+import { CqrsAdapterModule } from 'adapters/cqrs-adapter';
+import { DatabaseModule } from 'adapters/database-adapter';
 
+@Global()
 @Module({
   imports: [
     ConfigAdapterModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    CqrsModule,
+    CqrsAdapterModule.register({
+      isGlobal: true,
+    }),
+    DatabaseModule.registerAsync({
+      isGlobal: true,
+      useFactory: (configService: ConfigService) =>
+        configService.get<DatabaseConfig>('database')!,
+      inject: [ConfigService],
+    }),
+    CacheAdapterModule.registerAsync({
+      useFactory: (configService: ConfigService) => {
+        return configService.get<CacheConfig>('cache')!;
+      },
+      inject: [ConfigService],
+    }),
     MetricsModule.registerAsync({
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
@@ -60,14 +87,16 @@ import { CqrsModule } from '@nestjs/cqrs';
       },
     ]),
   ],
-  controllers: [AuthController, BoardController],
+  controllers: [...controllersProviders],
   providers: [
-    AuthService,
-    AuthConsumer,
+    ...servicesProviders,
+    ...controllersProviders,
+    ...queryHandlersProviders,
+    ...helpersProviders,
+    ...consumersProviders,
+    ...repositoriesProviders,
+    ...queryRepositoriesProviders,
     ConfigService,
-    BoardService,
-    BoardConsumer,
-    AuthHelper,
   ],
 })
 export class ApiGatewayModule {

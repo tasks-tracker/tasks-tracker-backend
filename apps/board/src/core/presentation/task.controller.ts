@@ -60,6 +60,7 @@ export class TaskController {
           taskId: result.value,
           status: 'SUCCESS',
           message: 'TASK_CREATED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -71,6 +72,7 @@ export class TaskController {
           taskId: payload.title,
           status: 'CONFLICT',
           message: 'COLUMN_NOT_FOUND',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -83,6 +85,7 @@ export class TaskController {
         taskId: payload.title,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }
@@ -98,6 +101,7 @@ export class TaskController {
         this.kafkaClient.emit('delete-task-response', {
           taskId: payload.taskId,
           status: 'SUCCESS',
+          requestId: payload.requestId,
           message: 'TASK_DELETED_SUCCESSFULLY',
         });
         return;
@@ -110,6 +114,7 @@ export class TaskController {
           taskId: payload.taskId,
           status: 'NOT_FOUND',
           message: 'TASK_NOT_FOUND',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -117,6 +122,7 @@ export class TaskController {
       this.kafkaClient.emit('delete-task-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
+        requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
       });
     } catch (error) {
@@ -128,6 +134,7 @@ export class TaskController {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
       return;
     }
@@ -148,6 +155,7 @@ export class TaskController {
           taskId: payload.taskId,
           status: 'SUCCESS',
           message: 'TASK_RENAMED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -158,14 +166,17 @@ export class TaskController {
         this.kafkaClient.emit('rename-task-response', {
           taskId: payload.taskId,
           status: 'NOT_FOUND',
+          requestId: payload.requestId,
           message: 'TASK_NOT_FOUND',
         });
+        return;
       }
 
       this.kafkaClient.emit('rename-task-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
       return;
     } catch (error) {
@@ -177,6 +188,7 @@ export class TaskController {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }
@@ -194,6 +206,7 @@ export class TaskController {
       if (result.isOk()) {
         this.kafkaClient.emit('change-task-column-response', {
           taskId: payload.taskId,
+          requestId: payload.requestId,
           status: 'SUCCESS',
           message: 'TASK_COLUMN_CHANGED_SUCCESSFULLY',
         });
@@ -202,6 +215,7 @@ export class TaskController {
 
       this.kafkaClient.emit('change-task-column-response', {
         taskId: payload.taskId,
+        requestId: payload.requestId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
       });
@@ -212,6 +226,7 @@ export class TaskController {
       );
       this.kafkaClient.emit('change-task-column-response', {
         taskId: payload.taskId,
+        requestId: payload.requestId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
       });
@@ -233,6 +248,7 @@ export class TaskController {
           taskId: payload.taskId,
           status: 'SUCCESS',
           message: 'TASK_DESCRIPTION_CHANGED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -243,6 +259,7 @@ export class TaskController {
         this.kafkaClient.emit('change-task-description-response', {
           taskId: payload.taskId,
           status: 'NOT_FOUND',
+          requestId: payload.requestId,
           message: 'TASK_NOT_FOUND',
         });
       }
@@ -251,6 +268,7 @@ export class TaskController {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     } catch (error) {
       this.logger.error(
@@ -259,6 +277,7 @@ export class TaskController {
       );
       this.kafkaClient.emit('change-task-description-response', {
         taskId: payload.taskId,
+        requestId: payload.requestId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
       });
@@ -279,6 +298,7 @@ export class TaskController {
         this.kafkaClient.emit('change-task-order-response', {
           taskId: payload.taskId,
           status: 'SUCCESS',
+          requestId: payload.requestId,
           message: 'TASK_ORDER_CHANGED_SUCCESSFULLY',
         });
         return;
@@ -287,6 +307,7 @@ export class TaskController {
       this.kafkaClient.emit('change-task-order-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
+        requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
       });
     } catch (error) {
@@ -297,6 +318,7 @@ export class TaskController {
       this.kafkaClient.emit('change-task-order-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
+        requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
       });
     }
@@ -316,6 +338,7 @@ export class TaskController {
         this.kafkaClient.emit('change-task-assignee-response', {
           taskId: payload.taskId,
           status: 'SUCCESS',
+          requestId: payload.requestId,
           message: 'TASK_ASSIGNEE_CHANGED_SUCCESSFULLY',
         });
         return;
@@ -324,6 +347,7 @@ export class TaskController {
       this.kafkaClient.emit('change-task-assignee-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
+        requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
       });
     } catch (error) {
@@ -334,6 +358,7 @@ export class TaskController {
       this.kafkaClient.emit('change-task-assignee-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
+        requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
       });
     }
@@ -352,6 +377,7 @@ export class TaskController {
           status: 'SUCCESS',
           message: 'TASK_INFO_FETCHED_SUCCESSFULLY',
           task: JSON.stringify(result),
+          requestId: payload.requestId,
         });
         return;
       }
@@ -364,6 +390,7 @@ export class TaskController {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requsetId: payload.requestId,
       });
     }
   }

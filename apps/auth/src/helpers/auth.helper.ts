@@ -15,8 +15,10 @@ export class AuthHelper {
       const userId = await this.queryBus.execute(
         new GetUserIdBySessionTokenQuery(new SessionTokenVO(sessionToken)),
       );
+
       return userId;
-    } catch {
+    } catch (error) {
+      console.log(error);
       return null;
     }
   }

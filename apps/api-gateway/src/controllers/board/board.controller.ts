@@ -29,11 +29,15 @@ import {
   CreateBoardResponseDto,
   CreateTaskDto,
   DeleteTaskDto,
+  GetBoardDto,
   GetColumnInfoDto,
+  GetTaskInfoDto,
   RemoveBoardDto,
   RemoveColumnDto,
   RenameBoardDto,
   RenameColumnDto,
+  RenameTaskDto,
+  TaskChangeOrderDto,
 } from './dtos';
 import { ValidationException } from 'libs/validation-exception';
 import {
@@ -43,13 +47,7 @@ import {
 } from '../../services';
 import { SessionToken } from 'libs/session-token-decorator';
 import { AuthHelper } from 'apps/auth/src';
-import {
-  ChangeTaskOrderDto,
-  CreateColumnDto,
-  GetBoardDto,
-  GetTaskInfoDto,
-  RenameTaskDto,
-} from 'apps/board/src/core/presentation/dtos';
+import { CreateColumnDto } from './dtos';
 
 @ApiTags('Board')
 @Controller('board')
@@ -82,7 +80,14 @@ export class BoardController {
     status: HttpStatus.UNPROCESSABLE_ENTITY,
     description: 'Validation error',
   })
-  async createBoard(@Body() body: CreateBoardDto) {
+  async createBoard(
+    @Body() body: CreateBoardDto,
+    @SessionToken() sessionToken: string,
+  ) {
+    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
+
     const requestId = crypto.randomUUID();
     this.kafkaClient.emit('create-board', {
       ...body,
@@ -150,6 +155,7 @@ export class BoardController {
       throw new UnauthorizedException('UNAUTHORIZED');
     }
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+
     if (!userId) {
       throw new UnauthorizedException('UNAUTHORIZED');
     }
@@ -157,7 +163,7 @@ export class BoardController {
     const requestId = crypto.randomUUID();
     this.kafkaClient.emit('change-owner-board', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -228,7 +234,7 @@ export class BoardController {
     const requestId = crypto.randomUUID();
     this.kafkaClient.emit('remove-board', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -286,7 +292,7 @@ export class BoardController {
 
     this.kafkaClient.emit('rename-board', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -350,7 +356,7 @@ export class BoardController {
     const requestId = crypto.randomUUID();
     this.kafkaClient.emit('get-board-info', {
       ...query,
-      userId,
+      boardId: query.boardId,
       requestId,
     });
 
@@ -416,7 +422,7 @@ export class BoardController {
     const requestId = crypto.randomUUID();
     this.kafkaClient.emit('create-column', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -478,7 +484,7 @@ export class BoardController {
 
     this.kafkaClient.emit('change-column-board', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -540,7 +546,7 @@ export class BoardController {
 
     this.kafkaClient.emit('change-column-owner', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -602,7 +608,7 @@ export class BoardController {
 
     this.kafkaClient.emit('remove-column', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -664,7 +670,7 @@ export class BoardController {
 
     this.kafkaClient.emit('rename-column', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -727,7 +733,7 @@ export class BoardController {
 
     this.kafkaClient.emit('get-column-info', {
       ...query,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -790,7 +796,7 @@ export class BoardController {
 
     this.kafkaClient.emit('create-task', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -853,7 +859,7 @@ export class BoardController {
 
     this.kafkaClient.emit('delete-task', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -916,7 +922,7 @@ export class BoardController {
 
     this.kafkaClient.emit('rename-task', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -935,6 +941,11 @@ export class BoardController {
       if (result.status === 'BAD_REQUEST') {
         throw new BadRequestException(result.message);
       }
+
+      if (result.status === 'NOT_FOUND') {
+        throw new NotFoundException('TASK_NOT_FOUND');
+      }
+
       throw new Error(result.message);
     } catch (error) {
       this.logger.error(
@@ -979,7 +990,7 @@ export class BoardController {
 
     this.kafkaClient.emit('change-task-column', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -1042,7 +1053,7 @@ export class BoardController {
 
     this.kafkaClient.emit('change-task-description', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -1100,7 +1111,7 @@ export class BoardController {
     description: 'UNKNOWN_ERROR',
   })
   async changeTaskOrder(
-    @Body() body: ChangeTaskOrderDto,
+    @Body() body: TaskChangeOrderDto,
     @SessionToken() sessionToken: string,
   ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
@@ -1111,7 +1122,7 @@ export class BoardController {
 
     this.kafkaClient.emit('change-task-order', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -1174,7 +1185,7 @@ export class BoardController {
 
     this.kafkaClient.emit('change-task-assignee', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 
@@ -1236,7 +1247,7 @@ export class BoardController {
 
     this.kafkaClient.emit('get-task-info', {
       ...body,
-      userId,
+      userId: userId.value,
       requestId,
     });
 

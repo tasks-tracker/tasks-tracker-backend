@@ -6,7 +6,7 @@ import type { SwaggerConfig } from 'adapters/config-adapter';
 import type { CorsConfig } from 'adapters/config-adapter';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { ApiGatewayModule } from './api-gateway.module';
+import { ApiGatewayModule } from '../module';
 import { enableSwagger } from './swagger';
 import { Logger } from 'libs/logger';
 export async function bootstrap() {

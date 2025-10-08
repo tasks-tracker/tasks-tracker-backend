@@ -45,7 +45,7 @@ export class ColumnController {
           new ColumnTitleVO(payload.title),
           new ColumnOrderVO(payload.order),
           new BoardIdVO(payload.boardId),
-          new UserIdVO(payload.ownerId),
+          new UserIdVO(payload.userId),
         ),
       );
 
@@ -54,6 +54,7 @@ export class ColumnController {
           columnId: result.value.value,
           status: 'SUCCESS',
           message: 'COLUMN_CREATED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -65,6 +66,7 @@ export class ColumnController {
           columnId: payload.title,
           status: 'CONFLICT',
           message: 'COLUMN_ALREADY_EXISTS',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -74,6 +76,7 @@ export class ColumnController {
           columnId: payload.title,
           status: 'UNPROCESSABLE_ENTITY',
           message: 'VALIDATION_ERROR',
+          requestId: payload.requestId,
         });
       }
     } catch (error) {
@@ -85,6 +88,7 @@ export class ColumnController {
         columnId: payload.title,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }
@@ -104,6 +108,7 @@ export class ColumnController {
           columnId: payload.columnId,
           status: 'SUCCESS',
           message: 'COLUMN_BOARD_CHANGED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -115,6 +120,7 @@ export class ColumnController {
           columnId: payload.columnId,
           status: 'NOT_FOUND',
           message: 'UNKNOWN_ERROR',
+          requestId: payload.requestId,
         });
       }
     } catch (error) {
@@ -139,6 +145,7 @@ export class ColumnController {
         this.kafkaClient.emit('change-column-owner-response', {
           columnId: payload.columnId,
           status: 'SUCCESS',
+          requestId: payload.requestId,
           message: 'COLUMN_OWNER_CHANGED_SUCCESSFULLY',
         });
         return;
@@ -149,14 +156,10 @@ export class ColumnController {
       if (err) {
         this.kafkaClient.emit('change-column-owner-response', {
           status: 'BAD_REQUEST',
+          requestId: payload.requestId,
           message: 'UNKNOWN_ERROR',
         });
       }
-      this.kafkaClient.emit('change-column-owner-response', {
-        columnId: payload.columnId,
-        status: 'BAD_REQUEST',
-        message: 'UNKNOWN_ERROR',
-      });
     } catch (error) {
       this.logger.error(
         { message: 'Error changing column owner', error: String(error) },
@@ -166,6 +169,7 @@ export class ColumnController {
         columnId: payload.columnId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }
@@ -182,6 +186,7 @@ export class ColumnController {
           columnId: payload.columnId,
           status: 'SUCCESS',
           message: 'COLUMN_REMOVED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -193,6 +198,7 @@ export class ColumnController {
           columnId: payload.columnId,
           status: 'BAD_REQUEST',
           message: 'COLUMN_NOT_FOUND',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -205,6 +211,7 @@ export class ColumnController {
         columnId: payload.columnId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }
@@ -224,6 +231,7 @@ export class ColumnController {
         this.kafkaClient.emit('rename-column-response', {
           columnId: payload.columnId,
           status: 'SUCCESS',
+          requestId: payload.requestId,
           message: 'COLUMN_RENAMED_SUCCESSFULLY',
         });
         return;
@@ -236,6 +244,7 @@ export class ColumnController {
           columnId: payload.columnId,
           status: 'BAD_REQUEST',
           message: 'UNKNOWN_ERROR',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -247,6 +256,7 @@ export class ColumnController {
       this.kafkaClient.emit('rename-column-response', {
         columnId: payload.columnId,
         status: 'BAD_REQUEST',
+        requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
       });
     }
@@ -264,6 +274,7 @@ export class ColumnController {
           columnId: JSON.stringify(result),
           status: 'SUCCESS',
           message: 'COLUMN_INFO_RETRIEVED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -272,6 +283,7 @@ export class ColumnController {
         columnId: JSON.stringify(result),
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     } catch (error) {
       this.logger.error(
@@ -282,6 +294,7 @@ export class ColumnController {
         columnId: payload.columnId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }

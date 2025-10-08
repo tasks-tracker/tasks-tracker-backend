@@ -138,7 +138,7 @@ export class Task extends AggregateRoot {
   }
 
   changeTitle(title: TaskTitleVO) {
-    if (!this.#isRemoved) {
+    if (this.#isRemoved) {
       throw new Error('Task is removed');
     }
 

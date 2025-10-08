@@ -20,10 +20,12 @@ export class UserRegisteredByLoginConsumer implements OnModuleInit {
 
   public async onModuleInit(): Promise<void> {
     this.consumer = this.kafka.consumer({ groupId: 'board-group' });
+
     await this.consumer.subscribe({
-      topic: 'register-by-login',
-      fromBeginning: true,
+      topic: 'User.RegisteredByLogin',
+      fromBeginning: false,
     });
+
     await this.consumer.run({
       autoCommit: false,
       eachMessage: async (message: EachMessagePayload) => {
@@ -33,9 +35,15 @@ export class UserRegisteredByLoginConsumer implements OnModuleInit {
         const event = JSON.parse(message.message.value.toString()) as {
           id: string;
         };
+
         const result = await this.commandBus.execute(
           new CreateDefaultBoardCommand(new UserIdVO(event.id)),
         );
+
+        if (result.isOk()) {
+          this.logger.log(`Created default board for user ${event.id}`);
+        }
+
         if (result.isErr()) {
           this.logger.error(
             `Error creating default board for user ${event.id}: ${result.error.message}`,

@@ -117,10 +117,11 @@ export class BoardController {
       );
 
       if (result.isOk()) {
-        this.kafkaClient.emit('change-owner-response', {
+        this.kafkaClient.emit('change-owner-board-response', {
           boardId: payload.boardId,
           status: 'SUCCESS',
           message: 'BOARD_OWNER_CHANGED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -128,36 +129,40 @@ export class BoardController {
       const err = result.error;
 
       if (err instanceof BoardIsNotFoundDomainError) {
-        this.kafkaClient.emit('change-owner-response', {
+        this.kafkaClient.emit('change-owner-board-response', {
           boardId: payload.boardId,
           status: 'NOT_FOUND',
           message: 'BOARD_NOT_FOUND',
+          requestId: payload.requestId,
         });
         return;
       }
 
       if (err instanceof ValidationException) {
-        this.kafkaClient.emit('change-owner-response', {
+        this.kafkaClient.emit('change-owner-board-response', {
           boardId: payload.boardId,
           status: 'UNPROCESSABLE_ENTITY',
           message: 'VALIDATION_ERROR',
+          requestId: payload.requestId,
         });
       }
 
-      this.kafkaClient.emit('change-owner-response', {
+      this.kafkaClient.emit('change-owner-board-response', {
         boardId: payload.boardId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     } catch (error) {
       this.logger.error(
         { message: 'Error changing board owner', error: String(error) },
         'BoardController',
       );
-      this.kafkaClient.emit('change-owner-response', {
+      this.kafkaClient.emit('change-owner-board-response', {
         boardId: payload.boardId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }
@@ -178,6 +183,7 @@ export class BoardController {
           boardId: payload.boardId,
           status: 'SUCCESS',
           message: 'BOARD_RENAMED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -189,6 +195,7 @@ export class BoardController {
           boardId: payload.boardId,
           status: 'NOT_FOUND',
           message: 'BOARD_NOT_FOUND',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -198,6 +205,7 @@ export class BoardController {
           boardId: payload.boardId,
           status: 'UNPROCESSABLE_ENTITY',
           message: 'VALIDATION_ERROR',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -206,12 +214,19 @@ export class BoardController {
         boardId: payload.boardId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     } catch (error) {
       this.logger.error(
         { message: 'Error renaming board', error: String(error) },
         'BoardController',
       );
+      this.kafkaClient.emit('rename-board-response', {
+        boardId: payload.boardId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
+      });
     }
   }
 
@@ -227,6 +242,7 @@ export class BoardController {
           boardId: payload.boardId,
           status: 'SUCCESS',
           message: 'BOARD_REMOVED_SUCCESSFULLY',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -238,6 +254,7 @@ export class BoardController {
           boardId: payload.boardId,
           status: 'NOT_FOUND',
           message: 'BOARD_NOT_FOUND',
+          requestId: payload.requestId,
         });
         return;
       }
@@ -247,6 +264,7 @@ export class BoardController {
           boardId: payload.boardId,
           status: 'UNPROCESSABLE_ENTITY',
           message: 'VALIDATION_ERROR',
+          requestId: payload.requestId,
         });
       }
 
@@ -254,6 +272,7 @@ export class BoardController {
         boardId: payload.boardId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     } catch (error) {
       if (error instanceof ValidationException) {
@@ -261,6 +280,7 @@ export class BoardController {
           boardId: payload.boardId,
           status: 'UNPROCESSABLE_ENTITY',
           message: 'VALIDATION_ERROR',
+          requestId: payload.requestId,
         });
       }
 
@@ -271,6 +291,7 @@ export class BoardController {
       this.kafkaClient.emit('remove-board-response', {
         boardId: payload.boardId,
         status: 'BAD_REQUEST',
+        requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
       });
     }
@@ -280,14 +301,23 @@ export class BoardController {
   async getBoard(@Payload() payload: GetBoardDto) {
     try {
       const result = await this.queryBus.execute(
-        new GetBoardInfoByIdQuery(new UserIdVO(payload.userId)),
+        new GetBoardInfoByIdQuery(new BoardIdVO(payload.boardId)),
       );
 
+      const board = {
+        id: result.id.value,
+        title: result.title.value,
+        ownerId: result.ownerId.value,
+        createdAt: result.createdAt.toISOString(),
+        updatedAt: result.updatedAt.toISOString(),
+      };
+
       if (result) {
-        this.kafkaClient.emit('get-board-response', {
+        this.kafkaClient.emit('get-board-info-response', {
           status: 'SUCCESS',
           message: 'BOARD_INFO_FETCHED_SUCCESSFULLY',
-          board: JSON.stringify(result),
+          board,
+          requestId: payload.requestId,
         });
         return;
       }
@@ -296,9 +326,10 @@ export class BoardController {
         { message: 'Error getting board', error: String(error) },
         'BoardController',
       );
-      this.kafkaClient.emit('get-board-response', {
+      this.kafkaClient.emit('get-board-info-response', {
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }

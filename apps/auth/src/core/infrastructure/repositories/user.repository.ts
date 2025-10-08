@@ -6,7 +6,7 @@ import type { UserRepository } from '../../domain';
 import type { Result } from 'neverthrow';
 import type { UserSchema } from 'adapters/database-adapter';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
 import { Redis } from 'ioredis';
@@ -23,14 +23,20 @@ import { User } from '../../domain';
 import { UserLoginAlreadyUsedDomainError } from '../../domain';
 import { UserRegisteredByLoginEvent } from '../../domain';
 import { SessionAddedEvent } from '../../domain';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
-export class UserRepositoryImpl implements UserRepository {
+export class UserRepositoryImpl implements UserRepository, OnModuleInit {
   private readonly knex = knex({ client: 'pg' });
   constructor(
+    private readonly kafkaClient: ClientKafka,
     private readonly txHost: TransactionHost<TransactionalAdapterPgPromise>,
     private readonly redis: Redis,
   ) {}
+
+  async onModuleInit() {
+    await this.kafkaClient.connect();
+  }
 
   public nextId(): UserIdVO {
     return new UserIdVO(randomUUID());
@@ -83,6 +89,11 @@ export class UserRepositoryImpl implements UserRepository {
       })
       .toSQL()
       .toNative();
+
+    this.kafkaClient.emit('User.RegisteredByLogin', {
+      id: user.id.value,
+    });
+
     try {
       await this.txHost.tx.none(SQL.sql, SQL.bindings);
       return ok(null);
