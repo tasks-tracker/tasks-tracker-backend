@@ -31,6 +31,7 @@ import {
   DeleteTaskDto,
   GetBoardDto,
   GetColumnInfoDto,
+  GetFullBoardBodyDto,
   GetTaskInfoDto,
   RemoveBoardDto,
   RemoveColumnDto,
@@ -40,11 +41,7 @@ import {
   TaskChangeOrderDto,
 } from './dtos';
 import { ValidationException } from 'libs/validation-exception';
-import {
-  BoardResponse,
-  BoardService,
-  CreateBoardResponse,
-} from '../../services';
+import { BoardResponse, BoardService } from '../../services';
 import { SessionToken } from 'libs/session-token-decorator';
 import { AuthHelper } from 'apps/auth/src';
 import { CreateColumnDto } from './dtos';
@@ -59,6 +56,62 @@ export class BoardController {
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {
     logger.setContext(BoardController.name);
+  }
+
+  @Post('get-full-board')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Full board fetched successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'UNAUTHORIZED',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  async getDefaultBoard(
+    @Query() query: GetFullBoardBodyDto,
+    @SessionToken() sessionToken: string,
+  ) {
+    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
+
+    const requestId = crypto.randomUUID();
+    this.kafkaClient.emit('get-full-board', {
+      ...query,
+      userId: query.userId,
+      requestId,
+    });
+
+    try {
+      const result = await this.boardService.waitForResponse<BoardResponse>(
+        requestId,
+        30000,
+      );
+
+      if (result.status === 'SUCCESS') {
+        return {
+          ...result,
+        };
+      }
+
+      if (result.status === 'NOT_FOUND') {
+        throw new NotFoundException('BOARD_NOT_FOUND');
+      }
+      if (result.status === 'BAD_REQUEST') {
+        throw new BadRequestException(result.message);
+      }
+      throw new Error(result.message);
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for response', error: String(error) },
+        'BoardController',
+      );
+    }
   }
 
   @Post('create')
@@ -95,11 +148,10 @@ export class BoardController {
     });
 
     try {
-      const result =
-        await this.boardService.waitForResponse<CreateBoardResponse>(
-          requestId,
-          30000,
-        );
+      const result = await this.boardService.waitForResponse<BoardResponse>(
+        requestId,
+        30000,
+      );
 
       if (result.status === 'SUCCESS') {
         return {

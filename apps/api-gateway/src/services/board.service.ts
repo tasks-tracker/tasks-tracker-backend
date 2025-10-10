@@ -9,7 +9,43 @@ export interface CreateBoardResponse {
   boardId: string;
 }
 
-export type BoardResponse = CreateBoardResponse;
+export interface Board {
+  id: string;
+  title: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+}
+
+export interface Column {
+  id: string;
+  title: string;
+  boardId: string;
+  order: number;
+  isDeleted: boolean;
+  creatorId: string;
+  ownerId: string;
+  tasks: Array<Task>;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  order: number;
+  columnId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  ownerId: string;
+}
+
+export interface FullBoardResponse {
+  board: Board;
+  columns: Array<Column>;
+}
+
+export type BoardResponse = CreateBoardResponse & FullBoardResponse;
 
 @Injectable()
 export class BoardService extends EventEmitter {

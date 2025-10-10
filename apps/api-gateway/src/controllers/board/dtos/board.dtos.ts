@@ -34,6 +34,13 @@ export class TaskChangeOrderDto {
   order: number;
 }
 
+export class GetFullBoardBodyDto {
+  @ApiProperty({
+    example: 'e0a89e34-8210-4280-89c4-a46e9af2b450',
+  })
+  userId: string;
+}
+
 export class GetBoardDto {
   @ApiProperty({
     example: 'e0a89e34-8210-4280-89c4-a46e9af2b450',
