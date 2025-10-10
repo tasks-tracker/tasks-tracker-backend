@@ -113,3 +113,8 @@ export class RenameBoardDto {
   requestId: string;
   userId: string;
 }
+
+export class GetFullBoardDto {
+  userId: string;
+  requestId: string;
+}

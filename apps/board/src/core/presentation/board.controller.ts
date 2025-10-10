@@ -6,6 +6,7 @@ import {
   ChangeBoardOwnerCommand,
   CreateBoardCommand,
   GetBoardInfoByIdQuery,
+  GetFullBoardQuery,
   RemoveBoardCommand,
   RenameBoardCommand,
 } from '../application';
@@ -20,6 +21,7 @@ import {
   ChangeOwnerDto,
   CreateBoardDto,
   GetBoardDto,
+  GetFullBoardDto,
   RemoveBoardDto,
   RenameBoardDto,
 } from './dtos';
@@ -293,6 +295,41 @@ export class BoardController {
         status: 'BAD_REQUEST',
         requestId: payload.requestId,
         message: 'UNKNOWN_ERROR',
+      });
+    }
+  }
+
+  @MessagePattern('get-full-board')
+  async getFullBoard(@Payload() payload: GetFullBoardDto) {
+    try {
+      const result = await this.queryBus.execute(
+        new GetFullBoardQuery(new UserIdVO(payload.userId)),
+      );
+
+      if (result) {
+        this.kafkaClient.emit('get-full-board-response', {
+          status: 'SUCCESS',
+          message: 'FULL_BOARD_FETCHED_SUCCESSFULLY',
+          result,
+          requestId: payload.requestId,
+        });
+        return;
+      }
+
+      this.kafkaClient.emit('get-full-board-response', {
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
+      });
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error getting full board', error: String(error) },
+        'BoardController',
+      );
+      this.kafkaClient.emit('get-full-board-response', {
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
       });
     }
   }

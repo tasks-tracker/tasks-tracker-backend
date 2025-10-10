@@ -45,6 +45,11 @@ export class BoardConsumer implements OnModuleInit {
     });
 
     await this.consumer.subscribe({
+      topic: 'get-full-board-response',
+      fromBeginning: false,
+    });
+
+    await this.consumer.subscribe({
       topic: 'create-column-response',
       fromBeginning: false,
     });
@@ -158,6 +163,21 @@ export class BoardConsumer implements OnModuleInit {
           }
 
           case 'create-column-response': {
+            const event = JSON.parse(
+              message.message.value.toString(),
+            ) as BoardResponse;
+
+            this.loggger.log(
+              `Received response for request ${event.requestId}:`,
+              event,
+            );
+
+            this.boardService.saveResponse(event.requestId, event);
+
+            break;
+          }
+
+          case 'get-full-board-response': {
             const event = JSON.parse(
               message.message.value.toString(),
             ) as BoardResponse;
