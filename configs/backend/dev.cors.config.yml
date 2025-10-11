@@ -1,35 +1,31 @@
-origin: 'http://localhost:4200'
-methods: '*'
-allowedHeaders: '*'
+origin:
+  - 'http://localhost:3000'
+  - 'http://localhost:3001'
+  - 'http://localhost:4200'
+  - 'http://localhost:8080'
+  - 'http://127.0.0.1:3000'
+  - 'http://127.0.0.1:3001'
+  - 'http://127.0.0.1:4200'
+  - 'http://127.0.0.1:8080'
+methods:
+  - 'GET'
+  - 'POST'
+  - 'PUT'
+  - 'PATCH'
+  - 'DELETE'
+  - 'OPTIONS'
+allowedHeaders:
+  - 'Accept'
+  - 'Content-Type'
+  - 'Authorization'
+  - 'X-Requested-With'
+  - 'Origin'
+  - 'Referer'
+  - 'User-Agent'
+  - 'sec-ch-ua'
+  - 'sec-ch-ua-mobile'
+  - 'sec-ch-ua-platform'
 exposedHeaders: '*'
 credentials: true
 preflightContinue: false
 optionsSuccessStatus: 204
-
-
-# origin: 
-#   - 'http://localhost:3000'
-#   - 'http://localhost:3001'
-#   - 'http://localhost:4200'
-#   - 'http://localhost:8080'
-#   - 'http://127.0.0.1:3000'
-#   - 'http://127.0.0.1:3001'
-#   - 'http://127.0.0.1:4200'
-#   - 'http://127.0.0.1:8080'
-# methods: '*'
-# allowedHeaders: 
-#   - 'Accept'
-#   - 'Content-Type'
-#   - 'Authorization'
-#   - 'X-Requested-With'
-#   - 'Origin'
-#   - 'Referer'
-#   - 'User-Agent'
-#   - 'sec-ch-ua'
-#   - 'sec-ch-ua-mobile'
-#   - 'sec-ch-ua-platform'
-# exposedHeaders: '*'
-# credentials: true
-# preflightContinue: false
-# optionsSuccessStatus: 204
-
