@@ -71,6 +71,7 @@ export class BoardQueryRepositoryImpl implements BoardQueryRepository {
     const SQL = this.knex<BoardSchema>('boards')
       .select('id', 'title', 'owner_id', 'created_at', 'updated_at')
       .where('owner_id', userId.value)
+      .where('is_deleted', false)
       .toSQL()
       .toNative();
 

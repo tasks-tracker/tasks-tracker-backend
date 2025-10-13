@@ -111,6 +111,7 @@ export class ColumnQueryRepositoryImpl implements ColumnQueryRepository {
     const SQL = this.knex<ColumnSchema>('columns')
       .select('*')
       .where('owner_id', userId.value)
+      .where('is_deleted', false)
       .toSQL()
       .toNative();
 
