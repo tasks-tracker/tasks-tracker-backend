@@ -1,3 +1,3 @@
 export * from './repositories';
 export * from './query-repositories';
-export * from './consumers';
+export * from '../presentation/consumers';

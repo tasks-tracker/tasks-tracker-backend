@@ -31,6 +31,7 @@ export class TaskQueryRepositoryImpl implements TaskQueryRepository {
     const SQL = this.knex<TaskSchema>('tasks')
       .select('*')
       .where('owner_id', userId.value)
+      .where('is_deleted', false)
       .toSQL()
       .toNative();
 
