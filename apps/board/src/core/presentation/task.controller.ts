@@ -3,24 +3,16 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 import { Logger } from 'libs/logger';
 import {
-  ChangeTaskAssigneeDto,
-  ChangeTaskColumnDto,
-  ChangeTaskDescriptionDto,
-  ChangeTaskOrderDto,
   CreateTaskDto,
   DeleteTaskDto,
   GetTaskInfoDto,
-  RenameTaskDto,
+  UpdateTaskDto,
 } from './dtos';
 import {
-  ChangeTaskColumnCommand,
-  ChangeTaskDescriptionCommand,
-  ChangeTaskOrderCommand,
-  ChangeTaskOwnerCommand,
   CreateTaskCommand,
   GetTaskInfoByIdQuery,
   RemoveTaskCommand,
-  RenameTaskCommand,
+  UpdateTaskCommand,
 } from '../application';
 import {
   ColumnAlreadyExistDomainError,
@@ -140,21 +132,25 @@ export class TaskController {
     }
   }
 
-  @MessagePattern('rename-task')
-  async renameTask(@Payload() payload: RenameTaskDto) {
+  @MessagePattern('update-task')
+  async updateTask(@Payload() payload: UpdateTaskDto) {
     try {
       const result = await this.commandBus.execute(
-        new RenameTaskCommand(
+        new UpdateTaskCommand(
           new TaskIdVO(payload.taskId),
-          new TaskTitleVO(payload.newTitle),
+          new TaskTitleVO(payload.title),
+          new TaskDescriptionVO(payload.description),
+          new TaskOrderVO(payload.order),
+          new ColumnIdVO(payload.columnId),
+          new UserIdVO(payload.userId),
         ),
       );
 
       if (result.isOk()) {
-        this.kafkaClient.emit('rename-task-response', {
+        this.kafkaClient.emit('update-task-response', {
           taskId: payload.taskId,
           status: 'SUCCESS',
-          message: 'TASK_RENAMED_SUCCESSFULLY',
+          message: 'TASK_UPDATED_SUCCESSFULLY',
           requestId: payload.requestId,
         });
         return;
@@ -163,16 +159,16 @@ export class TaskController {
       const err = result.error;
 
       if (err instanceof TaskNotFoundDomainError) {
-        this.kafkaClient.emit('rename-task-response', {
+        this.kafkaClient.emit('update-task-response', {
           taskId: payload.taskId,
           status: 'NOT_FOUND',
-          requestId: payload.requestId,
           message: 'TASK_NOT_FOUND',
+          requestId: payload.requestId,
         });
         return;
       }
 
-      this.kafkaClient.emit('rename-task-response', {
+      this.kafkaClient.emit('update-task-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
@@ -181,185 +177,14 @@ export class TaskController {
       return;
     } catch (error) {
       this.logger.error(
-        { message: 'Error renaming task', error: String(error) },
+        { message: 'Error updating task', error: String(error) },
         'TaskController',
       );
-      this.kafkaClient.emit('rename-task-response', {
+      this.kafkaClient.emit('update-task-response', {
         taskId: payload.taskId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
         requestId: payload.requestId,
-      });
-    }
-  }
-
-  @MessagePattern('change-task-column')
-  async changeTaskColumn(@Payload() payload: ChangeTaskColumnDto) {
-    try {
-      const result = await this.commandBus.execute(
-        new ChangeTaskColumnCommand(
-          new TaskIdVO(payload.taskId),
-          new ColumnIdVO(payload.columnId),
-        ),
-      );
-
-      if (result.isOk()) {
-        this.kafkaClient.emit('change-task-column-response', {
-          taskId: payload.taskId,
-          requestId: payload.requestId,
-          status: 'SUCCESS',
-          message: 'TASK_COLUMN_CHANGED_SUCCESSFULLY',
-        });
-        return;
-      }
-
-      this.kafkaClient.emit('change-task-column-response', {
-        taskId: payload.taskId,
-        requestId: payload.requestId,
-        status: 'BAD_REQUEST',
-        message: 'UNKNOWN_ERROR',
-      });
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error changing task column', error: String(error) },
-        'TaskController',
-      );
-      this.kafkaClient.emit('change-task-column-response', {
-        taskId: payload.taskId,
-        requestId: payload.requestId,
-        status: 'BAD_REQUEST',
-        message: 'UNKNOWN_ERROR',
-      });
-    }
-  }
-
-  @MessagePattern('change-task-description')
-  async changeTaskDescription(@Payload() payload: ChangeTaskDescriptionDto) {
-    try {
-      const result = await this.commandBus.execute(
-        new ChangeTaskDescriptionCommand(
-          new TaskIdVO(payload.taskId),
-          new TaskDescriptionVO(payload.description),
-        ),
-      );
-
-      if (result.isOk()) {
-        this.kafkaClient.emit('change-task-description-response', {
-          taskId: payload.taskId,
-          status: 'SUCCESS',
-          message: 'TASK_DESCRIPTION_CHANGED_SUCCESSFULLY',
-          requestId: payload.requestId,
-        });
-        return;
-      }
-
-      const err = result.error;
-
-      if (err instanceof TaskNotFoundDomainError) {
-        this.kafkaClient.emit('change-task-description-response', {
-          taskId: payload.taskId,
-          status: 'NOT_FOUND',
-          requestId: payload.requestId,
-          message: 'TASK_NOT_FOUND',
-        });
-      }
-
-      this.kafkaClient.emit('change-task-description-response', {
-        taskId: payload.taskId,
-        status: 'BAD_REQUEST',
-        message: 'UNKNOWN_ERROR',
-        requestId: payload.requestId,
-      });
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error changing task description', error: String(error) },
-        'TaskController',
-      );
-      this.kafkaClient.emit('change-task-description-response', {
-        taskId: payload.taskId,
-        requestId: payload.requestId,
-        status: 'BAD_REQUEST',
-        message: 'UNKNOWN_ERROR',
-      });
-    }
-  }
-
-  @MessagePattern('change-task-order')
-  async changeTaskOrder(@Payload() payload: ChangeTaskOrderDto) {
-    try {
-      const result = await this.commandBus.execute(
-        new ChangeTaskOrderCommand(
-          new TaskIdVO(payload.taskId),
-          new TaskOrderVO(payload.order),
-        ),
-      );
-
-      if (result.isOk()) {
-        this.kafkaClient.emit('change-task-order-response', {
-          taskId: payload.taskId,
-          status: 'SUCCESS',
-          requestId: payload.requestId,
-          message: 'TASK_ORDER_CHANGED_SUCCESSFULLY',
-        });
-        return;
-      }
-
-      this.kafkaClient.emit('change-task-order-response', {
-        taskId: payload.taskId,
-        status: 'BAD_REQUEST',
-        requestId: payload.requestId,
-        message: 'UNKNOWN_ERROR',
-      });
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error changing task order', error: String(error) },
-        'TaskController',
-      );
-      this.kafkaClient.emit('change-task-order-response', {
-        taskId: payload.taskId,
-        status: 'BAD_REQUEST',
-        requestId: payload.requestId,
-        message: 'UNKNOWN_ERROR',
-      });
-    }
-  }
-
-  @MessagePattern('change-task-assignee')
-  async changeTaskAssignee(@Payload() payload: ChangeTaskAssigneeDto) {
-    try {
-      const result = await this.commandBus.execute(
-        new ChangeTaskOwnerCommand(
-          new TaskIdVO(payload.taskId),
-          new UserIdVO(payload.assigneeId),
-        ),
-      );
-
-      if (result.isOk()) {
-        this.kafkaClient.emit('change-task-assignee-response', {
-          taskId: payload.taskId,
-          status: 'SUCCESS',
-          requestId: payload.requestId,
-          message: 'TASK_ASSIGNEE_CHANGED_SUCCESSFULLY',
-        });
-        return;
-      }
-
-      this.kafkaClient.emit('change-task-assignee-response', {
-        taskId: payload.taskId,
-        status: 'BAD_REQUEST',
-        requestId: payload.requestId,
-        message: 'UNKNOWN_ERROR',
-      });
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error changing task assignee', error: String(error) },
-        'TaskController',
-      );
-      this.kafkaClient.emit('change-task-assignee-response', {
-        taskId: payload.taskId,
-        status: 'BAD_REQUEST',
-        requestId: payload.requestId,
-        message: 'UNKNOWN_ERROR',
       });
     }
   }

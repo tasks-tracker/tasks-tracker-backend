@@ -12,6 +12,7 @@ import {
   TaskRemovedEvent,
   TaskRenameEvent,
   TaskRepository,
+  TaskUpdatedEvent,
 } from '../../domain';
 import { knex } from 'knex';
 import { TransactionHost } from '@nestjs-cls/transactional';
@@ -93,6 +94,8 @@ export class TaskRepositoryImpl implements TaskRepository {
       return await this.saveRemovedEvent(task);
     } else if (events.some((event) => event instanceof TaskRenameEvent)) {
       return await this.saveRenamedEvent(task);
+    } else if (events.some((event) => event instanceof TaskUpdatedEvent)) {
+      return await this.saveUpdateEvent(task);
     }
   }
 
@@ -124,6 +127,23 @@ export class TaskRepositoryImpl implements TaskRepository {
     const SQL = this.knex<TaskSchema>('tasks')
       .update({
         order_number: task.order.value,
+      })
+      .where('id', task.id.value)
+      .toSQL()
+      .toNative();
+
+    await this.txHost.tx.none(SQL.sql, SQL.bindings);
+  }
+
+  private async saveUpdateEvent(task: Task) {
+    const SQL = this.knex<TaskSchema>('tasks')
+      .update({
+        title: task.title.value,
+        column_id: task.columnId.value,
+        owner_id: task.assignerId.value,
+        description: task.description.value,
+        order_number: task.order.value,
+        updated_at: task.updatedAt,
       })
       .where('id', task.id.value)
       .toSQL()
