@@ -8,13 +8,10 @@ import {
   TaskTitleVO,
 } from '../value-objects';
 import {
-  TaskChangeColumnEvent,
-  TaskChangeDescriptionEvent,
-  TaskChangeOrderEvent,
-  TaskChangeOwnerEvent,
   TaskChangeTitleEvent,
   TaskCreatedEvent,
   TaskRemovedEvent,
+  TaskUpdatedEvent,
 } from '../events';
 
 export class Task extends AggregateRoot {
@@ -114,27 +111,34 @@ export class Task extends AggregateRoot {
     return task;
   }
 
-  changeColumn(columnId: ColumnIdVO) {
-    this.#columnId = columnId;
-    this.apply(new TaskChangeColumnEvent(this.#id, columnId));
-  }
-
-  changeDescription(description: TaskDescriptionVO) {
-    this.#description = description;
-    this.apply(new TaskChangeDescriptionEvent(this.#id, description));
-  }
-
-  changeOrder(order: TaskOrderVO) {
-    this.#order = order;
-    this.apply(new TaskChangeOrderEvent(this.#id, order));
-  }
-
-  changeAssigner(assignerId: UserIdVO) {
-    if (this.#assignerId && this.#assignerId.equals(assignerId)) {
-      throw new Error('Task already has an assigner');
+  update(userData: {
+    title?: TaskTitleVO;
+    description?: TaskDescriptionVO;
+    order?: TaskOrderVO;
+    columnId?: ColumnIdVO;
+    assignerId?: UserIdVO;
+  }) {
+    if (Object.keys(userData).length === 0) {
+      throw new Error('No data to update');
     }
-    this.#assignerId = assignerId;
-    this.apply(new TaskChangeOwnerEvent(this.#id, assignerId));
+
+    if (userData.title) {
+      this.#title = userData.title;
+    }
+    if (userData.description) {
+      this.#description = userData.description;
+    }
+    if (userData.order) {
+      this.#order = userData.order;
+    }
+    if (userData.columnId) {
+      this.#columnId = userData.columnId;
+    }
+    if (userData.assignerId) {
+      this.#assignerId = userData.assignerId;
+    }
+
+    this.apply(new TaskUpdatedEvent(this.#id, userData));
   }
 
   changeTitle(title: TaskTitleVO) {

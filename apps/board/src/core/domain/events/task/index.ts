@@ -6,3 +6,4 @@ export * from './task-change-order.event';
 export * from './task-removed.event';
 export * from './task-change-column.event';
 export * from './task-change-title.event';
+export * from './task-updated.event';

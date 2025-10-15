@@ -124,6 +124,11 @@ export class BoardConsumer implements OnModuleInit {
       fromBeginning: false,
     });
 
+    await this.consumer.subscribe({
+      topic: 'update-task-response',
+      fromBeginning: false,
+    });
+
     await this.consumer.run({
       autoCommit: false,
       eachMessage: async (message: EachMessagePayload) => {
@@ -417,6 +422,21 @@ export class BoardConsumer implements OnModuleInit {
           }
 
           case 'get-task-info-response': {
+            const event = JSON.parse(
+              message.message.value.toString(),
+            ) as BoardResponse;
+
+            this.loggger.log(
+              `Received response for request ${event.requestId}:`,
+              event,
+            );
+
+            this.boardService.saveResponse(event.requestId, event);
+
+            break;
+          }
+
+          case 'update-task-response': {
             const event = JSON.parse(
               message.message.value.toString(),
             ) as BoardResponse;

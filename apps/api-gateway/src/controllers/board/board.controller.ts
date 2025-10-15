@@ -22,9 +22,6 @@ import {
   ChangeColumnBoardDto,
   ChangeColumnOwnerDto,
   ChangeOwnerDto,
-  ChangeTaskAssigneeDto,
-  ChangeTaskColumnDto,
-  ChangeTaskDescriptionDto,
   CreateBoardDto,
   CreateBoardResponseDto,
   CreateTaskDto,
@@ -37,8 +34,7 @@ import {
   RemoveColumnDto,
   RenameBoardDto,
   RenameColumnDto,
-  RenameTaskDto,
-  TaskChangeOrderDto,
+  UpdateTaskDto,
 } from './dtos';
 import { ValidationException } from 'libs/validation-exception';
 import { BoardResponse, BoardService } from '../../services';
@@ -889,6 +885,70 @@ export class BoardController {
     }
   }
 
+  @Patch('task/update')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Task updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  async updateTask(
+    @Body() body: UpdateTaskDto,
+    @SessionToken() sessionToken: string,
+  ) {
+    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
+
+    const requestId = crypto.randomUUID();
+
+    this.kafkaClient.emit('update-task', {
+      ...body,
+      userId: userId.value,
+      requestId,
+    });
+
+    try {
+      const result = await this.boardService.waitForResponse<BoardResponse>(
+        requestId,
+        30000,
+      );
+
+      if (result.status === 'SUCCESS') {
+        return {
+          message: 'TASK_UPDATED_SUCCESSFULLY',
+          status: 'SUCCESS',
+        };
+      }
+
+      if (result.status === 'BAD_REQUEST') {
+        throw new BadRequestException(result.message);
+      }
+
+      throw new Error(result.message);
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for response', error: String(error) },
+        'BoardController',
+      );
+      if (error instanceof ValidationException) {
+        throw new UnprocessableEntityException();
+      }
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      }
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+    }
+  }
+
   @Delete('task/delete')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
@@ -937,331 +997,6 @@ export class BoardController {
         'BoardController',
       );
 
-      if (error instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-    }
-  }
-
-  @Post('task/rename')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Task renamed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async renameTask(
-    @Body() body: RenameTaskDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('rename-task', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'TASK_RENAMED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
-      }
-
-      if (result.status === 'NOT_FOUND') {
-        throw new NotFoundException('TASK_NOT_FOUND');
-      }
-
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
-      if (error instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-    }
-  }
-
-  @Post('task/change-column')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Task column changed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async changeTaskColumn(
-    @Body() body: ChangeTaskColumnDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('change-task-column', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'TASK_COLUMN_CHANGED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
-      }
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
-      if (error instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-    }
-  }
-
-  @Post('task/change-description')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Task description changed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async changeTaskDescription(
-    @Body() body: ChangeTaskDescriptionDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('change-task-description', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'TASK_DESCRIPTION_CHANGED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
-      }
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
-    }
-  }
-  catch(error) {
-    this.logger.error(
-      { message: 'Error waiting for response', error: String(error) },
-      'BoardController',
-    );
-    if (error instanceof ValidationException) {
-      throw new UnprocessableEntityException();
-    }
-
-    if (error instanceof ConflictException) {
-      throw new ConflictException(error.message);
-    }
-    if (error instanceof BadRequestException) {
-      throw new BadRequestException(error.message);
-    }
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    }
-  }
-
-  @Post('task/change-order')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Task order changed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async changeTaskOrder(
-    @Body() body: TaskChangeOrderDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('change-task-order', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'TASK_ORDER_CHANGED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
-      }
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
-
-      if (error instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-    }
-  }
-
-  @Post('task/change-assignee')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Task assignee changed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async changeTaskAssignee(
-    @Body() body: ChangeTaskAssigneeDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('change-task-assignee', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'TASK_ASSIGNEE_CHANGED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
-      }
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
       if (error instanceof ValidationException) {
         throw new UnprocessableEntityException();
       }

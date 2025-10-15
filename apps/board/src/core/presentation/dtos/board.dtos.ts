@@ -72,46 +72,26 @@ export class DeleteTaskDto {
   requestId: string;
 }
 
-export class RenameTaskDto {
-  taskId: string;
-  newTitle: string;
-  requestId: string;
-}
-
-export class ChangeTaskColumnDto {
-  taskId: string;
-  columnId: string;
-  requestId: string;
-}
-
-export class ChangeTaskDescriptionDto {
-  taskId: string;
-  description: string;
-  requestId: string;
-}
-
-export class ChangeTaskOrderDto {
-  taskId: string;
-  order: number;
-  requestId: string;
-}
-
-export class ChangeTaskAssigneeDto {
-  taskId: string;
-  assigneeId: string;
-  requestId: string;
-}
-
 export class GetTaskInfoDto {
   taskId: string;
+  requestId: string;
+}
+
+export class UpdateTaskDto {
+  taskId: string;
+  title: string;
+  description: string;
+  order: number;
+  columnId: string;
+  userId: string;
   requestId: string;
 }
 
 export class RenameBoardDto {
   boardId: string;
   newTitle: string;
-  requestId: string;
   userId: string;
+  requestId: string;
 }
 
 export class GetFullBoardDto {
