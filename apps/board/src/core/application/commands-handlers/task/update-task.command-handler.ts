@@ -21,6 +21,7 @@ export class UpdateTaskCommandHandler
       }
 
       const task = result.value;
+
       task.update({
         title: command.newTitle,
         description: command.newDescription,

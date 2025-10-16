@@ -79,11 +79,11 @@ export class GetTaskInfoDto {
 
 export class UpdateTaskDto {
   taskId: string;
-  title: string;
-  description: string;
-  order: number;
-  columnId: string;
-  userId: string;
+  title?: string;
+  description?: string;
+  order?: number;
+  columnId?: string;
+  userId?: string;
   requestId: string;
 }
 

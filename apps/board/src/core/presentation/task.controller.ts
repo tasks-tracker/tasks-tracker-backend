@@ -135,16 +135,38 @@ export class TaskController {
   @MessagePattern('update-task')
   async updateTask(@Payload() payload: UpdateTaskDto) {
     try {
+      const { title, description, order, columnId, userId } = payload;
+      const hasUpdatableFields =
+        title !== undefined ||
+        description !== undefined ||
+        order !== undefined ||
+        columnId !== undefined ||
+        userId !== undefined;
+
+      if (!hasUpdatableFields) {
+        this.kafkaClient.emit('update-task-response', {
+          taskId: payload.taskId,
+          status: 'BAD_REQUEST',
+          message: 'NO_DATA_TO_UPDATE',
+          requestId: payload.requestId,
+        });
+        return;
+      }
+
       const result = await this.commandBus.execute(
         new UpdateTaskCommand(
           new TaskIdVO(payload.taskId),
-          new TaskTitleVO(payload.title),
-          new TaskDescriptionVO(payload.description),
-          new TaskOrderVO(payload.order),
-          new ColumnIdVO(payload.columnId),
-          new UserIdVO(payload.userId),
+          title !== undefined ? new TaskTitleVO(title) : undefined,
+          description !== undefined
+            ? new TaskDescriptionVO(description)
+            : undefined,
+          order !== undefined ? new TaskOrderVO(order) : undefined,
+          columnId !== undefined ? new ColumnIdVO(columnId) : undefined,
+          userId !== undefined ? new UserIdVO(userId) : undefined,
         ),
       );
+
+      this.logger.log(result);
 
       if (result.isOk()) {
         this.kafkaClient.emit('update-task-response', {
@@ -157,6 +179,8 @@ export class TaskController {
       }
 
       const err = result.error;
+
+      console.log(err);
 
       if (err instanceof TaskNotFoundDomainError) {
         this.kafkaClient.emit('update-task-response', {
