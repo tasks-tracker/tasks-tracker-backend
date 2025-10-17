@@ -25,17 +25,12 @@ export class BoardConsumer implements OnModuleInit {
     });
 
     await this.consumer.subscribe({
-      topic: 'change-owner-board-response',
+      topic: 'update-board-response',
       fromBeginning: false,
     });
 
     await this.consumer.subscribe({
       topic: 'remove-board-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
-      topic: 'rename-board-response',
       fromBeginning: false,
     });
 
@@ -55,22 +50,7 @@ export class BoardConsumer implements OnModuleInit {
     });
 
     await this.consumer.subscribe({
-      topic: 'change-column-board-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
-      topic: 'change-column-owner-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
       topic: 'remove-column-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
-      topic: 'rename-column-response',
       fromBeginning: false,
     });
 
@@ -90,42 +70,17 @@ export class BoardConsumer implements OnModuleInit {
     });
 
     await this.consumer.subscribe({
-      topic: 'rename-task-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
-      topic: 'change-task-column-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
-      topic: 'change-task-description-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
-      topic: 'change-task-order-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
-      topic: 'change-task-assignee-response',
-      fromBeginning: false,
-    });
-
-    await this.consumer.subscribe({
       topic: 'get-task-info-response',
       fromBeginning: false,
     });
 
     await this.consumer.subscribe({
-      topic: 'change-task-order-response',
+      topic: 'update-task-response',
       fromBeginning: false,
     });
 
     await this.consumer.subscribe({
-      topic: 'update-task-response',
+      topic: 'update-column-response',
       fromBeginning: false,
     });
 
@@ -138,21 +93,6 @@ export class BoardConsumer implements OnModuleInit {
 
         switch (message.topic) {
           case 'create-board-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'get-board-info-response': {
             const event = JSON.parse(
               message.message.value.toString(),
             ) as BoardResponse;
@@ -182,7 +122,7 @@ export class BoardConsumer implements OnModuleInit {
             break;
           }
 
-          case 'get-full-board-response': {
+          case 'update-board-response': {
             const event = JSON.parse(
               message.message.value.toString(),
             ) as BoardResponse;
@@ -197,7 +137,7 @@ export class BoardConsumer implements OnModuleInit {
             break;
           }
 
-          case 'rename-board-response': {
+          case 'get-full-board-response': {
             const event = JSON.parse(
               message.message.value.toString(),
             ) as BoardResponse;
@@ -227,67 +167,7 @@ export class BoardConsumer implements OnModuleInit {
             break;
           }
 
-          case 'change-owner-board-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'change-column-board-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'change-column-owner-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
           case 'remove-column-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'rename-column-response': {
             const event = JSON.parse(
               message.message.value.toString(),
             ) as BoardResponse;
@@ -346,81 +226,6 @@ export class BoardConsumer implements OnModuleInit {
             break;
           }
 
-          case 'rename-task-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'change-task-column-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'change-task-description-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'change-task-order-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
-          case 'change-task-assignee-response': {
-            const event = JSON.parse(
-              message.message.value.toString(),
-            ) as BoardResponse;
-
-            this.loggger.log(
-              `Received response for request ${event.requestId}:`,
-              event,
-            );
-
-            this.boardService.saveResponse(event.requestId, event);
-
-            break;
-          }
-
           case 'get-task-info-response': {
             const event = JSON.parse(
               message.message.value.toString(),
@@ -451,6 +256,20 @@ export class BoardConsumer implements OnModuleInit {
             break;
           }
 
+          case 'update-column-response': {
+            const event = JSON.parse(
+              message.message.value.toString(),
+            ) as BoardResponse;
+
+            this.loggger.log(
+              `Received response for request ${event.requestId}:`,
+              event,
+            );
+
+            this.boardService.saveResponse(event.requestId, event);
+
+            break;
+          }
           default: {
             this.loggger.error(`Unknown topic: ${message.topic}`);
             break;

@@ -10,9 +10,7 @@ import {
   ColumnRepository,
   ColumnCreatedEvent,
   ColumnRemovedEvent,
-  ColumnChangeBoardEvent,
-  ColumnChangeOwnerEvent,
-  ColumnRenameEvent,
+  ColumnUpdatedEvent,
 } from '../../domain';
 import { knex } from 'knex';
 import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
@@ -33,18 +31,10 @@ export class ColumnRepositoryImpl implements ColumnRepository {
     const events = column.getUncommittedEvents();
     if (events.some((event) => event instanceof ColumnCreatedEvent)) {
       return await this.saveCreatedEvent(column);
-    } else if (
-      events.some((event) => event instanceof ColumnChangeBoardEvent)
-    ) {
-      return await this.saveChangedBoardEvent(column);
-    } else if (
-      events.some((event) => event instanceof ColumnChangeOwnerEvent)
-    ) {
-      return await this.saveChangedOwnerEvent(column);
-    } else if (events.some((event) => event instanceof ColumnRenameEvent)) {
-      return await this.saveRenamedEvent(column);
     } else if (events.some((event) => event instanceof ColumnRemovedEvent)) {
       return await this.saveRemovedEvent(column);
+    } else if (events.some((event) => event instanceof ColumnUpdatedEvent)) {
+      return await this.saveUpdatedEvent(column);
     } else {
       throw new Error('Unknown event');
     }
@@ -68,18 +58,6 @@ export class ColumnRepositoryImpl implements ColumnRepository {
     await this.txHost.tx.none(SQL.sql, SQL.bindings);
   }
 
-  private async saveChangedBoardEvent(column: Column): Promise<void> {
-    const SQL = this.knex<ColumnSchema>('columns')
-      .update({
-        board_id: column.boardId.value,
-      })
-      .where('id', column.id.value)
-      .toSQL()
-      .toNative();
-
-    await this.txHost.tx.none(SQL.sql, SQL.bindings);
-  }
-
   private async saveRemovedEvent(column: Column): Promise<void> {
     const SQL = this.knex<ColumnSchema>('columns')
       .update({
@@ -92,22 +70,17 @@ export class ColumnRepositoryImpl implements ColumnRepository {
     await this.txHost.tx.none(SQL.sql, SQL.bindings);
   }
 
-  private async saveChangedOwnerEvent(column: Column): Promise<void> {
+  public async saveUpdatedEvent(column: Column) {
     const SQL = this.knex<ColumnSchema>('columns')
       .update({
+        board_id: column.boardId.value,
+        created_at: column.craetedAt,
+        id: column.id.value,
+        is_deleted: column.isDeleted,
+        order_number: column.order.value,
         owner_id: column.creatorId.value,
-      })
-      .where('id', column.id.value)
-      .toSQL()
-      .toNative();
-
-    await this.txHost.tx.none(SQL.sql, SQL.bindings);
-  }
-
-  private async saveRenamedEvent(column: Column): Promise<void> {
-    const SQL = this.knex<ColumnSchema>('columns')
-      .update({
         title: column.title.value,
+        updated_at: column.updatedAt,
       })
       .where('id', column.id.value)
       .toSQL()
