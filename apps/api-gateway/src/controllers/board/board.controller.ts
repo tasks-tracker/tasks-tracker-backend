@@ -19,9 +19,6 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Logger } from 'libs/logger';
 import { Post } from '@nestjs/common';
 import {
-  ChangeColumnBoardDto,
-  ChangeColumnOwnerDto,
-  ChangeOwnerDto,
   CreateBoardDto,
   CreateBoardResponseDto,
   CreateTaskDto,
@@ -32,8 +29,8 @@ import {
   GetTaskInfoDto,
   RemoveBoardDto,
   RemoveColumnDto,
-  RenameBoardDto,
-  RenameColumnDto,
+  UpdateBoardDto,
+  UpdateColumnDto,
   UpdateTaskDto,
 } from './dtos';
 import { ValidationException } from 'libs/validation-exception';
@@ -185,31 +182,30 @@ export class BoardController {
     }
   }
 
-  @Post('change-owner')
+  @Patch('update')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Board owner changed successfully',
+    description: 'Board updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'UNAUTHORIZED',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'UNKNOWN_ERROR',
   })
-  async changeOwner(
-    @Body() body: ChangeOwnerDto,
+  async updateBoard(
+    @Body() body: UpdateBoardDto,
     @SessionToken() sessionToken: string,
   ) {
-    if (!sessionToken) {
-      throw new UnauthorizedException('UNAUTHORIZED');
-    }
+    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-
-    if (!userId) {
-      throw new UnauthorizedException('UNAUTHORIZED');
-    }
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
 
     const requestId = crypto.randomUUID();
-    this.kafkaClient.emit('change-owner-board', {
+    this.kafkaClient.emit('update-board', {
       ...body,
       userId: userId.value,
       requestId,
@@ -223,12 +219,9 @@ export class BoardController {
 
       if (result.status === 'SUCCESS') {
         return {
-          message: 'BOARD_OWNER_CHANGED_SUCCESSFULLY',
+          message: 'BOARD_UPDATED_SUCCESSFULLY',
           status: 'SUCCESS',
         };
-      }
-      if (result.status === 'NOT_FOUND') {
-        throw new NotFoundException('BOARD_NOT_FOUND');
       }
       if (result.status === 'BAD_REQUEST') {
         throw new BadRequestException(result.message);
@@ -242,17 +235,8 @@ export class BoardController {
       if (error instanceof ValidationException) {
         throw new UnprocessableEntityException();
       }
-
       if (error instanceof ConflictException) {
         throw new ConflictException(error.message);
-      }
-
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-
-      if (error instanceof Error) {
-        throw new Error(error.message);
       }
     }
   }
@@ -311,75 +295,6 @@ export class BoardController {
         { message: 'Error waiting for response', error: String(error) },
         'BoardController',
       );
-    }
-  }
-
-  @Patch('rename-board')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Board renamed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async renameBoard(
-    @Body() body: RenameBoardDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) {
-      throw new UnauthorizedException('UNAUTHORIZED');
-    }
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) {
-      throw new UnauthorizedException('UNAUTHORIZED');
-    }
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('rename-board', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'BOARD_RENAMED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'NOT_FOUND') {
-        throw new NotFoundException('BOARD_NOT_FOUND');
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
-      }
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
-      if (error instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
     }
   }
 
@@ -510,18 +425,18 @@ export class BoardController {
     }
   }
 
-  @Post('column/change-board')
+  @Patch('column/update')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Column board changed successfully',
+    description: 'Column updated successfully',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'UNKNOWN_ERROR',
   })
-  async changeColumnBoard(
-    @Body() body: ChangeColumnBoardDto,
+  async updateColumn(
+    @Body() body: UpdateColumnDto,
     @SessionToken() sessionToken: string,
   ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
@@ -530,7 +445,7 @@ export class BoardController {
 
     const requestId = crypto.randomUUID();
 
-    this.kafkaClient.emit('change-column-board', {
+    this.kafkaClient.emit('update-column', {
       ...body,
       userId: userId.value,
       requestId,
@@ -544,74 +459,15 @@ export class BoardController {
 
       if (result.status === 'SUCCESS') {
         return {
-          message: 'COLUMN_BOARD_CHANGED_SUCCESSFULLY',
+          message: 'COLUMN_UPDATED_SUCCESSFULLY',
           status: 'SUCCESS',
         };
       }
       if (result.status === 'BAD_REQUEST') {
         throw new BadRequestException(result.message);
       }
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
-      if (error instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-    }
-  }
-
-  @Post('column/change-owner')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Column owner changed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async changeColumnOwner(
-    @Body() body: ChangeColumnOwnerDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('change-column-owner', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'COLUMN_OWNER_CHANGED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
+      if (result.status === 'NOT_FOUND') {
+        throw new NotFoundException('COLUMN_NOT_FOUND');
       }
       throw new Error(result.message);
     } catch (error) {
@@ -681,69 +537,6 @@ export class BoardController {
         { message: 'Error waiting for response', error: String(error) },
         'BoardController',
       );
-      if (error instanceof ValidationException) {
-        throw new UnprocessableEntityException();
-      }
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-    }
-  }
-
-  @Post('column/rename')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Column renamed successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'UNKNOWN_ERROR',
-  })
-  async renameColumn(
-    @Body() body: RenameColumnDto,
-    @SessionToken() sessionToken: string,
-  ) {
-    if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
-    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
-    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
-
-    const requestId = crypto.randomUUID();
-
-    this.kafkaClient.emit('rename-column', {
-      ...body,
-      userId: userId.value,
-      requestId,
-    });
-
-    try {
-      const result = await this.boardService.waitForResponse<BoardResponse>(
-        requestId,
-        30000,
-      );
-
-      if (result.status === 'SUCCESS') {
-        return {
-          message: 'COLUMN_RENAMED_SUCCESSFULLY',
-          status: 'SUCCESS',
-        };
-      }
-      if (result.status === 'BAD_REQUEST') {
-        throw new BadRequestException(result.message);
-      }
-      throw new Error(result.message);
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error waiting for response', error: String(error) },
-        'BoardController',
-      );
-
       if (error instanceof ValidationException) {
         throw new UnprocessableEntityException();
       }
@@ -1012,7 +805,7 @@ export class BoardController {
     }
   }
 
-  @Post('task/get-info')
+  @Get('task/get-info')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -1023,8 +816,8 @@ export class BoardController {
     description: 'UNKNOWN_ERROR',
   })
   async getTaskInfo(
-    @Body() body: GetTaskInfoDto,
     @SessionToken() sessionToken: string,
+    @Query() query: GetTaskInfoDto,
   ) {
     if (!sessionToken) throw new UnauthorizedException('UNAUTHORIZED');
     const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
@@ -1033,7 +826,7 @@ export class BoardController {
     const requestId = crypto.randomUUID();
 
     this.kafkaClient.emit('get-task-info', {
-      ...body,
+      ...query,
       userId: userId.value,
       requestId,
     });

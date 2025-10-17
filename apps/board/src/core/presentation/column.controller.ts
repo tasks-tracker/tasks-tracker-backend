@@ -3,25 +3,22 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 import { Logger } from 'libs/logger';
 import {
-  ChangeColumnBoardDto,
-  ChangeColumnOwnerDto,
   CreateColumnDto,
   GetColumnInfoDto,
   RemoveColumnDto,
-  RenameColumnDto,
+  UpdateColumnDto,
 } from './dtos';
 import {
-  ChangeColumnBoardCommand,
-  ChangeColumnOwnerCommand,
   CreateColumnCommand,
   GetColumnInfoByIdQuery,
   RemoveColumnCommand,
-  RenameColumnCommand,
+  UpdateColumnCommand,
 } from '../application';
 import {
   BoardIdVO,
   ColumnAlreadyExistDomainError,
   ColumnIdVO,
+  ColumnNotFoundDomainError,
   ColumnOrderVO,
   ColumnTitleVO,
   UserIdVO,
@@ -93,21 +90,49 @@ export class ColumnController {
     }
   }
 
-  @MessagePattern('change-column-board')
-  async changeColumnBoard(@Payload() payload: ChangeColumnBoardDto) {
+  @MessagePattern('update-column')
+  async updateColumn(@Payload() payload: UpdateColumnDto) {
     try {
+      const hasUpdatableFields = Object.keys(payload).every(
+        (key) => key !== undefined,
+      );
+
+      if (!hasUpdatableFields) {
+        this.kafkaClient.emit('update-column-response', {
+          columnId: payload.columnId,
+          status: 'BAD_REQUEST',
+          message: 'NO_DATA_TO_UPDATE',
+          requestId: payload.requestId,
+        });
+        return;
+      }
+
       const result = await this.commandBus.execute(
-        new ChangeColumnBoardCommand(
+        new UpdateColumnCommand(
           new ColumnIdVO(payload.columnId),
-          new BoardIdVO(payload.boardId),
+          payload.title !== undefined
+            ? new ColumnTitleVO(payload.title)
+            : undefined,
+          payload.order !== undefined
+            ? new ColumnOrderVO(payload.order)
+            : undefined,
+          payload.boardId !== undefined
+            ? new BoardIdVO(payload.boardId)
+            : undefined,
+          payload.ownerId !== undefined
+            ? new UserIdVO(payload.ownerId)
+            : undefined,
+          payload.isDeleted !== undefined ? payload.isDeleted : undefined,
+          payload.updatedAt !== undefined ? payload.updatedAt : undefined,
+          payload.createdAt !== undefined ? payload.createdAt : undefined,
         ),
       );
 
       if (result.isOk()) {
-        this.kafkaClient.emit('change-column-board-response', {
+        this.kafkaClient.emit('update-column-response', {
           columnId: payload.columnId,
           status: 'SUCCESS',
-          message: 'COLUMN_BOARD_CHANGED_SUCCESSFULLY',
+          message: 'COLUMN_UPDATED_SUCCESSFULLY',
           requestId: payload.requestId,
         });
         return;
@@ -115,57 +140,40 @@ export class ColumnController {
 
       const err = result.error;
 
-      if (err) {
-        this.kafkaClient.emit('change-column-board-response', {
+      if (err instanceof ColumnNotFoundDomainError) {
+        this.kafkaClient.emit('update-column-response', {
           columnId: payload.columnId,
           status: 'NOT_FOUND',
-          message: 'UNKNOWN_ERROR',
+          message: 'COLUMN_NOT_FOUND',
           requestId: payload.requestId,
-        });
-      }
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error changing column board', error: String(error) },
-        'ColumnController',
-      );
-    }
-  }
-
-  @MessagePattern('change-column-owner')
-  async changeColumnOwner(@Payload() payload: ChangeColumnOwnerDto) {
-    try {
-      const result = await this.commandBus.execute(
-        new ChangeColumnOwnerCommand(
-          new ColumnIdVO(payload.columnId),
-          new UserIdVO(payload.ownerId),
-        ),
-      );
-
-      if (result.isOk()) {
-        this.kafkaClient.emit('change-column-owner-response', {
-          columnId: payload.columnId,
-          status: 'SUCCESS',
-          requestId: payload.requestId,
-          message: 'COLUMN_OWNER_CHANGED_SUCCESSFULLY',
         });
         return;
       }
 
-      const err = result.error;
+      if (err instanceof ValidationException) {
+        this.kafkaClient.emit('update-column-response', {
+          columnId: payload.columnId,
+          status: 'UNPROCESSABLE_ENTITY',
+          message: 'VALIDATION_ERROR',
+          requestId: payload.requestId,
+        });
+      }
 
       if (err) {
-        this.kafkaClient.emit('change-column-owner-response', {
+        this.kafkaClient.emit('update-column-response', {
+          columnId: payload.columnId,
           status: 'BAD_REQUEST',
-          requestId: payload.requestId,
           message: 'UNKNOWN_ERROR',
+          requestId: payload.requestId,
         });
+        return;
       }
     } catch (error) {
       this.logger.error(
-        { message: 'Error changing column owner', error: String(error) },
+        { message: 'Error updating column', error: String(error) },
         'ColumnController',
       );
-      this.kafkaClient.emit('change-column-owner-response', {
+      this.kafkaClient.emit('update-column-response', {
         columnId: payload.columnId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
@@ -212,52 +220,6 @@ export class ColumnController {
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',
         requestId: payload.requestId,
-      });
-    }
-  }
-
-  @MessagePattern('rename-column')
-  async renameColumn(@Payload() payload: RenameColumnDto) {
-    try {
-      const result = await this.commandBus.execute(
-        new RenameColumnCommand(
-          new ColumnIdVO(payload.columnId),
-          new ColumnTitleVO(payload.newTitle),
-          new UserIdVO(payload.userId),
-        ),
-      );
-
-      if (result.isOk()) {
-        this.kafkaClient.emit('rename-column-response', {
-          columnId: payload.columnId,
-          status: 'SUCCESS',
-          requestId: payload.requestId,
-          message: 'COLUMN_RENAMED_SUCCESSFULLY',
-        });
-        return;
-      }
-
-      const err = result.error;
-
-      if (err) {
-        this.kafkaClient.emit('rename-column-response', {
-          columnId: payload.columnId,
-          status: 'BAD_REQUEST',
-          message: 'UNKNOWN_ERROR',
-          requestId: payload.requestId,
-        });
-        return;
-      }
-    } catch (error) {
-      this.logger.error(
-        { message: 'Error renaming column', error: String(error) },
-        'ColumnController',
-      );
-      this.kafkaClient.emit('rename-column-response', {
-        columnId: payload.columnId,
-        status: 'BAD_REQUEST',
-        requestId: payload.requestId,
-        message: 'UNKNOWN_ERROR',
       });
     }
   }

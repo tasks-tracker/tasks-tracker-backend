@@ -1,7 +1,5 @@
 import {
   ChangeBoardOwnerCommandHandler,
-  ChangeColumnBoardCommandHandler,
-  ChangeColumnOwnerCommandHandler,
   CreateBoardCommandHandler,
   CreateColumnCommandHandler,
   CreateDefaultBoardCommandHandler,
@@ -10,7 +8,7 @@ import {
   RemoveColumnCommandHandler,
   RemoveTaskCommandHandler,
   RenameBoardCommandHandler,
-  RenameColumnCommandHandler,
+  UpdateColumnCommandHandler,
   UpdateTaskCommandHandler,
   UserRegisteredByLoginConsumer,
 } from '../core';
@@ -38,10 +36,8 @@ export const commandHandlersProviders = [
   ChangeBoardOwnerCommandHandler,
   CreateColumnCommandHandler,
   RemoveColumnCommandHandler,
-  RenameColumnCommandHandler,
-  ChangeColumnOwnerCommandHandler,
+  UpdateColumnCommandHandler,
   CreateDefaultBoardCommandHandler,
-  ChangeColumnBoardCommandHandler,
   CreateTaskCommandHandler,
   RemoveTaskCommandHandler,
   UpdateTaskCommandHandler,

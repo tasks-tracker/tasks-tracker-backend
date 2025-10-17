@@ -87,6 +87,18 @@ export class UpdateTaskDto {
   requestId: string;
 }
 
+export class UpdateColumnDto {
+  columnId: string;
+  title?: string;
+  order?: number;
+  boardId?: string;
+  ownerId?: string;
+  isDeleted?: boolean;
+  updatedAt?: Date;
+  createdAt?: Date;
+  requestId: string;
+}
+
 export class RenameBoardDto {
   boardId: string;
   newTitle: string;

@@ -8,11 +8,8 @@ import {
 } from '../value-objects';
 import {
   ColumnCreatedEvent,
-  ColumnChangeOwnerEvent,
-  ColumnRenameEvent,
-  ColumnChangeOrderEvent,
-  ColumnChangeBoardEvent,
   ColumnRemovedEvent,
+  ColumnUpdatedEvent,
 } from '../events';
 import { DomainError } from 'libs/domain-error';
 
@@ -102,31 +99,43 @@ export class Column extends AggregateRoot {
     return column;
   }
 
-  rename(userId: UserIdVO, title: ColumnTitleVO) {
-    if (userId.equals(this.#creatorId)) {
-      throw new DomainError('USER_NOT_AUTHORIZED');
+  update(columnData: {
+    title?: ColumnTitleVO;
+    order?: ColumnOrderVO;
+    boardId?: BoardIdVO;
+    ownerId?: UserIdVO;
+    isDeleted?: boolean;
+    updatedAt?: Date;
+    createdAt?: Date;
+  }) {
+    if (Object.keys(columnData).length === 0) {
+      throw new DomainError('NO_DATA_TO_UPDATE');
     }
-    this.#title = title;
-    this.#updatedAt = new Date();
-    this.apply(new ColumnRenameEvent(title));
-  }
 
-  changeCreator(newCreatorId: UserIdVO) {
-    this.#creatorId = new UserIdVO(newCreatorId.value);
-    this.#updatedAt = new Date();
-    this.apply(new ColumnChangeOwnerEvent(this.#creatorId, newCreatorId));
-  }
+    if (columnData.title) {
+      this.#title = columnData.title;
+    }
+    if (columnData.order) {
+      this.#order = columnData.order;
+    }
+    if (columnData.boardId) {
+      this.#boardId = columnData.boardId;
+    }
+    if (columnData.ownerId) {
+      this.#creatorId = columnData.ownerId;
+    }
+    if (columnData.isDeleted) {
+      this.#isDeleted = columnData.isDeleted;
+    }
+    if (columnData.updatedAt) {
+      this.#updatedAt = columnData.updatedAt;
+    }
 
-  changeOrder(order: ColumnOrderVO) {
-    this.#order = order;
-    this.#updatedAt = new Date();
-    this.apply(new ColumnChangeOrderEvent(order));
-  }
+    if (columnData.createdAt) {
+      this.#createdAt = columnData.createdAt;
+    }
 
-  changeBoard(boardId: BoardIdVO) {
-    this.#boardId = boardId;
-    this.#updatedAt = new Date();
-    this.apply(new ColumnChangeBoardEvent(boardId));
+    this.apply(new ColumnUpdatedEvent(this.#id, columnData));
   }
 
   delete() {

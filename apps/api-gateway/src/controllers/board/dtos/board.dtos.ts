@@ -23,6 +23,48 @@ export class RenameTaskDto {
   newTitle: string;
 }
 
+export class UpdateBoardDto {
+  @ApiProperty({
+    example: '1234-5678-9012-3456',
+  })
+  boardId?: string;
+  @ApiProperty({
+    example: 'Example title',
+  })
+  newTitle?: string;
+  @ApiProperty({
+    example: '26241415-39b0-413e-8759-66d5ddde4b45',
+  })
+  ownerId?: string;
+}
+
+export class UpdateColumnDto {
+  @ApiProperty({
+    example: '1234-5678-9012-3456',
+  })
+  columnId: string;
+  @ApiProperty({
+    example: 'Example title',
+  })
+  newTitle: string;
+  @ApiProperty({
+    example: 1,
+  })
+  order?: number;
+  @ApiProperty({
+    example: '1234-5678-9012-3456',
+  })
+  boardId?: string;
+  @ApiProperty({
+    example: '26241415-39b0-413e-8759-66d5ddde4b45',
+  })
+  ownerId?: string;
+  @ApiProperty({
+    example: true,
+  })
+  isDeleted?: boolean;
+}
+
 export class UpdateTaskDto {
   @ApiProperty({
     example: '1234-5678-9012-3456',
