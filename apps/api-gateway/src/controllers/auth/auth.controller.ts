@@ -268,6 +268,9 @@ export class AuthController {
         requestId,
         30000,
       );
+
+      console.log('response', response.status);
+
       if (response.status === 'OK') {
         res.status(HttpStatus.OK).json({
           success: true,
@@ -290,12 +293,10 @@ export class AuthController {
         { message: 'Error waiting for me response', error: String(error) },
         'AuthController',
       );
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('UNKNOWN_ERROR');
     }
-    this.kafkaClient.emit('me', JSON.stringify(sessionToken));
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: 'USER_INFO_REQUEST_ACCEPTED',
-      status: 'PROCESSING',
-    });
   }
 }
