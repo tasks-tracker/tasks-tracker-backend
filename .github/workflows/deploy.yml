@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   workflow_run:
-    workflows: ["Docker Build"]
+    workflows: ['Docker Build']
     types: [completed]
     branches: [master]
 
@@ -10,7 +10,7 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
@@ -20,7 +20,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /opt/backend
-            
+
             # Создать/обновить docker-compose.yml
             cat > docker-compose.yml << 'EOF'
             version: '3.8'
@@ -113,11 +113,11 @@ jobs:
               zookeeper_logs:
               kafka1_data:
             EOF
-            
+
             # Создать production конфиги
             rm -rf configs
             mkdir -p configs
-            
+
             # Kafka конфиг
             cat > configs/kafka.config.yml << 'EOF'
             clientId: 'backend-prod'
@@ -132,7 +132,7 @@ jobs:
             ssl: false
             sasl: false
             EOF
-            
+
             # CORS конфиг
             cat > configs/cors.config.yml << 'EOF'
             origin: 
@@ -159,13 +159,13 @@ jobs:
             preflightContinue: false
             optionsSuccessStatus: 204
             EOF
-            
+
             # Service конфиг
             cat > configs/service.config.yml << 'EOF'
             port: 8000
             host: 0.0.0.0
             EOF
-            
+
             # Environment файл
             cat > configs/.env << 'EOF'
             NODE_ENV=production
@@ -178,7 +178,7 @@ jobs:
             METRICS_AUTH_TOKEN=dev-token
             METRICS_CONFIG_FILE_PATH=configs/metrics.config.yml
             EOF
-            
+
             # logger конфиг
             cat > configs/logger.config.yml << 'EOF'
             logLevel: DEBUG
@@ -224,29 +224,29 @@ jobs:
 
             # Остановить текущие контейнеры
             docker-compose down
-            
+
             # Получить новый образ backend'а
             docker-compose pull backend
-            
+
             # Запустить базу данных и дождаться готовности
             docker-compose up -d database
             echo "Waiting for database to be ready..."
             sleep 30
-            
+
             # Собрать и запустить миграции
             docker-compose pull db-migrations
             docker-compose up db-migrations
             echo "Migrations completed"
-            
+
             # Запустить все остальные сервисы
             docker-compose up -d
-            
+
             # Подождать немного для инициализации сервисов
             sleep 30
-            
+
             # Показать статус
             docker-compose ps
-            
+
             # Проверить логи backend'а
             echo "=== Backend logs ==="
             docker-compose logs --tail=20 backend

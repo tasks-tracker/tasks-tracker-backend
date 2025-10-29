@@ -18,24 +18,12 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@adapters": [
-        "src/adapters"
-      ],
-      "@adapters/*": [
-        "src/adapters/*"
-      ],
-      "@contexts": [
-        "src/contexts"
-      ],
-      "@contexts/*": [
-        "src/contexts/*"
-      ],
-      "@libs": [
-        "src/libs"
-      ],
-      "@libs/*": [
-        "src/libs/*"
-      ]
+      "@adapters": ["src/adapters"],
+      "@adapters/*": ["src/adapters/*"],
+      "@contexts": ["src/contexts"],
+      "@contexts/*": ["src/contexts/*"],
+      "@libs": ["src/libs"],
+      "@libs/*": ["src/libs/*"]
     }
   }
 }
