@@ -7,7 +7,7 @@ jobs:
   test-ssh:
     name: Test SSH Connection
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Test SSH connection
         uses: appleboy/ssh-action@v1.0.3

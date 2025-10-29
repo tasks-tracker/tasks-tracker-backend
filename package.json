@@ -7,7 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "format": "prettier --write \"**/*.{ts,js,json,yml,yaml,md}\" --ignore-path .gitignore",
+    "format:fix-eol": "prettier --write \"**/*.{ts,js,json,yml,yaml,md}\" --ignore-path .gitignore --end-of-line lf",
     "start": "cross-env ENV_PATH=./configs/backend/dev.env nest start --watch",
     "start:dev": "cross-env ENV_PATH=./configs/backend/dev.env nest start --watch",
     "start:api-gateway": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start api-gateway --watch",

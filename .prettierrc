@@ -1,7 +1,5 @@
 {
   "singleQuote": true,
   "trailingComma": "all",
-  "endOfLine": "lf",
-  "insertFinalNewline": true,
-  "trimTrailingWhitespace": true
+  "endOfLine": "lf"
 }
