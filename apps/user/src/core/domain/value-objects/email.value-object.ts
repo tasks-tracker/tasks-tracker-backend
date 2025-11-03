@@ -1,0 +1,20 @@
+import { IsEmail, IsString } from 'class-validator';
+import { validateSync } from 'class-validator';
+import { ValidationException } from 'libs/validation-exception';
+
+export class EmailVO {
+  @IsEmail()
+  @IsString()
+  public readonly value: string;
+  constructor(value: string) {
+    this.value = value;
+    const errors = validateSync(this);
+    if (errors.length > 0) {
+      throw new ValidationException(errors);
+    }
+  }
+
+  equals(vo: EmailVO): boolean {
+    return this.value === vo.value;
+  }
+}
