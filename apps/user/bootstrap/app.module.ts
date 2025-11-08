@@ -14,8 +14,8 @@ import { KafkaModule } from 'adapters/kafka-adapter';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-// import { BoardModule } from '../src/module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { UserModule } from '../src';
 
 @Module({
   imports: [
@@ -62,7 +62,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         configService.get<MetricsConfig>('metrics')!,
       inject: [ConfigService],
     }),
-    // BoardModule,
+    UserModule,
   ],
 })
 export class AppModule {
