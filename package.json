@@ -14,6 +14,7 @@
     "start:api-gateway": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start api-gateway --watch",
     "start:auth": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start auth --watch",
     "start:board": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start board --watch",
+    "start:user": "cross-env ENV_PATH=./configs/backend/dev.env npx nest start user --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/task-tracker/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -23,7 +24,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/task-tracker/test/jest-e2e.json",
     "migration": "npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts",
-    "migration:up": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts up",
+    "migration:up": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register adapters/database-adapter/scripts/migration.ts up",
     "migration:down": "cross-env ENV_PATH=./configs/backend/dev.env npx ts-node -P ./tsconfig.json -r tsconfig-paths/register src/adapters/database-adapter/scripts/migration.ts down"
   },
   "dependencies": {
