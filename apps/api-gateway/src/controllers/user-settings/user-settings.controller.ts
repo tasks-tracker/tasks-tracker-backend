@@ -1,0 +1,78 @@
+import {
+  Body,
+  ConflictException,
+  Controller,
+  BadRequestException,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Post, Inject } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ClientKafka } from '@nestjs/microservices';
+import { Logger } from 'libs/logger';
+import { UserSettingsService } from '../../services';
+import { UpdateUserAvatarRequestDto } from './dtos';
+import { AuthHelper } from 'apps/auth/src/helpers';
+import { SessionToken } from 'libs/session-token-decorator';
+
+@ApiTags('User Settings')
+@Controller('user-settings')
+export class UserSettingsController {
+  constructor(
+    private readonly userSettingsService: UserSettingsService,
+    private readonly logger: Logger,
+    private readonly authHelper: AuthHelper,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
+  ) {
+    logger.setContext(UserSettingsController.name);
+  }
+
+  @Post('update-user-avatar')
+  @ApiResponse({
+    status: HttpStatus.ACCEPTED,
+    description: 'USER_AVATAR_UPDATED_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'INVALID_AVATAR_URL || UNKNOWN_ERROR || TIMEOUT',
+  })
+  public async updateUserAvatar(
+    @Body() body: UpdateUserAvatarRequestDto,
+    @SessionToken() sessionToken: string,
+  ) {
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
+
+    const requestId = crypto.randomUUID();
+    this.kafkaClient.emit('update-user-avatar', {
+      ...body,
+      userId: userId.value,
+      requestId,
+    });
+
+    try {
+      const response = await this.userSettingsService.waitForResponse(
+        requestId,
+        30000,
+      );
+      return response;
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for response', error: String(error) },
+        'AuthController',
+      );
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException({
+          message: error.message,
+          status: 'BAD_REQUEST',
+        });
+      }
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+    }
+  }
+}
