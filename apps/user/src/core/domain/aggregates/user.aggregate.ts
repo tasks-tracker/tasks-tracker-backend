@@ -12,6 +12,7 @@ export interface Settings {
 
 export class UserSettings extends AggregateRoot {
   #id: UserIdVO;
+  #userId: UserIdVO;
   #avatarUrl: AvatarUrlVO;
   #settings: Settings;
   #createdAt: Date;
@@ -19,6 +20,7 @@ export class UserSettings extends AggregateRoot {
 
   constructor(
     id: UserIdVO,
+    userId: UserIdVO,
     avatarUrl: AvatarUrlVO,
     settings: Settings,
     createdAt: Date,
@@ -26,6 +28,7 @@ export class UserSettings extends AggregateRoot {
   ) {
     super();
     this.#id = id;
+    this.#userId = userId;
     this.#avatarUrl = avatarUrl;
     this.#settings = settings;
     this.#createdAt = createdAt;
@@ -34,6 +37,10 @@ export class UserSettings extends AggregateRoot {
 
   get id() {
     return this.#id;
+  }
+
+  get userId() {
+    return this.#userId;
   }
 
   get avatarUrl() {
@@ -52,25 +59,28 @@ export class UserSettings extends AggregateRoot {
     return this.#updatedAt;
   }
 
-  static create(avatarUrl: AvatarUrlVO): UserSettings {
+  static create(userId: UserIdVO): UserSettings {
     const defaultSettings: Settings = {
       notificationsEnabled: true,
       theme: 'auto',
       language: 'ru',
     };
 
-    const userId = randomUUID();
+    const id = randomUUID();
     const now = new Date();
 
     const user = new UserSettings(
-      new UserIdVO(userId),
-      avatarUrl,
+      new UserIdVO(id),
+      userId,
+      new AvatarUrlVO(
+        'https://sun9-62.userapi.com/s/v1/ig2/L77CPXsVjZSGit7if9DUP-KDH1KwyKQ_lJZUjO7cuTAf3D0CQVOnPqjTjpToEeAum_foW2v1PVjUTxUcbpsrkTy7.jpg?quality=95&as=32x40,48x60,72x90,108x135,160x200,240x300,360x450,480x600,540x675,640x800,720x900,736x920&from=bu&cs=736x0',
+      ),
       defaultSettings,
       now,
       now,
     );
 
-    user.apply(new UserCreatedEvent(new UserIdVO(userId)));
+    user.apply(new UserCreatedEvent(userId));
     return user;
   }
 
