@@ -6,6 +6,7 @@ import { KafkaModule } from 'adapters/kafka-adapter';
 import { UserSettingsController } from '../core/presentation';
 import { commandHandlersProviders } from './module.providers';
 import { repositoriesProviders } from './module.providers';
+import { consumersProviders } from './module.providers';
 
 @Global()
 @Module({
@@ -32,6 +33,10 @@ import { repositoriesProviders } from './module.providers';
     }),
   ],
   controllers: [UserSettingsController],
-  providers: [...commandHandlersProviders, ...repositoriesProviders],
+  providers: [
+    ...commandHandlersProviders,
+    ...repositoriesProviders,
+    ...consumersProviders,
+  ],
 })
 export class UserModule {}

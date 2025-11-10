@@ -9,6 +9,7 @@ import {
   UserSettings,
   UserNotFoundDomainError,
   AvatarUrlVO,
+  UserCreatedEvent,
 } from '../../domain';
 import { randomUUID } from 'crypto';
 import { err, ok, Result } from 'neverthrow';
@@ -25,17 +26,34 @@ export class UserSettingsRepostitoryImpl implements UserSettingsRepository {
 
   public async save(userSettings: UserSettings): Promise<void> {
     const events = userSettings.getUncommittedEvents();
-
     if (events.some((event) => event instanceof UserAvatarChangedEvent)) {
       return await this.updateAvatarEvent(userSettings);
+    } else if (events.some((event) => event instanceof UserCreatedEvent)) {
+      return await this.userSettingsCreatedEvent(userSettings);
     } else {
       throw new Error('Unknown event');
     }
   }
 
+  public async userSettingsCreatedEvent(
+    userSettings: UserSettings,
+  ): Promise<void> {
+    const SQL = this.knex<UserSettingsSchema>('users-settings')
+      .insert({
+        id: userSettings.id.value,
+        user_id: userSettings.userId.value,
+        avatar_url: userSettings.avatarUrl.value!,
+        settings: userSettings.settings,
+      })
+      .toSQL()
+      .toNative();
+
+    await this.txHost.tx.none(SQL.sql, SQL.bindings);
+  }
+
   public async updateAvatarEvent(userSettings: UserSettings): Promise<void> {
-    const SQL = this.knex<UserSettingsSchema>('user-settings')
-      .update({ avatarUrl: userSettings.avatarUrl.value! })
+    const SQL = this.knex<UserSettingsSchema>('users-settings')
+      .update({ avatar_url: userSettings.avatarUrl.value! })
       .where(userSettings.id)
       .toSQL()
       .toNative();
@@ -61,11 +79,12 @@ export class UserSettingsRepostitoryImpl implements UserSettingsRepository {
 
     try {
       const userSettings = new UserSettings(
+        new UserIdVO(dbUser.id),
         new UserIdVO(dbUser.user_id),
-        new AvatarUrlVO(dbUser.avatarUrl),
+        new AvatarUrlVO(dbUser.avatar_url),
         dbUser.settings,
-        new Date(dbUser.createdAt),
-        new Date(dbUser.updatedAt),
+        new Date(dbUser.created_at),
+        new Date(dbUser.updated_at),
       );
 
       return ok(userSettings);
