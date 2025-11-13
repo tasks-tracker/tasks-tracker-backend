@@ -2,8 +2,11 @@ import { Controller, Inject } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Logger } from 'libs/logger';
 import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
-import { UpdateUserAvatarDto } from './dtos/update-user-avatar.dto';
-import { UpdateUserAvatarCommand } from '../application';
+import {
+  GetUserSettingsDto,
+  UpdateUserAvatarDto,
+} from './dtos/update-user-avatar.dto';
+import { GetUserSettingsQuery, UpdateUserAvatarCommand } from '../application';
 import { UserIdVO } from 'apps/auth/src';
 import { AvatarUrlVO, UserNotFoundDomainError } from '../domain';
 import { ValidationException } from 'libs/validation-exception';
@@ -69,6 +72,44 @@ export class UserSettingsController {
         'UserSettingsController',
       );
       this.kafkaClient.emit('update-user-avatar-response', {
+        userId: payload.userId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
+      });
+    }
+  }
+
+  @MessagePattern('get-user-settings')
+  async getUserSettings(@Payload() payload: GetUserSettingsDto) {
+    try {
+      const result = await this.queryBus.execute(
+        new GetUserSettingsQuery(new UserIdVO(payload.userId)),
+      );
+
+      if (result instanceof UserNotFoundDomainError) {
+        this.kafkaClient.emit('get-user-settings-response', {
+          userId: payload.userId,
+          status: 'NOT_FOUND',
+          message: 'USER_NOT_FOUND',
+          requestId: payload.requestId,
+        });
+        return;
+      }
+
+      this.kafkaClient.emit('get-user-settings-response', {
+        status: 'SUCCESS',
+        message: 'USER_SETTINGS_FETCHED_SUCCESSFULLY',
+        result: result,
+        requestId: payload.requestId,
+      });
+      return;
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error getting user settings', error: String(error) },
+        'UserSettingsController',
+      );
+      this.kafkaClient.emit('get-user-settings-response', {
         userId: payload.userId,
         status: 'BAD_REQUEST',
         message: 'UNKNOWN_ERROR',

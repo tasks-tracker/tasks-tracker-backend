@@ -4,9 +4,13 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { KafkaConfig } from 'adapters/config-adapter';
 import { KafkaModule } from 'adapters/kafka-adapter';
 import { UserSettingsController } from '../core/presentation';
-import { commandHandlersProviders } from './module.providers';
+import {
+  commandHandlersProviders,
+  queryHandlersProviders,
+} from './module.providers';
 import { repositoriesProviders } from './module.providers';
 import { consumersProviders } from './module.providers';
+import { queryRepositoriesProviders } from 'apps/auth/src/module/module.providers';
 
 @Global()
 @Module({
@@ -35,6 +39,8 @@ import { consumersProviders } from './module.providers';
   controllers: [UserSettingsController],
   providers: [
     ...commandHandlersProviders,
+    ...queryHandlersProviders,
+    ...queryRepositoriesProviders,
     ...repositoriesProviders,
     ...consumersProviders,
   ],
