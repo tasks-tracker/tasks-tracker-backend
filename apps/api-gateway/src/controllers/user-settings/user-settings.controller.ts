@@ -5,13 +5,15 @@ import {
   BadRequestException,
   HttpStatus,
   UnauthorizedException,
+  Get,
+  Query,
 } from '@nestjs/common';
 import { Post, Inject } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClientKafka } from '@nestjs/microservices';
 import { Logger } from 'libs/logger';
 import { UserSettingsService } from '../../services';
-import { UpdateUserAvatarRequestDto } from './dtos';
+import { GetUserSettingsRequestDto, UpdateUserAvatarRequestDto } from './dtos';
 import { AuthHelper } from 'apps/auth/src/helpers';
 import { SessionToken } from 'libs/session-token-decorator';
 
@@ -25,6 +27,55 @@ export class UserSettingsController {
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {
     logger.setContext(UserSettingsController.name);
+  }
+
+  @Get('get-user-settings')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'USER_SETTINGS_FETCHED_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  public async getUserSettings(
+    @Query() query: GetUserSettingsRequestDto,
+    @SessionToken() sessionToken: string,
+  ) {
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
+
+    const requestId = crypto.randomUUID();
+    this.kafkaClient.emit('get-user-settings', {
+      ...query,
+      userId: userId.value,
+      requestId,
+    });
+
+    try {
+      const response = await this.userSettingsService.waitForResponse(
+        requestId,
+        30000,
+      );
+      return response;
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for response', error: String(error) },
+        'UserSettingsController',
+      );
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException({
+          message: error.message,
+          status: 'BAD_REQUEST',
+        });
+      }
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+    }
   }
 
   @Post('update-user-avatar')

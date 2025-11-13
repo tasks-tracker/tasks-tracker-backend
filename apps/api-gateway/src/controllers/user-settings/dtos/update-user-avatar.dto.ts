@@ -21,3 +21,10 @@ export class UpdateUserAvatarRequestDto {
   })
   avatarUrl: string;
 }
+
+export class GetUserSettingsRequestDto {
+  @ApiProperty({
+    example: '1234-1234-1234-1234',
+  })
+  userId: string;
+}
