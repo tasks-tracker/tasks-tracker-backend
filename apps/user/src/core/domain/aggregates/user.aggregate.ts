@@ -89,6 +89,8 @@ export class UserSettings extends AggregateRoot {
       this.#avatarUrl = avatarUrl;
       this.apply(new UserAvatarChangedEvent(this.#id, avatarUrl));
     }
+
+    this.#updatedAt = new Date();
     throw new DomainError('INVALID_AVATAR_URL');
   }
 
@@ -107,6 +109,8 @@ export class UserSettings extends AggregateRoot {
         throw new DomainError('INVALID_SETTING_KEY');
       }
     }
+
+    this.#updatedAt = new Date();
     this.apply(new UserSettingsUpdatedEvent(this.#id, this.#settings));
   }
 }
