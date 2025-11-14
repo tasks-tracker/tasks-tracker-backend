@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Settings } from 'apps/user/src/core/domain';
 
 export class UpdateUserAvatarResponseDto {
   @ApiProperty({
@@ -27,4 +28,15 @@ export class GetUserSettingsRequestDto {
     example: '1234-1234-1234-1234',
   })
   userId: string;
+}
+
+export class UpdateUserSettingsRequestDto {
+  @ApiProperty({
+    example: '1234-1234-1234-1234',
+  })
+  userId: string;
+  @ApiProperty({
+    example: { theme: 'light', language: 'en', notificationsEnabled: true },
+  })
+  settings: Partial<Settings>;
 }

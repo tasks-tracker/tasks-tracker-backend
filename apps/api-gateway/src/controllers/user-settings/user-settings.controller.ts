@@ -7,13 +7,18 @@ import {
   UnauthorizedException,
   Get,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { Post, Inject } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClientKafka } from '@nestjs/microservices';
 import { Logger } from 'libs/logger';
 import { UserSettingsService } from '../../services';
-import { GetUserSettingsRequestDto, UpdateUserAvatarRequestDto } from './dtos';
+import {
+  GetUserSettingsRequestDto,
+  UpdateUserAvatarRequestDto,
+  UpdateUserSettingsRequestDto,
+} from './dtos';
 import { AuthHelper } from 'apps/auth/src/helpers';
 import { SessionToken } from 'libs/session-token-decorator';
 
@@ -123,6 +128,60 @@ export class UserSettingsController {
       }
       if (error instanceof Error) {
         throw new Error(error.message);
+      }
+    }
+  }
+
+  @Patch('update-user-settings')
+  @ApiResponse({
+    status: HttpStatus.ACCEPTED,
+    description: 'USER_SETTINGS_UPDATED_SUCCESSFULLY',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'UNKNOWN_ERROR',
+  })
+  public async updateUserSettings(
+    @Body() body: UpdateUserSettingsRequestDto,
+    @SessionToken() sessionToken: string,
+  ) {
+    const userId = await this.authHelper.getUserIdBySessionToken(sessionToken);
+    if (!userId) throw new UnauthorizedException('UNAUTHORIZED');
+
+    const requestId = crypto.randomUUID();
+    this.kafkaClient.emit('update-user-settings', {
+      ...body,
+      userId: userId.value,
+      requestId,
+    });
+
+    try {
+      const response = await this.userSettingsService.waitForResponse(
+        requestId,
+        30000,
+      );
+      if (response.status === 'SUCCESS') {
+        return {
+          message: 'USER_SETTINGS_UPDATED_SUCCESSFULLY',
+          status: 'SUCCESS',
+        };
+      }
+      if (response.status === 'BAD_REQUEST') {
+        throw new BadRequestException(response.message);
+      }
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error waiting for response', error: String(error) },
+        'UserSettingsController',
+      );
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException({
+          message: error.message,
+          status: 'BAD_REQUEST',
+        });
       }
     }
   }

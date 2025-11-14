@@ -5,8 +5,13 @@ import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   GetUserSettingsDto,
   UpdateUserAvatarDto,
+  UpdateUserSettingsDto,
 } from './dtos/update-user-avatar.dto';
-import { GetUserSettingsQuery, UpdateUserAvatarCommand } from '../application';
+import {
+  GetUserSettingsQuery,
+  UpdateUserAvatarCommand,
+  UpdateUserSettingsCommand,
+} from '../application';
 import { UserIdVO } from 'apps/auth/src';
 import { AvatarUrlVO, UserNotFoundDomainError } from '../domain';
 import { ValidationException } from 'libs/validation-exception';
@@ -115,6 +120,49 @@ export class UserSettingsController {
         message: 'UNKNOWN_ERROR',
         requestId: payload.requestId,
       });
+    }
+  }
+
+  @MessagePattern('update-user-settings')
+  async updateUserSettings(@Payload() payload: UpdateUserSettingsDto) {
+    try {
+      const result = await this.commandBus.execute(
+        new UpdateUserSettingsCommand(
+          new UserIdVO(payload.userId),
+          payload.settings,
+        ),
+      );
+
+      if (result.isOk()) {
+        this.kafkaClient.emit('update-user-settings-response', {
+          userId: payload.userId,
+          status: 'SUCCESS',
+          message: 'USER_SETTINGS_UPDATED_SUCCESSFULLY',
+          requestId: payload.requestId,
+        });
+        return;
+      }
+
+      if (result.isErr()) {
+        this.kafkaClient.emit('update-user-settings-response', {
+          userId: payload.userId,
+          status: 'BAD_REQUEST',
+          message: 'UNKNOWN_ERROR',
+          requestId: payload.requestId,
+        });
+      }
+
+      this.kafkaClient.emit('update-user-settings-response', {
+        userId: payload.userId,
+        status: 'BAD_REQUEST',
+        message: 'UNKNOWN_ERROR',
+        requestId: payload.requestId,
+      });
+    } catch (error) {
+      this.logger.error(
+        { message: 'Error updating user settings', error: String(error) },
+        'UserSettingsController',
+      );
     }
   }
 }
