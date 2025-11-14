@@ -31,6 +31,11 @@ export class UserSettingsConsumer implements OnModuleInit {
       fromBeginning: false,
     });
 
+    await this.consumer.subscribe({
+      topic: 'update-user-settings-response',
+      fromBeginning: false,
+    });
+
     await this.consumer.run({
       autoCommit: false,
       eachMessage: async (message: EachMessagePayload) => {
@@ -40,6 +45,18 @@ export class UserSettingsConsumer implements OnModuleInit {
 
         switch (message.topic) {
           case 'update-user-settings-avatar-response': {
+            const event = JSON.parse(
+              message.message.value.toString(),
+            ) as UserSettingsResponse;
+            this.logger.log(
+              `Received response for request ${event.requestId}:`,
+              event,
+            );
+            this.userSettingsService.saveResponse(event.requestId, event);
+            break;
+          }
+
+          case 'update-user-settings-response': {
             const event = JSON.parse(
               message.message.value.toString(),
             ) as UserSettingsResponse;

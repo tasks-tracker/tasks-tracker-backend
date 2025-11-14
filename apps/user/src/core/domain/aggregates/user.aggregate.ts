@@ -62,7 +62,7 @@ export class UserSettings extends AggregateRoot {
   static create(userId: UserIdVO): UserSettings {
     const defaultSettings: Settings = {
       notificationsEnabled: true,
-      theme: 'auto',
+      theme: 'light',
       language: 'ru',
     };
 
@@ -92,11 +92,21 @@ export class UserSettings extends AggregateRoot {
     throw new DomainError('INVALID_AVATAR_URL');
   }
 
-  updateSettings(settings: Settings) {
-    if (settings) {
-      this.#settings = settings;
-      this.apply(new UserSettingsUpdatedEvent(this.#id, this.#settings));
+  updateSettings(settings: Partial<Settings>) {
+    if (Object.keys(settings).length === 0) {
+      throw new DomainError('NO_SETTINGS_TO_UPDATE');
     }
-    throw new DomainError('INVALID_SETTINGS');
+
+    for (const key of Object.keys(settings)) {
+      if (key in this.#settings) {
+        const value = settings[key as keyof Settings];
+        if (value !== undefined) {
+          this.#settings[key as keyof Settings] = value as never;
+        }
+      } else {
+        throw new DomainError('INVALID_SETTING_KEY');
+      }
+    }
+    this.apply(new UserSettingsUpdatedEvent(this.#id, this.#settings));
   }
 }

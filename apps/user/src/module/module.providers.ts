@@ -3,6 +3,7 @@ import { UserSettingsRepostitoryImpl } from '../core/infrastructure/repositories
 import {
   CreateUserSettingsCommandHandler,
   UpdateUserAvatarCommandHandler,
+  UpdateUserSettingsCommandHandler,
 } from '../core/application/commands-handlers';
 import { UserSettingsConsumer } from '../core/presentation/consumers/user-settings.consumer';
 import { GetUserSettingsQueryHandler } from '../core/application/queries-handlers/get-user-settings.query-handler';
@@ -12,6 +13,7 @@ import { UserSettingsQueryRepositoryImpl } from '../core/infrastructure/query-re
 export const commandHandlersProviders = [
   UpdateUserAvatarCommandHandler,
   CreateUserSettingsCommandHandler,
+  UpdateUserSettingsCommandHandler,
 ];
 
 export const queryHandlersProviders = [GetUserSettingsQueryHandler];

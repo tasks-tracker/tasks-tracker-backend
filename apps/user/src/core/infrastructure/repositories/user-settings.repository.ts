@@ -5,6 +5,7 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPgPromise } from '@nestjs-cls/transactional-adapter-pg-promise';
 import {
   UserAvatarChangedEvent,
+  UserSettingsUpdatedEvent,
   UserIdVO,
   UserSettings,
   UserNotFoundDomainError,
@@ -30,6 +31,10 @@ export class UserSettingsRepostitoryImpl implements UserSettingsRepository {
       return await this.updateAvatarEvent(userSettings);
     } else if (events.some((event) => event instanceof UserCreatedEvent)) {
       return await this.userSettingsCreatedEvent(userSettings);
+    } else if (
+      events.some((event) => event instanceof UserSettingsUpdatedEvent)
+    ) {
+      return await this.updateSettingsEvent(userSettings);
     } else {
       throw new Error('Unknown event');
     }
@@ -45,6 +50,16 @@ export class UserSettingsRepostitoryImpl implements UserSettingsRepository {
         avatar_url: userSettings.avatarUrl.value!,
         settings: userSettings.settings,
       })
+      .toSQL()
+      .toNative();
+
+    await this.txHost.tx.none(SQL.sql, SQL.bindings);
+  }
+
+  public async updateSettingsEvent(userSettings: UserSettings): Promise<void> {
+    const SQL = this.knex<UserSettingsSchema>('users-settings')
+      .update({ settings: userSettings.settings })
+      .where('user_id', userSettings.userId.value)
       .toSQL()
       .toNative();
 
